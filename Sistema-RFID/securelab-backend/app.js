@@ -24,6 +24,7 @@ app.use(express.json());
 
 // Rotas
 app.use('/api/auth', authRoutes);
+const dashboardRoutes = require('./routes/dashboard');
 // Comentando temporariamente rotas que não serão usadas inicialmente
 // app.use('/api/users', userRoutes);
 // app.use('/api/doors', doorRoutes);
@@ -38,6 +39,7 @@ app.get('/', (req, res) => {
 
 // Middleware de tratamento de erros
 app.use(errorHandler);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
