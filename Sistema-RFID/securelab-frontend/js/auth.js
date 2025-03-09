@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = localStorage.getItem('user');
     
     // Se estiver na página de login mas já estiver autenticado, redirecionar para dashboard
-    if (token && user && window.location.pathname.includes('index.html')) {
+    if (token && user && window.location.pathname.includes('login.html')) {
         // Verificar se tem parâmetros na URL que indicam logout ou erro de autenticação
         const urlParams = new URLSearchParams(window.location.search);
         if (!urlParams.has('logout') && !urlParams.has('auth')) {
-            window.location.href = '/dashboard.html';
+            window.location.href = '/';
         }
     }
     
@@ -41,19 +41,31 @@ async function handleLogin(e) {
     }
     
     // Mostrar indicador de carregamento
-    const submitButton = loginForm.querySelector('button[type="submit"]');
+    const submitButton = document.querySelector('button[type="submit"]');
     const originalButtonText = submitButton.innerHTML;
     submitButton.disabled = true;
     submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Autenticando...';
     
     try {
-        const success = await login(email, password);
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
         
-        if (success) {
+        const data = await response.json();
+        
+        if (data.success) {
+            // Salvar token e dados do usuário
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            
             // Redirecionar para dashboard
-            window.location.href = '/dashboard.html';
+            window.location.href = '/';
         } else {
-            showLoginMessage('Email ou senha incorretos. Tente novamente.', 'error');
+            showLoginMessage(data.message || 'Email ou senha incorretos. Tente novamente.', 'error');
         }
     } catch (error) {
         console.error('Erro durante login:', error);
@@ -86,8 +98,14 @@ function checkUrlMessages() {
 
 // Exibir mensagem na tela de login
 function showLoginMessage(message, type = 'info') {
-    const messageContainer = document.getElementById('login-message');
-    if (!messageContainer) return;
+    // Criar elemento para a mensagem se não existir
+    let messageContainer = document.getElementById('login-message');
+    
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'login-message';
+        document.body.insertBefore(messageContainer, document.body.firstChild);
+    }
     
     // Mapear tipo para classe Bootstrap
     const classMap = {
@@ -110,4 +128,11 @@ function showLoginMessage(message, type = 'info') {
             messageContainer.style.display = 'none';
         }, 5000);
     }
+}
+
+// Função para realizar logout
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login.html?logout=success';
 }

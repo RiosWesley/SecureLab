@@ -5,12 +5,12 @@ require('dotenv').config();
 
 // Importando rotas
 const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const doorRoutes = require('./routes/doors');
-const deviceRoutes = require('./routes/devices');
-const logRoutes = require('./routes/logs');
-const reportRoutes = require('./routes/reports');
-
+// Comentando temporariamente rotas que não serão usadas inicialmente
+// const userRoutes = require('./routes/users');
+// const doorRoutes = require('./routes/doors');
+// const deviceRoutes = require('./routes/devices');
+// const logRoutes = require('./routes/logs');
+// const reportRoutes = require('./routes/reports');
 
 // Middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -24,11 +24,12 @@ app.use(express.json());
 
 // Rotas
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/doors', doorRoutes);
-app.use('/api/devices', deviceRoutes);
-app.use('/api/logs', logRoutes);
-app.use('/api/reports', reportRoutes);
+// Comentando temporariamente rotas que não serão usadas inicialmente
+// app.use('/api/users', userRoutes);
+// app.use('/api/doors', doorRoutes);
+// app.use('/api/devices', deviceRoutes);
+// app.use('/api/logs', logRoutes);
+// app.use('/api/reports', reportRoutes);
 
 // Rota de teste
 app.get('/', (req, res) => {
