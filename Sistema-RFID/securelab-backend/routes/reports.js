@@ -24,3 +24,4 @@ router.post('/export', reportController.exportReport);
 router.post('/schedule', reportController.scheduleReport);
 
 module.exports = router;
+router.get('/download/:filename', reportController.downloadReport);

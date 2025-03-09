@@ -453,3 +453,17 @@ exports.scheduleReport = async (req, res) => {
     });
   }
 };
+// Em reportController.js
+exports.downloadReport = async (req, res) => {
+  const { filename } = req.params;
+  const filePath = reportService.getFilePath(filename);
+  
+  if (!reportService.fileExists(filename)) {
+    return res.status(404).json({
+      success: false,
+      message: 'Relatório não encontrado'
+    });
+  }
+  
+  res.download(filePath);
+};
