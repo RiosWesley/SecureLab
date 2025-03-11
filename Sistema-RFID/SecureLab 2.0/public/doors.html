@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureLab RFID - Gerenciamento de Portas</title>
     <!-- Estilos principais (agora unificados) -->
     <link rel="stylesheet" href="css/styles.css">
@@ -15,7 +15,6 @@
 </head>
 <body>
     <div class="app-container">
-    <div id="sidebar-overlay" class="sidebar-overlay"></div>
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -288,8 +287,7 @@
     <script src="js/auth.js"></script>      <!-- Mantenha se tiver autenticação -->
     <script src="js/common.js"></script>
     <script src="js/utils.js"></script>    <!-- Mantenha se tiver funções utilitárias -->
-    <script src="js/doors.js"></script>   
-    <script src="js/mobile.js"></script> 
+    <script src="js/doors.js"></script>     <!-- Script específico para a lógica de portas -->
     <script>
         // Função genérica para fechar modais (melhora a reutilização)
         //Removida, pois agora estamos lidando com isso via close-button e modal-dialog
@@ -316,7 +314,13 @@
                 if(modal) modal.style.display = "none";
             })
 
-        
+            //Outros event listeners
+             const sidebarToggle = document.getElementById('sidebar-toggle');
+            const appContainer = document.querySelector('.app-container');
+
+            sidebarToggle.addEventListener('click', () => {
+                appContainer.classList.toggle('sidebar-collapsed');
+            });
         });
     </script>
 </body>
