@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/utils.css">
     <link rel="stylesheet" href="css/components.css">  <!-- Adicionado se existir -->
+    <!-- Otimizações Mobile -->
+    <link rel="stylesheet" href="css/mobile.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Remoção dos estilos inline -->
@@ -22,9 +24,6 @@
                     <i class="fas fa-shield-alt"></i>
                     <span>SecureLab</span>
                 </div>
-                <button class="sidebar-toggle" id="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
             <nav class="sidebar-nav">
                 <ul>
@@ -96,6 +95,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="main-header">
+                <button class="mobile-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
                 <div class="header-search">
                     <i class="fas fa-search"></i>
                     <input type="text" id="searchInput" placeholder="Buscar portas...">  <!-- Movido o ID para cá -->
@@ -288,6 +288,7 @@
     <script src="js/common.js"></script>
     <script src="js/utils.js"></script>    <!-- Mantenha se tiver funções utilitárias -->
     <script src="js/doors.js"></script>     <!-- Script específico para a lógica de portas -->
+    <script src="js/mobile.js"></script> <!-- Script de suporte mobile -->
     <script>
         // Função genérica para fechar modais (melhora a reutilização)
         //Removida, pois agora estamos lidando com isso via close-button e modal-dialog
@@ -323,5 +324,7 @@
             });
         });
     </script>
+    
+    <div class="mobile-overlay"></div> 
 </body>
 </html>

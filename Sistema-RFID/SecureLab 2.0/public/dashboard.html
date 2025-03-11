@@ -6,6 +6,8 @@
     <title>SecureLab RFID | Dashboard</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/utils.css">
+    <!-- Otimizações Mobile -->
+    <link rel="stylesheet" href="css/mobile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -17,9 +19,6 @@
                     <i class="fas fa-shield-alt"></i>
                     <span>SecureLab</span>
                 </div>
-                <button class="sidebar-toggle" id="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
             <nav class="sidebar-nav">
                 <ul>
@@ -91,6 +90,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="main-header">
+                <button class="mobile-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
                 <div class="header-search">
                     <i class="fas fa-search"></i>
                     <input type="text" placeholder="Pesquisar...">
@@ -347,5 +347,9 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/common.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/mobile.js"></script>
+    
+    <div class="mobile-overlay"></div> 
+        
 </body>
 </html>
