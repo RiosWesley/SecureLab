@@ -257,20 +257,68 @@ function loadDashboardData() {
   }
   
   // Função para alternar estado de tranca da porta
-  function toggleDoorLock(doorId, action) {
-    const newStatus = action === 'lock' ? 'locked' : 'unlocked';
-    
-    database.ref(`doors/${doorId}`).update({
-      status: newStatus,
-      last_status_change: new Date().toISOString()
-    })
-    .then(() => {
-      console.log(`Porta ${doorId} ${action === 'lock' ? 'trancada' : 'destrancada'} com sucesso`);
-      // Recarregar estatísticas de portas
-      loadDoorStats();
-    })
-    .catch(error => console.error(`Erro ao ${action} porta:`, error));
-  }
+  // Função para alternar estado de tranca da porta com registro de logs
+function toggleDoorLock(doorId, action) {
+  const newStatus = action === 'lock' ? 'locked' : 'unlocked';
+  
+  // Primeiro obter o nome da porta para usar no log
+  let doorName = '';
+  database.ref(`doors/${doorId}`).once('value')
+      .then(snapshot => {
+          const door = snapshot.val();
+          doorName = door ? door.name : 'Porta';
+          
+          // Atualizar status da porta
+          return database.ref(`doors/${doorId}`).update({
+              status: newStatus,
+              last_status_change: new Date().toISOString()
+          });
+      })
+      .then(() => {
+          // Registrar log de acesso
+          const user = firebase.auth().currentUser;
+          if (user) {
+              // Buscar o nome do usuário no banco de dados
+              return database.ref('users').orderByChild('email').equalTo(user.email).once('value')
+                  .then(snapshot => {
+                      let userName = user.email; // Fallback para o email
+
+                      // Se encontrou o usuário, usar o nome dele
+                      if (snapshot.exists()) {
+                          const userData = Object.values(snapshot.val())[0];
+                          if (userData && userData.name) {
+                              userName = userData.name;
+                          }
+                      }
+
+                      const logData = {
+                          user_id: user.uid,
+                          user_name: userName,
+                          door_id: doorId,
+                          door_name: doorName,
+                          action: action === 'lock' ? 'door_locked' : 'access_granted',
+                          method: 'web',
+                          timestamp: new Date().toISOString()
+                      };
+
+                      return database.ref('access_logs').push(logData);
+                  });
+          }
+          return Promise.resolve();
+      })
+      .then(() => {
+          console.log(`Porta ${doorId} ${action === 'lock' ? 'trancada' : 'destrancada'} com sucesso`);
+          // Recarregar estatísticas de portas
+          loadDoorStats();
+          
+          // Opcional: mostrar notificação como na página de portas
+          showNotification(`Porta ${action === 'lock' ? 'trancada' : 'destrancada'} com sucesso`, 'success');
+      })
+      .catch(error => {
+          console.error(`Erro ao ${action} porta:`, error);
+          showNotification(`Erro ao controlar porta: ${error.message}`, 'error');
+      });
+}
   
   // Função para atualizar o gráfico de rosca (donut) de dispositivos
   function updateDeviceDonutChart(percentage) {

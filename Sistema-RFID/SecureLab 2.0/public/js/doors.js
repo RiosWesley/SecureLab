@@ -143,6 +143,9 @@ function loadDoors() {
 /**
  * Renderiza as portas na tabela
  */
+/**
+ * Renderiza as portas na tabela
+ */
 function renderDoors() {
     console.log('Renderizando portas na tabela...');
 
@@ -258,11 +261,79 @@ function renderDoors() {
         });
 
         actionsCell.appendChild(controlBtn);
+        
+        // Botão de Excluir (novo)
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'action-btn action-btn-delete';
+        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        deleteBtn.title = 'Excluir Porta';
+        deleteBtn.style.marginLeft = '5px';
+
+        // Adicionar o event listener para o botão de excluir
+        deleteBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Botão excluir clicado para porta:', door.id);
+            confirmDeleteDoor(door);
+        });
+
+        actionsCell.appendChild(deleteBtn);
+        
         row.appendChild(actionsCell);
 
         // Adicionar a linha à tabela
         tableBody.appendChild(row);
     });
+}
+
+/**
+ * Confirma exclusão de uma porta
+ * @param {Object} door - A porta a ser excluída
+ */
+function confirmDeleteDoor(door) {
+    if (!door || !door.id) {
+        console.error('ID da porta não definido');
+        return;
+    }
+    
+    const confirmModalTitle = document.getElementById('confirm-modal-title');
+    const confirmModalMessage = document.getElementById('confirm-modal-message');
+    const confirmActionBtn = document.getElementById('confirm-action-btn');
+    
+    if (confirmModalTitle) confirmModalTitle.textContent = 'Excluir Porta';
+    if (confirmModalMessage) confirmModalMessage.textContent = `Tem certeza que deseja excluir a porta "${door.name}"?`;
+    
+    // Configurar ação do botão de confirmação
+    if (confirmActionBtn) {
+        confirmActionBtn.onclick = () => {
+            deleteDoor(door.id);
+            closeModal('confirm-modal');
+        };
+    }
+    
+    // Abrir modal de confirmação
+    openModal('confirm-modal');
+}
+
+/**
+ * Exclui uma porta
+ * @param {string} doorId - ID da porta a ser excluída
+ */
+function deleteDoor(doorId) {
+    if (!doorId) {
+        console.error('ID da porta não definido');
+        return;
+    }
+    
+    doorsRef.child(doorId).remove()
+        .then(() => {
+            showNotification('Porta excluída com sucesso', 'success');
+            // As portas serão atualizadas automaticamente pelo listener do Firebase
+        })
+        .catch(error => {
+            console.error('Erro ao excluir porta:', error);
+            showNotification(`Erro ao excluir porta: ${error.message}`, 'error');
+        });
 }
 
 /**
@@ -292,12 +363,26 @@ function openDoorModal(door = null) {
         if (doorName) doorName.value = door.name || '';
         if (doorLocation) doorLocation.value = door.location || '';
         if (doorStatus) doorStatus.value = door.status || 'locked';
+        
+        // Mostrar/Ocultar campo de Status Inicial baseado no modo (edição ou novo)
+        const statusField = document.getElementById('doorStatus').closest('.form-group');
+        if (statusField) {
+            // Modo de edição - ocultar status inicial
+            statusField.style.display = 'none';
+        }
     } else {
         // Modo adição: limpar ID atual
         currentDoorId = null;
 
         // Valores padrão
         if (doorStatus) doorStatus.value = 'locked';
+        
+        // Mostrar/Ocultar campo de Status Inicial baseado no modo (edição ou novo)
+        const statusField = document.getElementById('doorStatus').closest('.form-group');
+        if (statusField) {
+            // Modo de adição - mostrar status inicial
+            statusField.style.display = 'block';
+        }
     }
 
     // Abrir o modal de forma segura
@@ -321,8 +406,6 @@ function openDoorModal(door = null) {
         alert('Erro ao abrir modal. Consulte o console para detalhes.');
     }
 }
-
-
 /**
  * Manipula o envio do formulário de porta
  */
@@ -345,10 +428,14 @@ function handleDoorFormSubmit() {
     // Obter dados do formulário
     const doorData = {
         name: doorName.value.trim(),
-        location: doorLocation.value.trim(),
-        status: doorStatus ? doorStatus.value : 'locked',
-        last_status_change: new Date().toISOString()
+        location: doorLocation.value.trim()
     };
+
+    // Adicionar status apenas no modo de criação (não na edição)
+    if (!currentDoorId) {
+        doorData.status = doorStatus ? doorStatus.value : 'locked';
+        doorData.last_status_change = new Date().toISOString();
+    }
 
     // Salvar no Firebase
     if (currentDoorId) {
