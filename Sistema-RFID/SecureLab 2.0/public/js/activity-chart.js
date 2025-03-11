@@ -161,6 +161,23 @@ function processActivityData(accessLogs) {
 }
 
 /**
+ * Determina as cores e opções do gráfico com base no tema atual
+ * @return {Object} Objeto com cores e opções de tema
+ */
+function getChartThemeOptions() {
+    // Verificar se o tema atual é escuro
+    const isDarkMode = document.documentElement.classList.contains('dark-mode');
+    
+    // Definir cores base
+    return {
+        backgroundColor: isDarkMode ? '#252931' : '#fff',
+        textColor: isDarkMode ? '#e4e6eb' : '#333',
+        gridColor: isDarkMode ? '#3d434e' : '#ddd',
+        borderColor: isDarkMode ? '#3d434e' : '#ddd'
+    };
+}
+
+/**
  * Cria ou atualiza o gráfico com os dados processados
  * @param {Object} data - Dados processados para o gráfico
  */
