@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureLab RFID | Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/utils.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SecureLab</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="pages/doors.html">
+                            <i class="fas fa-door-open"></i>
+                            <span>Portas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="pages/users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Usuários</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="pages/devices.html">
+                            <i class="fas fa-microchip"></i>
+                            <span>Dispositivos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="pages/logs.html">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Logs de Acesso</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="pages/groups.html">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Grupos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="pages/alerts.html">
+                            <i class="fas fa-bell"></i>
+                            <span>Alertas</span>
+                            <span class="badge" id="alerts-count">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="pages/reports.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="pages/settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Pesquisar...">
+                </div>
+                <div class="header-right">
+                    <div class="notifications">
+                        <button class="icon-button">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge" id="header-alerts-count">0</span>
+                        </button>
+                    </div>
+                    <div class="user-menu">
+                        <img src="https://via.placeholder.com/40" alt="Avatar do usuário" class="avatar">
+                        <span class="user-name" id="current-user-name">Usuário</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <div class="date-filter">
+                        <label for="date-range">Período:</label>
+                        <select id="date-range">
+                            <option value="hoje">Hoje</option>
+                            <option value="ontem">Ontem</option>
+                            <option value="7dias" selected>Últimos 7 dias</option>
+                            <option value="30dias">Últimos 30 dias</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Status Cards -->
+                <div class="card-grid">
+                    <!-- Card: Usuários -->
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <h3>Usuários</h3>
+                            <i class="fas fa-users card-icon"></i>
+                        </div>
+                        <div class="status-card-body">
+                            <div class="status-count" id="active-users-count">0</div>
+                            <div class="status-label" id="users-label">Carregando...</div>
+                        </div>
+                        <div class="status-card-footer">
+                            <span class="status-trend positive">
+                                <i class="fas fa-arrow-up"></i> <span id="users-trend">0%</span>
+                            </span>
+                            <span class="status-period">desde o mês passado</span>
+                        </div>
+                    </div>
+
+                    <!-- Card: Portas -->
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <h3>Portas</h3>
+                            <i class="fas fa-door-open card-icon"></i>
+                        </div>
+                        <div class="status-card-body">
+                            <div class="status-count" id="doors-count">0</div>
+                            <div class="status-label">Total de portas monitoradas</div>
+                        </div>
+                        <div class="status-card-footer">
+                            <div class="door-status" id="door-status-summary">
+                                <span class="status-dot locked"></span> <span id="locked-doors-count">0</span> Trancadas
+                                <span class="status-dot unlocked"></span> <span id="unlocked-doors-count">0</span> Destrancadas
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Dispositivos -->
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <h3>Dispositivos</h3>
+                            <i class="fas fa-microchip card-icon"></i>
+                        </div>
+                        <div class="status-card-body">
+                            <div class="status-count" id="devices-status">0/0</div>
+                            <div class="status-label">Dispositivos online</div>
+                        </div>
+                        <div class="status-card-footer">
+                            <div class="progress-bar">
+                                <div class="progress" id="devices-progress" style="width: 0%;"></div>
+                            </div>
+                            <span id="devices-percentage">0% online</span>
+                        </div>
+                    </div>
+
+                    <!-- Card: Acessos Hoje -->
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <h3>Acessos Hoje</h3>
+                            <i class="fas fa-key card-icon"></i>
+                        </div>
+                        <div class="status-card-body">
+                            <div class="status-count" id="today-access-count">0</div>
+                            <div class="status-label" id="today-denied-count">0 acessos negados</div>
+                        </div>
+                        <div class="status-card-footer">
+                            <span class="status-trend positive">
+                                <i class="fas fa-arrow-up"></i> <span id="access-trend">0%</span>
+                            </span>
+                            <span class="status-period">em relação a ontem</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="card-row">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3>Atividade Diária</h3>
+                            <div class="card-actions">
+                                <button class="icon-button">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-placeholder">
+                                <img src="https://via.placeholder.com/800x300?text=Gráfico+de+Atividade+Diária" alt="Gráfico de atividade diária" class="placeholder-img">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity and Doors Row -->
+                <div class="card-row">
+                    <!-- Recent Activity Card -->
+                    <div class="card activity-card">
+                        <div class="card-header">
+                            <h3>Atividade Recente</h3>
+                            <div class="card-actions">
+                                <button class="icon-button" id="refresh-activity">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button class="icon-button">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="activity-list" id="activity-list">
+                                <!-- As atividades serão carregadas dinamicamente via JavaScript -->
+                                <li class="no-data">Carregando atividades...</li>
+                            </ul>
+                            <div class="card-actions center">
+                                <a href="pages/logs.html" class="btn btn-link">Ver todos os logs</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Door Status Card -->
+                    <div class="card door-status-card">
+                        <div class="card-header">
+                            <h3>Status das Portas</h3>
+                            <div class="card-actions">
+                                <button class="icon-button" id="refresh-doors">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button class="icon-button">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="door-list" id="door-list">
+                                <!-- As portas serão carregadas dinamicamente via JavaScript -->
+                                <li class="no-data">Carregando portas...</li>
+                            </ul>
+                            <div class="card-actions center">
+                                <a href="pages/doors.html" class="btn btn-link">Gerenciar Portas</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Widgets -->
+                <div class="card-row">
+                    <!-- Device Status -->
+                    <div class="card device-status-card">
+                        <div class="card-header">
+                            <h3>Status dos Dispositivos</h3>
+                            <div class="card-actions">
+                                <button class="icon-button">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="device-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="online-devices">0/0</div>
+                                    <div class="stat-label">Online</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="offline-devices">0</div>
+                                    <div class="stat-label">Offline</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="firmware-version">-</div>
+                                    <div class="stat-label">Firmware</div>
+                                </div>
+                            </div>
+                            <div class="device-chart-placeholder">
+                                <div class="donut-chart">
+                                    <div class="donut-hole"></div>
+                                    <div class="donut-ring">
+                                        <div class="donut-segment" id="device-donut-segment" style="clip-path: polygon(50% 50%, 100% 50%, 100% 0, 50% 0)"></div>
+                                    </div>
+                                    <div class="donut-text" id="device-percentage">0%</div>
+                                </div>
+                            </div>
+                            <div class="card-actions center">
+                                <a href="pages/devices.html" class="btn btn-link">Ver Dispositivos</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts Card -->
+                    <div class="card alerts-card">
+                        <div class="card-header">
+                            <h3>Alertas Ativos</h3>
+                            <div class="card-actions">
+                                <span class="badge alert-count" id="alert-count-badge">0</span>
+                                <button class="icon-button">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="alerts-list" id="alerts-list">
+                                <!-- Os alertas serão carregados dinamicamente via JavaScript -->
+                                <li class="no-data">Carregando alertas...</li>
+                            </ul>
+                            <div class="card-actions center">
+                                <a href="pages/alerts.html" class="btn btn-link">Ver Todos os Alertas</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/dashboard.js"></script>
+
+    
+</body>
+</html>
