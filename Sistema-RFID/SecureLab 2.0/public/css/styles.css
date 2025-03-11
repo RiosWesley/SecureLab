@@ -283,20 +283,21 @@
     outline: none;
   }
   
-  /* Cards */
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .card-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
-  }
+  /* Sistema de grid melhorado para cards de estatísticas */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Fixar em 4 colunas para desktop */
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* Sistema de grid melhorado para as seções maiores */
+.card-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Fixar em 2 colunas para desktop */
+  gap: 20px;
+  margin-bottom: 20px;
+}
   
   .card {
     background-color: white;
@@ -360,7 +361,7 @@
   }
   
   .status-card-body {
-    margin-bottom: 15px;
+    flex: 1; /* Ocupa o espaço restante */
   }
   
   .status-count {
@@ -606,7 +607,8 @@
 
 .chart-placeholder {
   width: 100%;
-  height: 300px;
+  min-height: 300px;
+  max-height: 400px;
   background-color: #fff;
   border-radius: 5px;
   overflow: hidden;
@@ -793,3 +795,42 @@
       grid-template-columns: 1fr;
     }
   }
+  /* Classe específica para o container do gráfico de atividade diária */
+.chart-fullwidth {
+  width: 100%;
+  margin-bottom: 20px;
+  grid-column: 1 / -1;
+}
+
+.chart-card {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.chart-card .card-body {
+  padding: 15px;
+  width: 100%;
+}
+
+.chart-placeholder {
+  width: 100%;
+  height: 350px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .chart-placeholder {
+    height: 250px;
+  }
+}
+
+/* Ajustes para integração com o layout existente */
+#activityChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+canvas.chartjs-render-monitor {
+  width: 100% !important;
+  height: 100% !important;
+}
