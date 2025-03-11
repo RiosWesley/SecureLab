@@ -386,9 +386,4 @@ function loadDashboardData() {
   document.addEventListener('DOMContentLoaded', () => {
     // Esse código será executado quando a página carregar completamente
     // Se o usuário já estiver autenticado, loadDashboardData será chamado via onAuthStateChanged
-    
-    // Alternar menu lateral
-    document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
-      document.querySelector('.app-container').classList.toggle('sidebar-collapsed');
-    });
   });

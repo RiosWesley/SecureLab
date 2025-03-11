@@ -56,14 +56,53 @@ function loadAlertsCount() {
 }
 
 // Inicializar sidebar toggle
+/**
+ * Versão aprimorada para o common.js com gerenciamento consistente do sidebar
+ */
+
+// Inicializar sidebar toggle com persistência de estado
 function initSidebar() {
     const sidebarToggle = document.getElementById('sidebar-toggle');
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
-            document.querySelector('.app-container').classList.toggle('sidebar-collapsed');
+    const appContainer = document.querySelector('.app-container');
+    
+    if (sidebarToggle && appContainer) {
+        // Remover event listeners anteriores para evitar duplicação
+        const newToggle = sidebarToggle.cloneNode(true);
+        sidebarToggle.parentNode.replaceChild(newToggle, sidebarToggle);
+        
+        // Adicionar event listener ao novo elemento
+        document.getElementById('sidebar-toggle').addEventListener('click', function() {
+            appContainer.classList.toggle('sidebar-collapsed');
+            
+            // Salvar estado no localStorage para persistir entre páginas
+            const isCollapsed = appContainer.classList.contains('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+        });
+        
+        // Restaurar estado do sidebar
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            appContainer.classList.add('sidebar-collapsed');
+        } else {
+            appContainer.classList.remove('sidebar-collapsed');
+        }
+    }
+}
+
+// Inicializar overlay para fechamento do menu em dispositivos móveis
+function initSidebarOverlay() {
+    const overlay = document.getElementById('sidebar-overlay');
+    const appContainer = document.querySelector('.app-container');
+    
+    if (overlay && appContainer) {
+        overlay.addEventListener('click', function() {
+            appContainer.classList.remove('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', false);
         });
     }
 }
+
+
 
 // Inicializar botão de logout
 function initLogout() {
@@ -325,6 +364,7 @@ function isValidPassword(password) {
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     initSidebar();
+    initSidebarOverlay();
     initLogout();
     
     // Adicionar estilos para notificações se ainda não existirem
