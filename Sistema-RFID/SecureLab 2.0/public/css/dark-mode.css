@@ -1,510 +1,391 @@
-/* dark-mode.css - Tema escuro para o SecureLab RFID */
+/* dark-mode.css - Implementação otimizada do modo escuro para SecureLab 2.0 */
 
-/* Quando a classe 'dark-mode' é aplicada ao elemento <html> */
+/* Redefinição das variáveis de cor para o modo escuro */
 html.dark-mode {
-    --primary-color: #6180ff; /* Azul mais claro e vibrante */
-    --secondary-color: #9ba5b0; /* Cinza mais claro */
-    --success-color: #3ceb89; /* Verde mais brilhante */
-    --danger-color: #ff5f5f; /* Vermelho mais suave */
-    --warning-color: #ffca3a; /* Amarelo mais brilhante */
-    --info-color: #4cd3ff; /* Azul info mais claro */
-    --light-color: #2a3039; /* Cinza escuro para "light" invertido */
-    --dark-color: #f0f2f5; /* Quase branco para "dark" invertido */
+    /* Cores principais - substituições para o modo escuro */
+    --primary-color: #5d7bf7; /* Azul mais claro para melhor contraste */
+    --secondary-color: #a7acb1; /* Cinza mais claro */
+    --success-color: #3eca5d; /* Verde mais brilhante */
+    --danger-color: #e8535e; /* Vermelho mais brilhante */
+    --warning-color: #ffce3a; /* Amarelo mais brilhante */
+    --info-color: #29c7d8; /* Azul claro mais brilhante */
+    --light-color: #2c3144; /* Escuro, mas não tão escuro quanto o fundo */
+    --dark-color: #f0f2f5; /* Invertido para textos claros */
     
-    /* Cores de fundo */
-    --bg-color: #1a1d23; /* Fundo principal escuro */
-    --bg-secondary: #252931; /* Fundo secundário (cards, etc) */
-    --bg-tertiary: #2e323b; /* Fundo terciário (cabeçalhos de card, etc) */
+    /* Cores específicas do modo escuro */
+    --dark-bg-color: #1a1d2a; /* Cor de fundo principal - mais escura para maior contraste */
+    --dark-card-bg: #232736; /* Fundo de cards, elementos de UI */
+    --dark-text-primary: #f0f2f5; /* Texto principal */
+    --dark-text-secondary: #c9cdd4; /* Texto secundário */
+    --dark-border-color: #3b4254; /* Cor de bordas */
+    --dark-input-bg: #1e2130; /* Fundo de campos de input */
+    --dark-hover-color: #353b50; /* Cor de hover */
     
-    /* Cores de texto */
-    --text-color: #e4e6eb; /* Texto principal */
-    --text-secondary: #b1b5bd; /* Texto secundário */
-    
-    /* Cores adicionais */
-    --border-color: #3d434e; /* Cor das bordas */
-    --hover-color: #2d3239; /* Cor de hover */
-  }
-  
-  /* Aplicar cores de fundo e texto base em elementos principais */
-  html.dark-mode body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-  }
-  
-  /* Cards, modais e outros elementos com fundo branco */
-  html.dark-mode .card,
-  html.dark-mode .status-card,
-  html.dark-mode .sidebar,
-  html.dark-mode .main-header,
-  html.dark-mode .modal-content,
-  html.dark-mode .modal-dialog,
-  html.dark-mode .header-search,
-  html.dark-mode .dropdown-menu,
-  html.dark-mode .notification {
-    background-color: var(--bg-secondary);
-    color: var(--text-color);
-  }
-  
-  /* Cabeçalhos de card e outros elementos secundários */
-  html.dark-mode .card-header,
-  html.dark-mode .modal-header,
-  html.dark-mode .modal-footer,
-  html.dark-mode .sidebar-header,
-  html.dark-mode .sidebar-footer {
-    background-color: var(--bg-tertiary);
-    border-color: var(--border-color);
-  }
-  
-  /* Campos de formulário */
-  html.dark-mode .form-control {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border-color: var(--border-color);
-  }
-  
-  html.dark-mode .form-control:focus {
+    /* Cores específicas para as tabelas */
+    --dark-table-header: #2a2f40; /* Cabeçalho da tabela */
+    --dark-table-row: #232736; /* Linha padrão da tabela */
+    --dark-table-row-even: #282d3d; /* Linha alternada da tabela */
+    --dark-table-hover: #323749; /* Cor ao passar o mouse sobre a linha */
+}
+
+/* Estilos base para o modo escuro */
+html.dark-mode body {
+    background-color: var(--dark-bg-color);
+    color: var(--dark-text-primary);
+}
+
+/* ===== CORREÇÃO: PÁGINA DE LOGIN ===== */
+html.dark-mode .login-container {
+    background-color: var(--dark-card-bg);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+html.dark-mode .login-header h2,
+html.dark-mode .form-group label {
+    color: var(--dark-text-primary);
+}
+
+html.dark-mode .logo i,
+html.dark-mode .logo span {
+    color: var(--primary-color);
+}
+
+html.dark-mode .form-control {
+    background-color: var(--dark-input-bg);
+    border-color: var(--dark-border-color);
+    color: var(--dark-text-primary);
+}
+
+html.dark-mode .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(97, 128, 255, 0.25);
-  }
-  
-  /* Tabelas - Correção completa */
-  html.dark-mode .table {
-    background-color: var(--bg-secondary);
-    color: var(--text-color);
-  }
-  
-  html.dark-mode .table th {
-    background-color: var(--bg-tertiary);
-    color: var(--text-color);
-    border-color: var(--border-color);
-  }
-  
-  html.dark-mode .table td {
-    border-color: var(--border-color);
-    color: var(--text-color);
-    background-color: var(--bg-secondary);
-  }
-  
-  html.dark-mode .table tbody tr {
-    background-color: var(--bg-secondary);
-    color: var(--text-color);
-  }
-  
-  html.dark-mode .table tbody tr:hover {
-    background-color: var(--hover-color);
-  }
-  
-  html.dark-mode .table tbody tr:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Garantir que células individuais também sejam escuras */
-  html.dark-mode .table tbody tr td {
-    background-color: transparent;
-  }
-  
-  /* Forçar cores para cabeçalhos e células específicas */
-  html.dark-mode [class*="table"] th,
-  html.dark-mode [class*="table"] thead th,
-  html.dark-mode [class*="table"] td {
-    background-color: var(--bg-secondary) !important;
-    color: var(--text-color) !important;
-  }
-  
-  html.dark-mode [class*="table"] thead th {
-    background-color: var(--bg-tertiary) !important;
-  }
-  
-  html.dark-mode [class*="table"] tr:nth-child(odd) td {
-    background-color: var(--bg-secondary) !important;
-  }
-  
-  html.dark-mode [class*="table"] tr:nth-child(even) td {
-    background-color: var(--hover-color) !important;
-  }
-  
-  /* Navegação da sidebar */
-  html.dark-mode .sidebar-nav li a {
-    color: var(--text-secondary);
-  }
-  
-  html.dark-mode .sidebar-nav li a:hover,
-  html.dark-mode .sidebar-nav li.active a {
-    background-color: rgba(97, 128, 255, 0.1);
+    box-shadow: 0 0 0 0.2rem rgba(93, 123, 247, 0.25);
+}
+
+html.dark-mode .forgot-password a {
     color: var(--primary-color);
-  }
-  
-  /* Ícones e textos com cores temáticas */
-  html.dark-mode .user-name,
-  html.dark-mode .badge-status.badge-success,
-  html.dark-mode .badge-status.badge-danger,
-  html.dark-mode .badge-status.badge-warning,
-  html.dark-mode .badge-status.badge-info,
-  html.dark-mode .badge-status.badge-secondary {
-    color: inherit;
-  }
-  
-  /* Ajustes de visibilidade para o tema escuro */
-  html.dark-mode .status-card-header h3,
-  html.dark-mode .status-label,
-  html.dark-mode .status-period,
-  html.dark-mode .door-location,
-  html.dark-mode .activity-details,
-  html.dark-mode .alert-details,
-  html.dark-mode .activity-reason {
-    color: var(--text-secondary);
-  }
-  
-  /* Status badges com fundo mais escuro */
-  html.dark-mode .badge-status {
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Ajustes para charts e visualizações */
-  html.dark-mode .donut-hole {
-    background-color: var(--bg-secondary);
-  }
-  
-  html.dark-mode .donut-ring {
-    background-color: var(--bg-tertiary);
-  }
-  
-  html.dark-mode .progress-bar {
-    background-color: var(--bg-tertiary);
-  }
-  
-  html.dark-mode .loading-chart,
-  html.dark-mode .no-data {
-    color: var(--text-secondary);
-  }
-  
-  /* Adaptações para modais */
-  html.dark-mode .close-button {
-    color: var(--text-secondary);
-  }
-  
-  html.dark-mode .close-button:hover {
-    color: var(--text-color);
-  }
-  
-  /* Toggle de tema - estilização */
-  .theme-toggle {
-    background: none;
-    border: none;
-    color: var(--secondary-color);
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 5px;
-    margin-right: 15px;
-    transition: transform 0.3s ease;
-  }
-  
-  .theme-toggle:hover {
+}
+
+html.dark-mode .alert-danger {
+    background-color: rgba(232, 83, 94, 0.2);
+    border-color: rgba(232, 83, 94, 0.3);
+    color: var(--danger-color);
+}
+
+/* ===== CORREÇÃO: STATUS DAS PORTAS ===== */
+/* Correção para indicadores de status das portas */
+html.dark-mode [style*="color: #e74c3c"],
+html.dark-mode [style*="color: #dc3545"] {
+    color: var(--danger-color) !important;
+}
+
+html.dark-mode [style*="color: #2ecc71"],
+html.dark-mode [style*="color: #28a745"] {
+    color: var(--success-color) !important;
+}
+
+/* Correção específica para status badges na página de portas */
+html.dark-mode .status-badge.badge-danger,
+html.dark-mode .status-locked {
+    background-color: rgba(232, 83, 94, 0.2) !important;
+    color: var(--danger-color) !important;
+}
+
+html.dark-mode .status-badge.badge-success,
+html.dark-mode .status-unlocked {
+    background-color: rgba(62, 202, 93, 0.2) !important;
+    color: var(--success-color) !important;
+}
+
+/* Correção para os ícones nas células da tabela */
+html.dark-mode .table td span[style*="color: #e74c3c"] i,
+html.dark-mode .table td span[style*="color: #dc3545"] i {
+    color: var(--danger-color) !important;
+}
+
+html.dark-mode .table td span[style*="color: #2ecc71"] i,
+html.dark-mode .table td span[style*="color: #28a745"] i {
+    color: var(--success-color) !important;
+}
+
+/* Correção para o texto junto aos ícones */
+html.dark-mode .table td span[style*="color: #e74c3c"],
+html.dark-mode .table td span[style*="color: #dc3545"] {
+    color: var(--danger-color) !important;
+}
+
+html.dark-mode .table td span[style*="color: #2ecc71"],
+html.dark-mode .table td span[style*="color: #28a745"] {
+    color: var(--success-color) !important;
+}
+
+/* Status de portas no dashboard */
+html.dark-mode .door-status.locked {
+    background-color: rgba(62, 202, 93, 0.2);
+    color: var(--success-color);
+}
+
+html.dark-mode .door-status.unlocked {
+    background-color: rgba(232, 83, 94, 0.2);
+    color: var(--danger-color);
+}
+
+/* Ajuste para os dots que indicam status */
+html.dark-mode .status-dot.locked {
+    background-color: var(--danger-color);
+}
+
+html.dark-mode .status-dot.unlocked {
+    background-color: var(--success-color);
+}
+
+/* ===== AJUSTES PARA OUTROS ELEMENTOS DA INTERFACE ===== */
+/* Sidebar e header */
+html.dark-mode .sidebar,
+html.dark-mode .main-header {
+    background-color: var(--dark-card-bg);
+    border-color: var(--dark-border-color);
+}
+
+html.dark-mode .sidebar-nav li a {
+    color: var(--dark-text-secondary);
+}
+
+html.dark-mode .sidebar-nav li a:hover,
+html.dark-mode .sidebar-nav li.active a {
+    background-color: rgba(93, 123, 247, 0.1);
     color: var(--primary-color);
-  }
-  
-  /* Animação suave ao alternar temas */
-  .theme-transition {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-  }
-  
-  /* Ajustes para Charts.js em tema escuro - Solução completa */
-  html.dark-mode .chart-placeholder {
-    background-color: var(--bg-secondary);
-  }
-  
-  /* Aplicar tema escuro diretamente ao canvas do gráfico */
-  html.dark-mode canvas[class*="chart"],
-  html.dark-mode canvas#activityChart {
-    background-color: var(--bg-secondary) !important;
-    border-radius: 5px;
-  }
-  
-  /* Ajustar cores de texto e grade nos gráficos */
-  html.dark-mode .chart-js-grid-line,
-  html.dark-mode .chart-js-axis {
-    stroke: var(--border-color) !important;
-  }
-  
-  html.dark-mode .chart-js-tick,
-  html.dark-mode .chart-js-legend {
-    fill: var(--text-color) !important;
-  }
-  
-  /* Importante: Em vez de usar filter, vamos modificar as cores globais do Chart.js */
-  html.dark-mode #activityChart {
-    background-color: var(--bg-secondary) !important;
-  }
-  /* 
-corrigir elementos específicos dentro dos modais
-*/
-
-/* Status badges dentro de modais */
-html.dark-mode .modal [class*="status-badge"],
-html.dark-mode .modal span[class*="status-"],
-html.dark-mode .modal [class*="badge"] {
-    /* Melhorar visibilidade dos badges no tema escuro */
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Badge de status "Trancada" em modais */
-html.dark-mode .modal .status-locked,
-html.dark-mode .modal span:contains("Trancada"),
-html.dark-mode .modal span[style*="color: #e74c3c"],
-html.dark-mode .modal span.status-badge {
-    background-color: rgba(231, 76, 60, 0.3) !important;
-    color: #ff7b6b !important;
-    border: 1px solid rgba(231, 76, 60, 0.5);
-    padding: 3px 8px;
-    border-radius: 4px;
+html.dark-mode .sidebar-footer a {
+    color: var(--dark-text-secondary);
 }
 
-/* Ajuste para botões de ação específicos nos modais de controle */
-html.dark-mode .modal button[class*="btn-success"],
-html.dark-mode .modal button:contains("Destrancar") {
-    background-color: rgba(46, 204, 113, 0.2) !important;
-    border-color: rgba(46, 204, 113, 0.5) !important;
-    color: #5ceba6 !important;
+/* Formulários e inputs */
+html.dark-mode .header-search {
+    background-color: var(--dark-input-bg);
 }
 
-html.dark-mode .modal button[class*="btn-danger"],
-html.dark-mode .modal button:contains("Trancar") {
-    background-color: rgba(231, 76, 60, 0.2) !important;
-    border-color: rgba(231, 76, 60, 0.5) !important;
-    color: #ff7b6b !important;
+html.dark-mode .header-search input {
+    color: var(--dark-text-primary);
 }
 
-/* Melhorar botões de ação padrão */
-html.dark-mode .modal button.btn-primary,
-html.dark-mode .modal button[class*="btn-primary"] {
+html.dark-mode .header-search i {
+    color: var(--dark-text-secondary);
+}
+
+/* Cards e tabelas */
+html.dark-mode .card,
+html.dark-mode .status-card {
+    background-color: var(--dark-card-bg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+html.dark-mode .card-header {
+    border-bottom-color: var(--dark-border-color);
+}
+
+html.dark-mode .card-header h3 {
+    color: var(--dark-text-primary);
+}
+
+/* Correção específica para a tabela de portas */
+html.dark-mode .table {
+    color: var(--dark-text-primary);
+}
+
+html.dark-mode .table th {
+    background-color: #2a2f40;
+    color: var(--dark-text-primary);
+    border-color: var(--dark-border-color);
+}
+
+html.dark-mode .table td {
+    border-color: var(--dark-border-color);
+    color: var(--dark-text-primary);
+}
+
+/* Correção para as linhas alternadas */
+html.dark-mode .table tbody tr {
+    background-color: #232736;
+}
+
+html.dark-mode .table tbody tr:nth-child(even) {
+    background-color: #282d3d;
+}
+
+html.dark-mode .table tbody tr:hover {
+    background-color: #323749;
+}
+
+/* Status cards no dashboard */
+html.dark-mode .status-card-header h3 {
+    color: var(--dark-text-secondary);
+}
+
+html.dark-mode .status-count {
+    color: var(--dark-text-primary);
+}
+
+html.dark-mode .status-label {
+    color: var(--dark-text-secondary);
+}
+
+html.dark-mode .status-period {
+    color: var(--dark-text-secondary);
+}
+
+/* Modais */
+html.dark-mode .modal-content {
+    background-color: var(--dark-card-bg);
+    color: var(--dark-text-primary);
+}
+
+html.dark-mode .modal-header,
+html.dark-mode .modal-footer {
+    border-color: var(--dark-border-color);
+}
+
+html.dark-mode .modal-header h3 {
+    color: var(--dark-text-primary);
+}
+
+html.dark-mode .modal-title,
+html.dark-mode #modalTitle,
+html.dark-mode #controlModalTitle,
+html.dark-mode #confirm-modal-title,
+html.dark-mode #user-modal-title {
+    color: var(--dark-text-primary);
+}
+
+html.dark-mode .close-button {
+    color: var(--dark-text-secondary);
+}
+
+/* Corrigir inputs em modais */
+html.dark-mode .modal-body .form-control {
+    background-color: var(--dark-input-bg);
+    border-color: var(--dark-border-color);
+    color: var(--dark-text-primary);
+}
+
+html.dark-mode .modal-body .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(93, 123, 247, 0.25);
+}
+
+html.dark-mode .modal-body label {
+    color: var(--dark-text-primary);
+}
+
+/* Notificações */
+html.dark-mode .notification {
+    background-color: var(--dark-card-bg);
+    color: var(--dark-text-primary);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Botões */
+html.dark-mode .btn-outline-secondary {
+    color: var(--dark-text-secondary);
+    border-color: var(--dark-border-color);
+}
+
+html.dark-mode .btn-outline-secondary:hover {
+    background-color: var(--dark-hover-color);
+    color: var(--dark-text-primary);
+}
+
+/* Paginação */
+html.dark-mode .pagination-info {
+    color: var(--dark-text-secondary);
+}
+
+html.dark-mode .pagination-btn,
+html.dark-mode .page-number {
+    background-color: var(--dark-card-bg);
+    border-color: var(--dark-border-color);
+    color: var(--dark-text-primary);
+}
+
+html.dark-mode .pagination-btn:hover:not(:disabled),
+html.dark-mode .page-number:hover:not(.active) {
+    background-color: var(--dark-hover-color);
+}
+
+html.dark-mode .page-number.active {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: white;
 }
 
-html.dark-mode .modal button.btn-secondary,
-html.dark-mode .modal button[class*="btn-secondary"],
-html.dark-mode .modal button.btn-outline-secondary,
-html.dark-mode .modal button[class*="btn-outline-secondary"],
-html.dark-mode .modal button:contains("Cancelar") {
-    background-color: rgba(120, 120, 120, 0.2);
-    border-color: rgba(120, 120, 120, 0.3);
-    color: #b1b5bd;
+/* Dropdown */
+html.dark-mode .dropdown-menu {
+    background-color: var(--dark-card-bg);
+    border-color: var(--dark-border-color);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
-html.dark-mode .modal button:hover {
-    opacity: 0.9;
+html.dark-mode .dropdown-item {
+    color: var(--dark-text-primary);
 }
 
-/* Ajustes para campos de formulário em modais */
-html.dark-mode .modal input[type="text"],
-html.dark-mode .modal input[type="email"],
-html.dark-mode .modal input[type="password"],
-html.dark-mode .modal input,
-html.dark-mode .modal select,
-html.dark-mode .modal textarea {
-    background-color: rgba(0, 0, 0, 0.2) !important;
-    color: var(--text-color) !important;
-    border-color: var(--border-color) !important;
+html.dark-mode .dropdown-item:hover {
+    background-color: var(--dark-hover-color);
 }
 
-html.dark-mode .modal select option {
-    background-color: var(--bg-tertiary);
-    color: var(--text-color);
+/* Chart.js - ajustes para gráficos */
+html.dark-mode .chart-placeholder {
+    background-color: var(--dark-card-bg);
 }
 
-/* Cabeçalhos de modal */
-html.dark-mode .modal-header {
-    border-bottom-color: var(--border-color);
+html.dark-mode canvas {
+    filter: brightness(0.9) contrast(1.1);
 }
 
-html.dark-mode .modal-footer {
-    border-top-color: var(--border-color);
+/* Correção para legendas do gráfico de atividade diária */
+html.dark-mode .chart-legend span {
+    color: var(--dark-text-primary) !important;
 }
 
-/* Cores para as linhas de título e fechamento em modais */
-html.dark-mode .modal-header h3,
-html.dark-mode .modal-title,
-html.dark-mode [class*="modal"] h3,
-html.dark-mode [id*="controlModal"] h3,
-html.dark-mode [id*="modal"] h4 {
-    color: var(--text-color) !important;
+/* Sempre garantir que as legendas nos gráficos sejam legíveis */
+html.dark-mode canvas + ul li span {
+    color: var(--dark-text-primary) !important;
 }
 
-/* Botão específico de destrancar */
-html.dark-mode [id*="unlockDoorBtn"],
-html.dark-mode button[id*="destrancar"] {
-    background-color: rgba(46, 204, 113, 0.2) !important;
-    border-color: rgba(46, 204, 113, 0.5) !important;
-    color: #5ceba6 !important;
+/* Correção específica para as legendas de gráficos no dashboard */
+html.dark-mode .chartjs-legend {
+    color: var(--dark-text-primary) !important;
 }
 
-/* Botão específico para fechar */
-html.dark-mode button[id*="fechar"],
-html.dark-mode button:contains("Fechar") {
-    background-color: rgba(120, 120, 120, 0.2);
-    border-color: rgba(120, 120, 120, 0.3);
-    color: #b1b5bd;
+/* Ajustes para legendas abaixo do gráfico */
+html.dark-mode #activityChart ~ div,
+html.dark-mode .chart-js-legend {
+    color: var(--dark-text-primary) !important;
 }
 
-/* Substituto para seletor :contains que não é suportado */
-html.dark-mode [id*="controlDoorStatus"] span {
-    background-color: rgba(231, 76, 60, 0.3) !important;
-    color: #ff7b6b !important;
-    border: 1px solid rgba(231, 76, 60, 0.5);
-    padding: 3px 8px;
-    border-radius: 4px;
+/* Correção para o gráfico de donut */
+html.dark-mode .donut-hole {
+    background-color: var(--dark-card-bg);
 }
 
-/* Estilo específico para badge "Trancada" no modal de controle */
-html.dark-mode #controlDoorStatus span,
-html.dark-mode .modal span.status-locked {
-    display: inline-block;
-    background-color: rgba(231, 76, 60, 0.3) !important;
-    color: #ff7b6b !important;
-    border: 1px solid rgba(231, 76, 60, 0.5);
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 0.85rem;
+html.dark-mode .donut-text {
+    color: var(--dark-text-primary);
 }
 
-/* Botão verde de destrancar */
-html.dark-mode button[id="unlockDoorBtn"],
-html.dark-mode .door-control-actions button.btn-success {
-    background-color: rgba(46, 204, 113, 0.2) !important;
-    border: 1px solid rgba(46, 204, 113, 0.5) !important;
-    color: #5ceba6 !important;
+html.dark-mode .donut-ring {
+    background-color: #3b4254;
 }
 
-html.dark-mode button[id="unlockDoorBtn"]:hover,
-html.dark-mode .door-control-actions button.btn-success:hover {
-    background-color: rgba(46, 204, 113, 0.3) !important;
+/* Cor para números e estado de dispositivos */
+html.dark-mode .stat-value, 
+html.dark-mode .stat-label,
+html.dark-mode #device-percentage,
+html.dark-mode #device-donut-segment {
+    color: var(--dark-text-primary);
 }
 
-/* Botão vermelho de trancar */
-html.dark-mode button[id="lockDoorBtn"],
-html.dark-mode .door-control-actions button.btn-danger {
-    background-color: rgba(231, 76, 60, 0.2) !important;
-    border: 1px solid rgba(231, 76, 60, 0.5) !important;
-    color: #ff7b6b !important;
-}
-
-html.dark-mode button[id="lockDoorBtn"]:hover,
-html.dark-mode .door-control-actions button.btn-danger:hover {
-    background-color: rgba(231, 76, 60, 0.3) !important;
-}
-
-/* Botão de fechar */
-html.dark-mode button[id="closeControlBtn"] {
-    background-color: rgba(108, 117, 125, 0.2) !important;
-    border: 1px solid rgba(108, 117, 125, 0.3) !important;
-    color: #b1b5bd !important;
-}
-
-html.dark-mode button[id="closeControlBtn"]:hover {
-    background-color: rgba(108, 117, 125, 0.3) !important;
-}
-
-/* Fixar o título e cabeçalho específicos do modal de controle */
-html.dark-mode #controlModalTitle,
-html.dark-mode #controlDoorName {
-    color: var(--text-color) !important;
-}
-
-/* Caso haja um botão específico com id */
-html.dark-mode button#destrancar,
-html.dark-mode button.destrancar {
-    background-color: rgba(46, 204, 113, 0.2) !important;
-    border: 1px solid rgba(46, 204, 113, 0.5) !important;
-    color: #5ceba6 !important;
-}
-
-/* 
-Adicione estes estilos ao final do arquivo dark-mode.css 
-para corrigir a cor dos labels de formulário
-*/
-
-/* Labels e subtítulos de formulários */
-html.dark-mode label,
-html.dark-mode .form-group label,
-html.dark-mode .modal label,
-html.dark-mode form label,
-html.dark-mode [for],
-html.dark-mode .modal-body label {
-    color: #9ba5b0 !important; /* Cor mais suave para labels */
-}
-
-/* Específico para os labels que estão na captura de tela */
-html.dark-mode [for="doorName"],
-html.dark-mode [for="doorLocation"],
-html.dark-mode [for="doorStatus"],
-html.dark-mode .modal-body:not(.card) label {
-    color: #9ba5b0 !important;
-}
-
-/* Especificamente para labels que não têm atributo "for" */
-html.dark-mode .modal-body div:not([class]) {
-    color: #9ba5b0 !important;
-}
-
-/* Elementos com estilo inline que contêm texto */
-html.dark-mode [style*="color"] {
-    color: #9ba5b0 !important;
-}
-
-/* Modo mais específico - selecionando exatamente os labels azuis */
-html.dark-mode [style*="color: #4a6cf7"],
-html.dark-mode [style*="color:#4a6cf7"],
-html.dark-mode [style*="color: rgb(74, 108, 247)"],
-html.dark-mode [style*="color:rgb(74,108,247)"] {
-    color: #9ba5b0 !important;
-}
-
-/* Seletor mais genérico para textos de formulário */
-html.dark-mode .form-group > *:first-child:not(input):not(select):not(textarea),
-html.dark-mode form div > *:first-child:not(input):not(select):not(textarea) {
-    color: #9ba5b0 !important;
-}/* 
-Adicione estes estilos ao final do arquivo dark-mode.css 
-para garantir que todos os textos com cores específicas sejam ajustados
-*/
-
-/* Textos de subtítulos e labels com cores específicas */
-html.dark-mode div,
-html.dark-mode span,
-html.dark-mode p,
-html.dark-mode small {
-    color: inherit;
-}
-
-/* Seletores extremamente específicos para labels no formulário de portas */
-html.dark-mode div[style*="color:"] {
-    color: #9ba5b0 !important;
-}
-
-/* Especificamente para os labels "Nome" e "Localização" */
-html.dark-mode .modal div:not([class]):first-of-type,
-html.dark-mode .modal div:not([class]):nth-of-type(2) {
-    color: #9ba5b0 !important;
-}
-
-/* Abordagem mais agressiva para todos os textos azuis/claros que precisam de ajuste */
-html.dark-mode *[style*="color: #"][style*="cf7"],
-html.dark-mode *[style*="color: rgb(74"][style*="247)"],
-html.dark-mode *[style*="color: rgb(30"][style*="144)"],
-html.dark-mode *[style*="color: #3498db"],
-html.dark-mode *[style*="color: #2980b9"],
-html.dark-mode *[style*="color: #1e90ff"] {
-    color: #9ba5b0 !important;
-}
-
-/* Para garantir, vamos selecionar explicitamente labels baseados na estrutura */
-html.dark-mode #doorModal div,
-html.dark-mode [id*="door"] div {
-    color: #9ba5b0 !important;
-}
-
-/* Selecionando textos no nível exato dos labels na sua captura de tela */
-html.dark-mode .modal-body > div:not(.form-group) {
-    color: #9ba5b0 !important;
+/* Ajustes para dispositivos mobile */
+@media (max-width: 768px) {
+    html.dark-mode .mobile-overlay {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
 }

@@ -1,234 +1,216 @@
 /**
- * theme-switcher.js - Controle de tema claro/escuro para o SecureLab RFID
+ * theme-switcher.js - Gerenciamento de tema claro/escuro para SecureLab 2.0
  */
 
-// Executar quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar sistema de tema
-    initThemeSystem();
-});
-
-/**
- * Inicializa o sistema de tema claro/escuro
- */
-function initThemeSystem() {
-    // Criar botão de alternância se ainda não existir
-    createThemeToggleButton();
+(function() {
+    // Constantes
+    const THEME_STORAGE_KEY = 'securelab-theme';
+    const DARK_MODE_CLASS = 'dark-mode';
     
-    // Verificar se temos uma preferência salva
-    const savedTheme = localStorage.getItem('secureLab-theme');
+    // Verifica se estamos na página de login ou no dashboard
+    const isLoginPage = window.location.pathname.includes('login.html');
     
-    // Se temos uma preferência salva, aplicar
-    if (savedTheme) {
-        applyTheme(savedTheme);
-    } else {
+    /**
+     * Inicializa o controle de tema
+     */
+    function initThemeSwitcher() {
+        // Criar botão de alternância se não existir
+        createThemeToggleButton();
+        
+        // Aplicar tema inicial
+        applyTheme(getPreferredTheme());
+        
+        // Adicionar listener para o botão de tema
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#theme-toggle')) {
+                toggleTheme();
+            }
+        });
+        
+        // Ouvir mudanças nas preferências do sistema
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                if (!localStorage.getItem(THEME_STORAGE_KEY)) {
+                    // Aplicar a preferência do sistema se o usuário não definiu manualmente
+                    applyTheme(e.matches ? 'dark' : 'light');
+                }
+            });
+        }
+    }
+    
+    /**
+     * Cria o botão de alternância de tema se não existir
+     */
+    function createThemeToggleButton() {
+        // Verificar se o botão já existe
+        if (document.getElementById('theme-toggle')) {
+            return;
+        }
+        
+        // Criar botão
+        const button = document.createElement('button');
+        button.id = 'theme-toggle';
+        button.className = 'icon-button';
+        button.setAttribute('aria-label', 'Alternar tema');
+        button.innerHTML = '<i class="fas fa-moon"></i>';
+        
+        // Adicionar o botão à página
+        if (isLoginPage) {
+            // Na página de login, adicionar no canto superior direito
+            const container = document.createElement('div');
+            container.className = 'theme-toggle-container';
+            container.style.cssText = 'position: absolute; top: 20px; right: 20px; z-index: 100;';
+            container.appendChild(button);
+            document.body.appendChild(container);
+        } else {
+            // Nas outras páginas, adicionar no header
+            const headerRight = document.querySelector('.header-right');
+            if (headerRight) {
+                headerRight.insertBefore(button, headerRight.firstChild);
+            }
+        }
+    }
+    
+    /**
+     * Obtém o tema preferido do usuário
+     */
+    function getPreferredTheme() {
+        // Verificar preferência salva
+        const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+        if (savedTheme) {
+            return savedTheme;
+        }
+        
         // Verificar preferência do sistema
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            applyTheme('dark');
+            return 'dark';
+        }
+        
+        // Padrão: tema claro
+        return 'light';
+    }
+    
+    /**
+     * Aplica o tema especificado
+     */
+    function applyTheme(theme) {
+        const html = document.documentElement;
+        const themeToggle = document.getElementById('theme-toggle');
+        const icon = themeToggle ? themeToggle.querySelector('i') : null;
+        
+        if (theme === 'dark') {
+            html.classList.add(DARK_MODE_CLASS);
+            if (icon) {
+                icon.className = 'fas fa-sun'; // Ícone do sol no modo escuro
+            }
         } else {
-            applyTheme('light');
-        }
-    }
-    
-    // Adicionar listener para mudanças na preferência do sistema
-    if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-            const newTheme = e.matches ? 'dark' : 'light';
-            applyTheme(newTheme);
-            saveThemePreference(newTheme);
-        });
-    }
-}
-
-/**
- * Cria o botão de alternância de tema no header
- */
-function createThemeToggleButton() {
-    // Verificar se o botão já existe
-    if (document.querySelector('.theme-toggle')) {
-        return;
-    }
-    
-    // Localizar o elemento de notificações no header (para inserir o botão ao lado)
-    const notificationsElement = document.querySelector('.notifications');
-    
-    if (notificationsElement) {
-        // Criar botão
-        const themeToggle = document.createElement('button');
-        themeToggle.className = 'theme-toggle';
-        themeToggle.setAttribute('title', 'Alternar tema claro/escuro');
-        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-        
-        // Adicionar event listener
-        themeToggle.addEventListener('click', toggleTheme);
-        
-        // Inserir antes do elemento de notificações
-        notificationsElement.parentNode.insertBefore(themeToggle, notificationsElement);
-        
-        console.log('Botão de tema criado com sucesso');
-    } else {
-        console.warn('Elemento de notificações não encontrado. O botão de tema não foi criado.');
-    }
-}
-
-/**
- * Alterna entre os temas claro e escuro
- */
-function toggleTheme() {
-    const currentTheme = document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    // Aplicar novo tema
-    applyTheme(newTheme);
-    
-    // Salvar preferência
-    saveThemePreference(newTheme);
-    
-    // Atualizar ícone do botão
-    updateThemeToggleIcon(newTheme);
-}
-
-/**
- * Aplica o tema especificado
- * @param {string} theme - 'light' ou 'dark'
- */
-function applyTheme(theme) {
-    // Adicionar classe de transição para suavizar a mudança
-    document.documentElement.classList.add('theme-transition');
-    
-    // Aplicar ou remover a classe dark-mode
-    if (theme === 'dark') {
-        document.documentElement.classList.add('dark-mode');
-        
-        // Corrigir textos coloridos específicos (como labels de formulário)
-        fixColoredTexts();
-    } else {
-        document.documentElement.classList.remove('dark-mode');
-    }
-    
-    // Atualizar ícone do botão
-    updateThemeToggleIcon(theme);
-    
-    // Aplicar tema aos gráficos do Chart.js (se existirem)
-    updateChartsTheme(theme);
-    
-    // Após a transição, remover a classe de transição
-    setTimeout(function() {
-        document.documentElement.classList.remove('theme-transition');
-    }, 300);
-}
-
-/**
- * Corrige elementos de texto específicos que precisam de ajuste no tema escuro
- * Isso é especialmente útil para elementos com cores definidas inline ou estilos específicos
- */
-function fixColoredTexts() {
-    // Buscar todos os elementos que podem ser labels de formulário
-    const potentialLabels = document.querySelectorAll('.modal-body > div:not(.form-group), .modal label, form label, .form-group label');
-    
-    // Aplicar cor adequada para o tema escuro
-    potentialLabels.forEach(element => {
-        // Preservar a cor original em um atributo data se ainda não existir
-        if (!element.dataset.originalColor && element.style.color) {
-            element.dataset.originalColor = element.style.color;
+            html.classList.remove(DARK_MODE_CLASS);
+            if (icon) {
+                icon.className = 'fas fa-moon'; // Ícone da lua no modo claro
+            }
         }
         
-        // Aplicar a cor do tema escuro
-        element.style.color = '#9ba5b0';
-    });
+        // Salvar preferência
+        localStorage.setItem(THEME_STORAGE_KEY, theme);
+        
+        // Ajustar gráficos se estiverem presentes
+        updateCharts(theme);
+    }
     
-    // Buscar elementos com cor azul ou clara definida inline
-    const coloredElements = document.querySelectorAll('[style*="color"]');
-    coloredElements.forEach(element => {
-        const style = element.getAttribute('style');
-        // Se o estilo contém cores azuis claras específicas
-        if (style && (
-            style.includes('color: #4a6cf7') || 
-            style.includes('color:#4a6cf7') ||
-            style.includes('color: rgb(74, 108, 247)') ||
-            style.includes('color: #3498db') ||
-            style.includes('color: #1e90ff')
-        )) {
-            // Preservar a cor original
-            if (!element.dataset.originalColor) {
-                element.dataset.originalColor = element.style.color;
+    /**
+     * Alterna entre os temas claro e escuro
+     */
+    function toggleTheme() {
+        const currentTheme = getPreferredTheme();
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+    }
+    
+    /**
+     * Atualiza os gráficos para se adequarem ao tema atual (se existirem)
+     */
+    function updateCharts(theme) {
+        // Verificar se a variável global Chart existe (Chart.js)
+        if (window.Chart && window.activityChartInstance) {
+            // Aplicar tema ao gráfico
+            const isDark = theme === 'dark';
+            
+            // Ajustar cores do gráfico
+            window.activityChartInstance.options.scales.x.grid.color = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            window.activityChartInstance.options.scales.y.grid.color = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            window.activityChartInstance.options.scales.x.ticks.color = isDark ? '#c9cdd4' : '#6c757d';
+            window.activityChartInstance.options.scales.y.ticks.color = isDark ? '#c9cdd4' : '#6c757d';
+            
+            // Ajustar legendas
+            if (window.activityChartInstance.options.plugins && window.activityChartInstance.options.plugins.legend) {
+                window.activityChartInstance.options.plugins.legend.labels.color = isDark ? '#c9cdd4' : '#333';
+                
+                // Tentar ajustar as cores de cada dataset para manter a visibilidade
+                if (window.activityChartInstance.data && window.activityChartInstance.data.datasets) {
+                    window.activityChartInstance.data.datasets.forEach(dataset => {
+                        // Aumentar a opacidade para maior visibilidade no modo escuro
+                        if (isDark && dataset.backgroundColor) {
+                            if (typeof dataset.backgroundColor === 'string') {
+                                // Se for uma string, assumimos que é uma cor única
+                                dataset.borderColor = increaseBrightness(dataset.backgroundColor, 15);
+                            } else if (Array.isArray(dataset.backgroundColor)) {
+                                // Se for um array, precisamos ajustar cada cor
+                                dataset.borderColor = dataset.backgroundColor.map(color => 
+                                    increaseBrightness(color, 15)
+                                );
+                            }
+                        }
+                    });
+                }
             }
             
-            // Aplicar a cor do tema escuro
-            element.style.color = '#9ba5b0';
+            // Atualizar o gráfico
+            window.activityChartInstance.update();
         }
-    });
-    
-    // Específicamente para os labels Nome e Localização
-    const doorLabels = document.querySelectorAll('#doorModal .modal-body > div:not(.form-group), [id*="door"] .modal-body > div');
-    doorLabels.forEach(label => {
-        label.style.color = '#9ba5b0';
-    });
-}
-
-/**
- * Atualiza o tema dos gráficos Chart.js
- * @param {string} theme - 'light' ou 'dark'
- */
-function updateChartsTheme(theme) {
-    // Verificar se o Chart.js está disponível
-    if (window.Chart) {
-        // Definir cores globais para todos os gráficos
-        const isDark = theme === 'dark';
         
-        // Definir defaults globais para o Chart.js
-        Chart.defaults.color = isDark ? '#e4e6eb' : '#666';
-        Chart.defaults.borderColor = isDark ? '#3d434e' : '#ddd';
-        Chart.defaults.backgroundColor = isDark ? '#252931' : '#fff';
-        
-        // Atualizar todos os gráficos existentes
-        updateExistingCharts(isDark);
-    }
-}
-
-/**
- * Atualiza os gráficos existentes para o tema atual
- * @param {boolean} isDark - Se o tema atual é escuro
- */
-function updateExistingCharts(isDark) {
-    // Verificar se há uma instância global de gráfico de atividade
-    if (window.activityChartInstance) {
-        const chart = window.activityChartInstance;
-        
-        // Atualizar configurações de cores
-        chart.options.scales.x.grid.color = isDark ? '#3d434e' : '#ddd';
-        chart.options.scales.y.grid.color = isDark ? '#3d434e' : '#ddd';
-        chart.options.scales.x.ticks.color = isDark ? '#b1b5bd' : '#666';
-        chart.options.scales.y.ticks.color = isDark ? '#b1b5bd' : '#666';
-        
-        // Atualizar o gráfico
-        chart.update();
-    }
-    
-    // Se houver outros gráficos específicos, atualizá-los aqui
-}
-
-/**
- * Salva a preferência de tema do usuário
- * @param {string} theme - 'light' ou 'dark'
- */
-function saveThemePreference(theme) {
-    localStorage.setItem('secureLab-theme', theme);
-    console.log(`Tema ${theme} salvo nas preferências`);
-}
-
-/**
- * Atualiza o ícone do botão de tema
- * @param {string} theme - 'light' ou 'dark'
- */
-function updateThemeToggleIcon(theme) {
-    const themeToggle = document.querySelector('.theme-toggle');
-    
-    if (themeToggle) {
-        if (theme === 'dark') {
-            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-        } else {
-            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        // Ajustar gráfico de donut dos dispositivos
+        const donutHole = document.querySelector('.donut-hole');
+        const donutText = document.querySelector('.donut-text');
+        if (donutHole && theme === 'dark') {
+            donutHole.style.backgroundColor = '#2c3144';
+            if (donutText) {
+                donutText.style.color = '#f0f2f5';
+            }
+        } else if (donutHole && theme === 'light') {
+            donutHole.style.backgroundColor = 'white';
+            if (donutText) {
+                donutText.style.color = '#212529';
+            }
         }
     }
-}
+    
+    /**
+     * Aumenta o brilho de uma cor para melhor visibilidade no modo escuro
+     */
+    function increaseBrightness(color, percent) {
+        // Se não for uma cor no formato hexadecimal, retornar a cor original
+        if (!color || typeof color !== 'string' || !color.startsWith('#')) {
+            return color;
+        }
+        
+        // Converter para RGB
+        let r = parseInt(color.substring(1, 3), 16);
+        let g = parseInt(color.substring(3, 5), 16);
+        let b = parseInt(color.substring(5, 7), 16);
+        
+        // Aumentar brilho
+        r = Math.min(255, Math.floor(r * (1 + percent / 100)));
+        g = Math.min(255, Math.floor(g * (1 + percent / 100)));
+        b = Math.min(255, Math.floor(b * (1 + percent / 100)));
+        
+        // Converter de volta para hex
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    }
+    
+    // Inicializar quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initThemeSwitcher);
+    } else {
+        initThemeSwitcher();
+    }
+})();
