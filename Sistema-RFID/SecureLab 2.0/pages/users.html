@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureLab RFID | Usuários</title>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <link rel="stylesheet" href="../public/css/utils.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SecureLab</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="doors.html">
+                            <i class="fas fa-door-open"></i>
+                            <span>Portas</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Usuários</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="devices.html">
+                            <i class="fas fa-microchip"></i>
+                            <span>Dispositivos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="logs.html">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Logs de Acesso</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="groups.html">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Grupos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="alerts.html">
+                            <i class="fas fa-bell"></i>
+                            <span>Alertas</span>
+                            <span class="badge" id="alerts-count">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-users" placeholder="Buscar usuários...">
+                </div>
+                <div class="header-right">
+                    <div class="notifications">
+                        <button class="icon-button">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge" id="header-alerts-count">0</span>
+                        </button>
+                    </div>
+                    <div class="user-menu">
+                        <img src="https://via.placeholder.com/40" alt="Avatar do usuário" class="avatar">
+                        <span class="user-name" id="current-user-name">Usuário</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1>Gerenciamento de Usuários</h1>
+                    <button class="btn btn-primary" id="add-user-btn">
+                        <i class="fas fa-plus"></i> Novo Usuário
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="mb-0">Filtros</h3>
+                            <button class="btn btn-sm btn-outline-primary" id="reset-filters-btn">
+                                <i class="fas fa-sync-alt"></i> Limpar Filtros
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-department">Departamento</label>
+                                <select id="filter-department" class="form-control">
+                                    <option value="">Todos</option>
+                                    <option value="TI">TI</option>
+                                    <option value="Pesquisa">Pesquisa</option>
+                                    <option value="Laboratório">Laboratório</option>
+                                    <option value="Administração">Administração</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-role">Função</label>
+                                <select id="filter-role" class="form-control">
+                                    <option value="">Todas</option>
+                                    <option value="admin">Administrador</option>
+                                    <option value="user">Usuário</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-status">Status</label>
+                                <select id="filter-status" class="form-control">
+                                    <option value="">Todos</option>
+                                    <option value="active">Ativo</option>
+                                    <option value="inactive">Inativo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Usuários -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Lista de Usuários</h3>
+                        <div class="card-actions">
+                            <button class="icon-button" id="refresh-users">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <div class="dropdown">
+                                <button class="icon-button" id="export-dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu" id="export-menu">
+                                    <a href="#" class="dropdown-item" id="export-csv">
+                                        <i class="fas fa-file-csv"></i> Exportar CSV
+                                    </a>
+                                    <a href="#" class="dropdown-item" id="export-pdf">
+                                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Departamento</th>
+                                        <th>Função</th>
+                                        <th>Status</th>
+                                        <th>Criado em</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <!-- Os usuários serão carregados dinamicamente via JavaScript -->
+                                    <tr>
+                                        <td colspan="7" class="text-center">Carregando usuários...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Paginação -->
+                        <div class="pagination-container mt-4">
+                            <div class="pagination-info">
+                                Exibindo <span id="pagination-start">0</span> - <span id="pagination-end">0</span> de <span id="pagination-total">0</span> usuários
+                            </div>
+                            <div class="pagination">
+                                <button class="pagination-btn" id="prev-page" disabled>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div id="pagination-numbers">
+                                    <!-- Números de paginação serão adicionados aqui -->
+                                </div>
+                                <button class="pagination-btn" id="next-page">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Usuário -->
+    <div class="modal" id="user-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="user-modal-title">Adicionar Usuário</h3>
+                    <button class="close-button" id="close-user-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="user-form">
+                        <div class="form-group">
+                            <label for="user-name">Nome Completo</label>
+                            <input type="text" id="user-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-email">Email</label>
+                            <input type="email" id="user-email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-department">Departamento</label>
+                            <select id="user-department" class="form-control" required>
+                                <option value="">Selecione um departamento</option>
+                                <option value="TI">TI</option>
+                                <option value="Pesquisa">Pesquisa</option>
+                                <option value="Laboratório">Laboratório</option>
+                                <option value="Administração">Administração</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-role">Função</label>
+                            <select id="user-role" class="form-control" required>
+                                <option value="">Selecione uma função</option>
+                                <option value="admin">Administrador</option>
+                                <option value="user">Usuário</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-status">Status</label>
+                            <select id="user-status" class="form-control" required>
+                                <option value="active">Ativo</option>
+                                <option value="inactive">Inativo</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="password-group">
+                            <label for="user-password">Senha Inicial</label>
+                            <div class="password-input">
+                                <input type="password" id="user-password" class="form-control" required>
+                                <button type="button" class="password-toggle" id="toggle-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" id="cancel-user-btn">Cancelar</button>
+                    <button class="btn btn-primary" id="save-user-btn">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="confirm-modal-title">Confirmar Ação</h3>
+                    <button class="close-button" id="close-confirm-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-modal-message">Tem certeza que deseja realizar esta ação?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" id="cancel-confirm-btn">Cancelar</button>
+                    <button class="btn btn-danger" id="confirm-action-btn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <!-- Scripts da aplicação -->
+    <script src="../public/js/firebase-config.js"></script>
+    <script src="../public/js/utils.js"></script>
+    <script src="../public/js/common.js"></script>
+    <script src="../public/js/users.js"></script>
+</body>
+</html>
