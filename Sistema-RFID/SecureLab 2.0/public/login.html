@@ -166,7 +166,7 @@
             firebase.auth().onAuthStateChanged(function(user) {
                 if (user) {
                     // Redirecionar para o dashboard se já estiver autenticado
-                    window.location.href = '../pages/dashboard.html';
+                    window.location.href = 'dashboard.html';
                 }
             });
             
@@ -184,7 +184,7 @@
                 firebase.auth().signInWithEmailAndPassword(email, password)
                     .then((userCredential) => {
                         // Sucesso - redirecionar para o dashboard
-                        window.location.href = '../pages/dashboard.html';
+                        window.location.href = 'dashboard.html';
                     })
                     .catch((error) => {
                         // Exibir mensagem de erro

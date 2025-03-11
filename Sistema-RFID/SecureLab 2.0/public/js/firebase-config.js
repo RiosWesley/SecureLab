@@ -24,8 +24,8 @@ const firebaseConfig = {
       loadDashboardData();
     } else {
       console.log('Nenhum usuário autenticado');
-      // Redirecionar para a página de login se necessário
-      // window.location.href = 'login.html';
+    // Redirecionar para a página de login se necessário
+      window.location.href = 'login.html';
     }
   });
   

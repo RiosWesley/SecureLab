@@ -7,7 +7,8 @@ function checkAuth() {
     firebase.auth().onAuthStateChanged(user => {
         if (!user) {
             // Redirecionar para login se não estiver autenticado
-            window.location.href = getPathToRoot() + 'public/login.html';
+            console.log("checkAuth: Usuário não autenticado. Redirecionando para /login.html")
+            window.location.href = '/login.html';
         } else {
             // Carregar nome do usuário
             loadCurrentUserName();
@@ -70,9 +71,11 @@ function initLogout() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
+            console.log("initLogout: Clicou em Sair. Chamando signOut()"); // ADICIONE ESTA LINHA
             firebase.auth().signOut()
                 .then(() => {
-                    window.location.href = getPathToRoot() + 'public/login.html';
+                    console.log("initLogout: signOut() bem-sucedido. Redirecionando para /login.html"); // ADICIONE ESTA LINHA
+                    window.location.href = '/login.html';
                 })
                 .catch(error => {
                     console.error('Erro ao fazer logout:', error);
@@ -81,7 +84,6 @@ function initLogout() {
         });
     }
 }
-
 // Função para exibir notificações
 function showNotification(type, message, duration = 3000) {
     // Verificar se já existe uma notificação
@@ -305,19 +307,7 @@ function translateRole(role) {
     return roleMap[role] || role;
 }
 
-// Função para obter caminho relativo à raiz
-function getPathToRoot() {
-    const path = window.location.pathname;
-    // Se estamos em 'pages/'
-    if (path.includes('/pages/')) {
-        return '../';
-    }
-    // Se estamos em 'public/'
-    if (path.includes('/public/')) {
-        return '../';
-    }
-    return '';
-}
+
 
 // Função para validar email
 function isValidEmail(email) {
