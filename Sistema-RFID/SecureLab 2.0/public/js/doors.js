@@ -1,67 +1,100 @@
 /**
- * doors.js - Gerenciamento básico de portas para o sistema SecureLab RFID
- * 
- * Funcionalidades:
- * - Visualizar portas existentes
- * - Adicionar novas portas
- * - Controlar portas (abrir/fechar)
+ * doors.js - Gerenciamento de portas para o sistema SecureLab RFID
+ * Versão corrigida
  */
 
-// Garantir que o usuário está autenticado
-checkAuth();
+// Garantir que o DOM foi carregado antes de inicializar
+document.addEventListener('DOMContentLoaded', initDoorManagement);
 
-// Elementos do DOM
-const elements = {
-    // Tabela
-    tableBody: document.querySelector('#doorsTable tbody'),
-    
-    // Pesquisa
-    searchInput: document.getElementById('searchInput'),
-    searchBtn: document.getElementById('searchBtn'),
-    
-    // Botões de ação
-    addDoorBtn: document.getElementById('addDoorBtn'),
-    
-    // Modal para adicionar/editar portas
-    doorModal: document.getElementById('doorModal'),
-    doorForm: document.getElementById('doorForm'),
-    doorName: document.getElementById('doorName'),
-    doorLocation: document.getElementById('doorLocation'),
-    doorStatus: document.getElementById('doorStatus'),
-    saveDoorBtn: document.getElementById('saveDoorBtn'),
-    cancelBtn: document.getElementById('cancelBtn'),
-    
-    // Modal de controle de portas
-    controlDoorModal: document.getElementById('controlDoorModal'),
-    controlDoorName: document.getElementById('controlDoorName'),
-    controlDoorStatus: document.getElementById('controlDoorStatus'),
-    lockDoorBtn: document.getElementById('lockDoorBtn'),
-    unlockDoorBtn: document.getElementById('unlockDoorBtn'),
-    closeControlBtn: document.getElementById('closeControlBtn')
-};
-
-// Dados e estado
+// Variáveis globais
 let doors = [];
 let currentDoorId = null;
-
-// Referência ao Firebase
 const doorsRef = firebase.database().ref('doors');
 
 /**
  * Inicializa a página de gerenciamento de portas
  */
 function initDoorManagement() {
+    console.log('Inicializando gerenciamento de portas...');
+    
+    // Configurar eventos dos botões
+    setupEventListeners();
+    
     // Carregar portas do Firebase
     loadDoors();
+}
+
+/**
+ * Configura todos os event listeners da página
+ */
+function setupEventListeners() {
+    // Botão Nova Porta
+    const addDoorBtn = document.getElementById('addDoorBtn');
+    if (addDoorBtn) {
+        addDoorBtn.addEventListener('click', () => openDoorModal());
+    } else {
+        console.error('Botão de adicionar porta não encontrado!');
+    }
     
-    // Configurar eventos
-    setupEventListeners();
+    // Botão Salvar no modal
+    const saveDoorBtn = document.getElementById('saveDoorBtn');
+    if (saveDoorBtn) {
+        saveDoorBtn.addEventListener('click', handleDoorFormSubmit);
+    }
+    
+    // Campo de pesquisa
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            renderDoors();
+        });
+    }
+    
+    // Botões de controle de porta no modal
+    const lockDoorBtn = document.getElementById('lockDoorBtn');
+    const unlockDoorBtn = document.getElementById('unlockDoorBtn');
+    
+    if (lockDoorBtn) {
+        lockDoorBtn.addEventListener('click', () => controlDoor('lock'));
+    }
+    
+    if (unlockDoorBtn) {
+        unlockDoorBtn.addEventListener('click', () => controlDoor('unlock'));
+    }
+    
+    // Configurar botões de fechar modal
+    const closeButtons = document.querySelectorAll('.close-modal');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+    
+    // Também configurar botões cancelar
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            document.getElementById('doorModal').style.display = 'none';
+        });
+    }
+    
+    const closeControlBtn = document.getElementById('closeControlBtn');
+    if (closeControlBtn) {
+        closeControlBtn.addEventListener('click', function() {
+            document.getElementById('controlDoorModal').style.display = 'none';
+        });
+    }
 }
 
 /**
  * Carrega as portas do Firebase
  */
 function loadDoors() {
+    console.log('Carregando portas do Firebase...');
+    
     doorsRef.on('value', (snapshot) => {
         doors = [];
         snapshot.forEach((childSnapshot) => {
@@ -72,40 +105,13 @@ function loadDoors() {
             doors.push(door);
         });
         
+        console.log(`Portas carregadas: ${doors.length}`);
+        
         // Atualizar tabela
         renderDoors();
-    });
-}
-
-/**
- * Configura os event listeners para a página
- */
-function setupEventListeners() {
-    // Pesquisa
-    elements.searchBtn.addEventListener('click', handleSearch);
-    elements.searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
-    });
-    
-    // Modal de porta
-    elements.addDoorBtn.addEventListener('click', () => openDoorModal());
-    elements.cancelBtn.addEventListener('click', () => closeModal(elements.doorModal));
-    elements.doorForm.addEventListener('submit', handleDoorFormSubmit);
-    elements.saveDoorBtn.addEventListener('click', () => elements.doorForm.dispatchEvent(new Event('submit')));
-    
-    // Modal de controle de porta
-    elements.closeControlBtn.addEventListener('click', () => closeModal(elements.controlDoorModal));
-    elements.lockDoorBtn.addEventListener('click', () => controlDoor('lock'));
-    elements.unlockDoorBtn.addEventListener('click', () => controlDoor('unlock'));
-    
-    // Fechar modais ao clicar no X
-    document.querySelectorAll('.close-modal').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const modal = e.target.closest('.modal');
-            closeModal(modal);
-        });
+    }, (error) => {
+        console.error("Erro ao carregar portas:", error);
+        showNotification('Erro ao carregar portas: ' + error.message, 'error');
     });
 }
 
@@ -113,62 +119,72 @@ function setupEventListeners() {
  * Renderiza as portas na tabela
  */
 function renderDoors() {
-    const tableBody = elements.tableBody;
+    console.log('Renderizando portas na tabela...');
+    
+    const tableBody = document.querySelector('#doorsTable tbody');
+    if (!tableBody) {
+        console.error('Corpo da tabela não encontrado!');
+        return;
+    }
+    
     tableBody.innerHTML = '';
     
+    // Filtrar portas se houver texto de pesquisa
+    let displayDoors = [...doors]; // Clonar o array de portas
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        const searchText = searchInput.value.trim().toLowerCase();
+        if (searchText) {
+            displayDoors = doors.filter(door => 
+                (door.name?.toLowerCase() || '').includes(searchText) || 
+                (door.location?.toLowerCase() || '').includes(searchText)
+            );
+        }
+    }
+    
     // Verificar se há portas para exibir
-    if (doors.length === 0) {
+    if (displayDoors.length === 0) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
-        cell.colSpan = 6;
+        cell.colSpan = 5;
         cell.textContent = 'Nenhuma porta encontrada.';
-        cell.classList.add('empty-table-message');
+        cell.style.textAlign = 'center';
+        cell.style.padding = '20px';
         row.appendChild(cell);
         tableBody.appendChild(row);
         return;
     }
     
-    // Filtrar portas se houver texto de pesquisa
-    let displayDoors = doors;
-    const searchText = elements.searchInput.value.trim().toLowerCase();
-    if (searchText) {
-        displayDoors = doors.filter(door => 
-            door.name.toLowerCase().includes(searchText) || 
-            door.location.toLowerCase().includes(searchText)
-        );
-    }
-    
     // Adicionar as portas à tabela
     displayDoors.forEach(door => {
+        // Criar linha da tabela
         const row = document.createElement('tr');
         
-        // Nome
+        // Nome da porta
         const nameCell = document.createElement('td');
-        nameCell.textContent = door.name;
+        nameCell.textContent = door.name || 'Sem nome';
         row.appendChild(nameCell);
         
         // Localização
         const locationCell = document.createElement('td');
-        locationCell.textContent = door.location;
+        locationCell.textContent = door.location || 'Local não definido';
         row.appendChild(locationCell);
         
-        // Status
+        // Status com ícone
         const statusCell = document.createElement('td');
-        const statusBadge = document.createElement('span');
-        statusBadge.classList.add('status-badge');
         
+        // Criar ícone baseado no status
+        const statusIcon = document.createElement('i');
         if (door.status === 'locked') {
-            statusBadge.classList.add('status-locked');
-            statusBadge.innerHTML = '<i class="fas fa-lock"></i> Trancada';
-        } else if (door.status === 'unlocked') {
-            statusBadge.classList.add('status-unlocked');
-            statusBadge.innerHTML = '<i class="fas fa-lock-open"></i> Destrancada';
+            statusIcon.className = 'fas fa-lock';
+            statusIcon.style.color = '#e74c3c';
+            statusCell.innerHTML = '<span style="color: #e74c3c;"><i class="fas fa-lock"></i> Trancada</span>';
         } else {
-            statusBadge.classList.add('status-unknown');
-            statusBadge.innerHTML = '<i class="fas fa-question-circle"></i> Desconhecido';
+            statusIcon.className = 'fas fa-lock-open';
+            statusIcon.style.color = '#2ecc71';
+            statusCell.innerHTML = '<span style="color: #2ecc71;"><i class="fas fa-lock-open"></i> Destrancada</span>';
         }
         
-        statusCell.appendChild(statusBadge);
         row.appendChild(statusCell);
         
         // Última Atividade
@@ -181,26 +197,42 @@ function renderDoors() {
         }
         row.appendChild(lastActivityCell);
         
-        // Ações
+        // Botões de Ação
         const actionsCell = document.createElement('td');
-        actionsCell.classList.add('actions-cell');
+        actionsCell.style.whiteSpace = 'nowrap';
         
-        // Botão de controle
-        const controlBtn = document.createElement('button');
-        controlBtn.classList.add('btn-icon', 'btn-control');
-        controlBtn.innerHTML = '<i class="fas fa-sliders-h"></i>';
-        controlBtn.setAttribute('title', 'Controlar Porta');
-        controlBtn.addEventListener('click', () => openControlModal(door));
-        actionsCell.appendChild(controlBtn);
-        
-        // Botão de edição
+        // Botão de Editar
         const editBtn = document.createElement('button');
-        editBtn.classList.add('btn-icon', 'btn-edit');
+        editBtn.className = 'btn btn-sm btn-outline-primary me-2';
         editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-        editBtn.setAttribute('title', 'Editar Porta');
-        editBtn.addEventListener('click', () => openDoorModal(door));
+        editBtn.title = 'Editar Porta';
+        editBtn.style.marginRight = '5px';
+        
+        // Adicionar o event listener DIRETAMENTE ao botão de editar
+        editBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Botão editar clicado para porta:', door.id);
+            openDoorModal(door);
+        });
+        
         actionsCell.appendChild(editBtn);
         
+        // Botão de Controle
+        const controlBtn = document.createElement('button');
+        controlBtn.className = 'btn btn-sm btn-outline-primary';
+        controlBtn.innerHTML = '<i class="fas fa-sliders-h"></i>';
+        controlBtn.title = 'Controlar Porta';
+        
+        // Adicionar o event listener DIRETAMENTE ao botão de controle
+        controlBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Botão controlar clicado para porta:', door.id);
+            openControlModal(door);
+        });
+        
+        actionsCell.appendChild(controlBtn);
         row.appendChild(actionsCell);
         
         // Adicionar a linha à tabela
@@ -209,61 +241,88 @@ function renderDoors() {
 }
 
 /**
- * Manipula a pesquisa de portas
- */
-function handleSearch() {
-    renderDoors();
-}
-
-/**
- * Abre o modal para adicionar ou editar uma porta
- * @param {Object} door - A porta a ser editada (null para adicionar)
+ * Função aprimorada para abrir o modal de porta de forma segura
  */
 function openDoorModal(door = null) {
-    // Limpar formulário
-    elements.doorForm.reset();
+    console.log('Abrindo modal de porta:', door ? door.id : 'nova porta');
     
-    if (door) {
-        // Modo de edição
-        document.getElementById('modalTitle').textContent = 'Editar Porta';
-        currentDoorId = door.id;
-        
-        // Preencher formulário
-        elements.doorName.value = door.name;
-        elements.doorLocation.value = door.location;
-        elements.doorStatus.value = door.status || 'locked';
-    } else {
-        // Modo de adição
-        document.getElementById('modalTitle').textContent = 'Adicionar Nova Porta';
-        currentDoorId = null;
-        
-        // Valor padrão para status
-        elements.doorStatus.value = 'locked';
+    // Limpar formulário
+    const doorForm = document.getElementById('doorForm');
+    const doorName = document.getElementById('doorName');
+    const doorLocation = document.getElementById('doorLocation');
+    const doorStatus = document.getElementById('doorStatus');
+    
+    if (doorForm) doorForm.reset();
+    
+    // Atualizar título do modal
+    const modalTitle = document.getElementById('modalTitle');
+    if (modalTitle) {
+        modalTitle.textContent = door ? 'Editar Porta' : 'Adicionar Nova Porta';
     }
     
-    // Abrir modal
-    openModal(elements.doorModal);
+    if (door) {
+        // Modo edição: preencher dados da porta existente
+        currentDoorId = door.id;
+        
+        if (doorName) doorName.value = door.name || '';
+        if (doorLocation) doorLocation.value = door.location || '';
+        if (doorStatus) doorStatus.value = door.status || 'locked';
+    } else {
+        // Modo adição: limpar ID atual
+        currentDoorId = null;
+        
+        // Valores padrão
+        if (doorStatus) doorStatus.value = 'locked';
+    }
+    
+    // Abrir o modal de forma segura
+    const modal = document.getElementById('doorModal');
+    if (modal) {
+        // Garantir que o modal seja exibido
+        modal.style.display = 'flex';
+        
+        // Forçar visibilidade
+        modal.style.opacity = '1';
+        modal.style.pointerEvents = 'auto';
+        modal.style.zIndex = '1000';
+        
+        // Adicionar classe 'show' se relevante para seu CSS
+        modal.classList.add('show');
+        
+        // Debugar para verificar se o modal está sendo exibido
+        console.log('Modal aberto:', modal.style.display);
+    } else {
+        console.error('Modal não encontrado! Elemento com ID "doorModal" não existe.');
+        alert('Erro ao abrir modal. Consulte o console para detalhes.');
+    }
 }
+
 
 /**
  * Manipula o envio do formulário de porta
- * @param {Event} e - O evento de envio
  */
-function handleDoorFormSubmit(e) {
-    e.preventDefault();
+function handleDoorFormSubmit() {
+    const doorName = document.getElementById('doorName');
+    const doorLocation = document.getElementById('doorLocation');
+    const doorStatus = document.getElementById('doorStatus');
     
-    // Validar formulário
-    if (!elements.doorForm.checkValidity()) {
-        elements.doorForm.reportValidity();
+    // Validar campos obrigatórios
+    if (!doorName || !doorName.value.trim()) {
+        showNotification('O nome da porta é obrigatório', 'error');
+        return;
+    }
+    
+    if (!doorLocation || !doorLocation.value.trim()) {
+        showNotification('A localização da porta é obrigatória', 'error');
         return;
     }
     
     // Obter dados do formulário
     const doorData = {
-        name: elements.doorName.value.trim(),
-        location: elements.doorLocation.value.trim(),
-        status: elements.doorStatus.value,
-        last_status_change: Date.now()
+        name: doorName.value.trim(),
+        location: doorLocation.value.trim(),
+        status: doorStatus ? doorStatus.value : 'locked',
+        last_status_change: new Date().toISOString()
     };
     
     // Salvar no Firebase
@@ -271,8 +330,8 @@ function handleDoorFormSubmit(e) {
         // Atualizar porta existente
         doorsRef.child(currentDoorId).update(doorData)
             .then(() => {
-                closeModal(elements.doorModal);
-                showNotification('Porta atualizada com sucesso!', 'success');
+                closeModal('doorModal');
+                showNotification('Porta atualizada com sucesso', 'success');
             })
             .catch(error => {
                 console.error('Erro ao atualizar porta:', error);
@@ -282,8 +341,8 @@ function handleDoorFormSubmit(e) {
         // Adicionar nova porta
         doorsRef.push(doorData)
             .then(() => {
-                closeModal(elements.doorModal);
-                showNotification('Porta adicionada com sucesso!', 'success');
+                closeModal('doorModal');
+                showNotification('Porta adicionada com sucesso', 'success');
             })
             .catch(error => {
                 console.error('Erro ao adicionar porta:', error);
@@ -293,78 +352,138 @@ function handleDoorFormSubmit(e) {
 }
 
 /**
- * Abre o modal de controle para uma porta específica
- * @param {Object} door - A porta a ser controlada
+ * Função aprimorada para abrir o modal de controle de forma segura
  */
 function openControlModal(door) {
+    if (!door) {
+        console.error('Nenhuma porta fornecida para o modal de controle');
+        return;
+    }
+    
+    console.log('Abrindo modal de controle para porta:', door.id);
+    
+    // Armazenar o ID da porta atual
     currentDoorId = door.id;
     
-    // Preencher informações da porta
-    document.getElementById('controlModalTitle').textContent = `Controlar Porta - ${door.name}`;
-    elements.controlDoorName.textContent = door.name;
+    // Preencher informações no modal
+    const controlModalTitle = document.getElementById('controlModalTitle');
+    const controlDoorName = document.getElementById('controlDoorName');
+    const controlDoorStatus = document.getElementById('controlDoorStatus');
     
-    // Status
-    let statusText = 'Desconhecido';
-    let statusClass = 'status-unknown';
-    
-    if (door.status === 'locked') {
-        statusText = 'Trancada';
-        statusClass = 'status-locked';
-    } else if (door.status === 'unlocked') {
-        statusText = 'Destrancada';
-        statusClass = 'status-unlocked';
+    if (controlModalTitle) {
+        controlModalTitle.textContent = `Controlar Porta - ${door.name || 'Sem nome'}`;
     }
     
-    const statusSpan = elements.controlDoorStatus.querySelector('span');
-    statusSpan.textContent = statusText;
-    statusSpan.className = 'status-badge ' + statusClass;
+    if (controlDoorName) {
+        controlDoorName.textContent = door.name || 'Porta';
+    }
     
-    // Configurar visibilidade dos botões de controle
-    if (door.status === 'locked') {
-        elements.lockDoorBtn.classList.add('hidden');
-        elements.unlockDoorBtn.classList.remove('hidden');
+    if (controlDoorStatus) {
+        const statusSpan = controlDoorStatus.querySelector('span') || controlDoorStatus;
+        statusSpan.textContent = door.status === 'locked' ? 'Trancada' : 'Destrancada';
+        
+        if (door.status === 'locked') {
+            statusSpan.className = 'status-badge status-locked';
+        } else {
+            statusSpan.className = 'status-badge status-unlocked';
+        }
+    }
+    
+    // Ajustar visibilidade dos botões de ação
+    const lockDoorBtn = document.getElementById('lockDoorBtn');
+    const unlockDoorBtn = document.getElementById('unlockDoorBtn');
+    
+    if (lockDoorBtn && unlockDoorBtn) {
+        if (door.status === 'locked') {
+            // Se a porta está trancada, mostrar apenas o botão de destrancar
+            lockDoorBtn.style.display = 'none';
+            unlockDoorBtn.style.display = 'inline-block';
+        } else {
+            // Se a porta está destrancada, mostrar apenas o botão de trancar
+            lockDoorBtn.style.display = 'inline-block';
+            unlockDoorBtn.style.display = 'none';
+        }
+    }
+    
+    // Abrir o modal de forma segura
+    const modal = document.getElementById('controlDoorModal');
+    if (modal) {
+        // Garantir que o modal seja exibido
+        modal.style.display = 'flex';
+        
+        // Forçar visibilidade
+        modal.style.opacity = '1';
+        modal.style.pointerEvents = 'auto';
+        modal.style.zIndex = '1000';
+        
+        // Adicionar classe 'show' se relevante para seu CSS
+        modal.classList.add('show');
+        
+        console.log('Modal de controle aberto:', modal.style.display);
     } else {
-        elements.lockDoorBtn.classList.remove('hidden');
-        elements.unlockDoorBtn.classList.add('hidden');
+        console.error('Modal de controle não encontrado! Elemento com ID "controlDoorModal" não existe.');
+        alert('Erro ao abrir modal de controle. Consulte o console para detalhes.');
+    }
+}
+
+// Verificar se modais existem no DOM após carregamento da página
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Verificando elementos do modal...');
+    
+    const doorModal = document.getElementById('doorModal');
+    const controlDoorModal = document.getElementById('controlDoorModal');
+    
+    console.log('doorModal existe?', !!doorModal);
+    console.log('controlDoorModal existe?', !!controlDoorModal);
+    
+    // Examinar HTML de modais se existirem
+    if (doorModal) {
+        console.log('Estrutura doorModal:', doorModal.outerHTML.substring(0, 100) + '...');
     }
     
-    // Abrir modal
-    openModal(elements.controlDoorModal);
-}
+    if (controlDoorModal) {
+        console.log('Estrutura controlDoorModal:', controlDoorModal.outerHTML.substring(0, 100) + '...');
+    }
+});
 
 /**
  * Controla uma porta (tranca/destranca)
  * @param {string} action - A ação a ser realizada (lock/unlock)
  */
 function controlDoor(action) {
-    if (!currentDoorId) return;
+    if (!currentDoorId) {
+        console.error('ID da porta não definido');
+        return;
+    }
     
     const statusUpdate = {
         status: action === 'lock' ? 'locked' : 'unlocked',
-        last_status_change: Date.now()
+        last_status_change: new Date().toISOString()
     };
     
     // Atualizar status no Firebase
     doorsRef.child(currentDoorId).update(statusUpdate)
         .then(() => {
-            // Registrar log de acesso
+            // Registrar log de acesso (opcional)
             const user = firebase.auth().currentUser;
-            const logData = {
-                user_id: user.uid,
-                user_name: user.displayName || user.email,
-                door_id: currentDoorId,
-                door_name: doors.find(d => d.id === currentDoorId)?.name || 'Porta',
-                action: action,
-                method: 'web',
-                timestamp: Date.now()
-            };
-            
-            return firebase.database().ref('access_logs').push(logData);
+            if (user) {
+                const logData = {
+                    user_id: user.uid,
+                    user_name: user.displayName || user.email,
+                    door_id: currentDoorId,
+                    door_name: doors.find(d => d.id === currentDoorId)?.name || 'Porta',
+                    action: action === 'lock' ? 'access_denied' : 'access_granted',
+                    method: 'web',
+                    timestamp: new Date().toISOString()
+                };
+                
+                return firebase.database().ref('access_logs').push(logData);
+            }
         })
         .then(() => {
-            closeModal(elements.controlDoorModal);
+            closeModal('controlDoorModal');
             const actionText = action === 'lock' ? 'trancada' : 'destrancada';
-            showNotification(`Porta ${actionText} com sucesso!`, 'success');
+            showNotification(`Porta ${actionText} com sucesso`, 'success');
         })
         .catch(error => {
             console.error(`Erro ao ${action === 'lock' ? 'trancar' : 'destrancar'} porta:`, error);
@@ -373,18 +492,17 @@ function controlDoor(action) {
 }
 
 /**
- * Formata uma data para exibição
- * @param {Date} date - A data a ser formatada
- * @returns {string} A data formatada
+ * Função de fechamento de modal aprimorada
  */
-function formatDate(date) {
-    return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+        console.log(`Modal ${modalId} fechado`);
+    } else {
+        console.error(`Modal com id ${modalId} não encontrado para fechar`);
+    }
 }
 
 /**
@@ -393,18 +511,30 @@ function formatDate(date) {
  * @param {string} type - Tipo de notificação (success, error, warning, info)
  */
 function showNotification(message, type = 'info') {
-    const container = document.getElementById('notificationContainer');
+    console.log(`Notificação (${type}): ${message}`);
     
+    // Verificar se já existe um container de notificações
+    let container = document.getElementById('notificationContainer');
+    
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notificationContainer';
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+    }
+    
+    // Criar notificação
     const notification = document.createElement('div');
-    notification.classList.add('notification', `notification-${type}`);
+    notification.className = `notification notification-${type}`;
     
+    // Ícone com base no tipo
     let icon = '';
     switch (type) {
         case 'success':
             icon = '<i class="fas fa-check-circle"></i>';
             break;
         case 'error':
-            icon = '<i class="fas fa-exclamation-circle"></i>';
+            icon = '<i class="fas fa-times-circle"></i>';
             break;
         case 'warning':
             icon = '<i class="fas fa-exclamation-triangle"></i>';
@@ -414,44 +544,60 @@ function showNotification(message, type = 'info') {
     }
     
     notification.innerHTML = `
-        ${icon}
-        <span>${message}</span>
-        <button class="close-notification"><i class="fas fa-times"></i></button>
+        <div class="notification-icon">${icon}</div>
+        <div class="notification-message">${message}</div>
+        <button class="notification-close"><i class="fas fa-times"></i></button>
     `;
     
     // Adicionar ao container
     container.appendChild(notification);
     
-    // Configurar botão de fechar
-    notification.querySelector('.close-notification').addEventListener('click', () => {
-        notification.remove();
-    });
+    // Adicionar classe para animar
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // Evento para fechar notificação
+    const closeBtn = notification.querySelector('.notification-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        });
+    }
     
     // Auto-remover após 5 segundos
     setTimeout(() => {
         if (notification.parentNode) {
-            notification.remove();
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
         }
     }, 5000);
 }
 
 /**
- * Abre um modal
- * @param {HTMLElement} modal - O modal a ser aberto
+ * Formata uma data para exibição
+ * @param {Date} date - A data a ser formatada
+ * @returns {string} A data formatada
  */
-function openModal(modal) {
-    modal.style.display = 'flex';
-    document.body.classList.add('modal-open');
+function formatDate(date) {
+    if (!(date instanceof Date) || isNaN(date)) {
+        try {
+            date = new Date(date);
+        } catch(e) {
+            return 'Data inválida';
+        }
+    }
+    
+    return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
-
-/**
- * Fecha um modal
- * @param {HTMLElement} modal - O modal a ser fechado
- */
-function closeModal(modal) {
-    modal.style.display = 'none';
-    document.body.classList.remove('modal-open');
-}
-
-// Inicializar a página quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', initDoorManagement);

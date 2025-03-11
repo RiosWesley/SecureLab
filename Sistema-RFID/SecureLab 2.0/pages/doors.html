@@ -6,8 +6,8 @@
     <title>SecureLab RFID - Gerenciamento de Portas</title>
     <!-- Estilos principais (agora unificados) -->
     <link rel="stylesheet" href="../public/css/styles.css">
-    <link rel="stylesheet" href="../public/css/utils.css">  <!-- Mantenha utils.css se tiver estilos específicos -->
-    <!-- <link rel="stylesheet" href="../public/css/components.css"> --> <!-- Remova se não for mais necessário -->
+    <link rel="stylesheet" href="../public/css/utils.css">
+    <link rel="stylesheet" href="../public/css/components.css">  <!-- Adicionado se existir -->
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Remoção dos estilos inline -->
@@ -119,29 +119,37 @@
             <div class="content-wrapper"> <!-- Usando content-wrapper -->
                 <div class="page-header">
                     <h1><i class="fas fa-door-open"></i> Gerenciamento de Portas</h1>
-                    <!-- Elementos do header, se necessário -->
+                     <button id="addDoorBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Nova Porta</button> <!-- Botão movido para cá -->
                 </div>
 
-                <!-- Toolbar (dentro de um card) -->
-                 <div class="card">
-                    <div class="card-header">
-                         <h3>Ações</h3>
-                    </div>
-                     <div class="card-body">
-                        <div class="toolbar" style="justify-content: end;">
-                            <button id="addDoorBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Nova Porta</button>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Data Table (dentro de um card) -->
                 <div class="card">
                     <div class="card-header">
                         <h3>Lista de Portas</h3>
+                        <div class="card-actions">
+                            <button class="icon-button" id="refresh-doors">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <div class="dropdown">
+                                <button class="icon-button" id="export-dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu" id="export-menu">
+                                    <a href="#" class="dropdown-item" id="export-csv">
+                                        <i class="fas fa-file-csv"></i> Exportar CSV
+                                    </a>
+                                    <a href="#" class="dropdown-item" id="export-pdf">
+                                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                     <div class="card-body">
-                        <div class="data-table-container"> <!-- Manter o container se for usado para estilização extra -->
-                            <table id="doorsTable" class="data-table">
+                        <div class="table-responsive"> <!-- Adicionado table-responsive -->
+                            <table id="doorsTable" class="table table-hover"> <!-- Classes do Bootstrap -->
                                 <thead>
                                     <tr>
                                         <th>Nome</th>
@@ -153,8 +161,28 @@
                                 </thead>
                                 <tbody>
                                     <!-- Door data will be inserted here -->
+                                    <tr>
+                                         <td colspan="5" class="text-center">Carregando Portas...</td>
+                                    </tr>
                                 </tbody>
                             </table>
+                        </div>
+                         <!-- Paginação -->
+                        <div class="pagination-container mt-4">
+                            <div class="pagination-info">
+                                Exibindo <span id="pagination-start">0</span> - <span id="pagination-end">0</span> de <span id="pagination-total">0</span> portas
+                            </div>
+                            <div class="pagination">
+                                <button class="pagination-btn" id="prev-page" disabled>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div id="pagination-numbers">
+                                    <!-- Números de paginação serão adicionados aqui -->
+                                </div>
+                                <button class="pagination-btn" id="next-page">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -164,59 +192,88 @@
 
      <!-- Modal for Adding/Editing Doors -->
     <div id="doorModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Adicionar Nova Porta</h3>
-                <button class="close-modal" onclick="closeModal('doorModal')">×</button>
-            </div>
-            <div class="modal-body">
-                <form id="doorForm">
-                    <div class="form-group">
-                        <label for="doorName">Nome</label>
-                        <input type="text" id="doorName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="doorLocation">Localização</label>
-                        <input type="text" id="doorLocation" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="doorStatus">Status Inicial</label>
-                        <select id="doorStatus" required>
-                            <option value="locked">Trancada</option>
-                            <option value="unlocked">Destrancada</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button id="cancelBtn" class="btn btn-secondary" onclick="closeModal('doorModal')">Cancelar</button>
-                <button id="saveDoorBtn" class="btn btn-primary">Salvar</button>
+        <div class="modal-dialog"> <!-- Adicionado modal-dialog -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Adicionar Nova Porta</h3>
+                     <button class="close-button"  id="close-door-modal"> <!-- Alterado para close-button -->
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="doorForm">
+                        <div class="form-group">
+                            <label for="doorName">Nome</label>
+                            <input type="text" id="doorName" class="form-control" required> <!-- Adicionado form-control -->
+                        </div>
+                        <div class="form-group">
+                            <label for="doorLocation">Localização</label>
+                            <input type="text" id="doorLocation" class="form-control" required> <!-- Adicionado form-control -->
+                        </div>
+                        <div class="form-group">
+                            <label for="doorStatus">Status Inicial</label>
+                            <select id="doorStatus" class="form-control" required> <!-- Adicionado form-control -->
+                                <option value="locked">Trancada</option>
+                                <option value="unlocked">Destrancada</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelBtn" class="btn btn-outline-secondary" >Cancelar</button> <!-- Alterado para btn-outline-secondary -->
+                    <button id="saveDoorBtn" class="btn btn-primary">Salvar</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Control Door Modal -->
     <div id="controlDoorModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="controlModalTitle">Controlar Porta</h3>
-                <button class="close-modal" onclick="closeModal('controlDoorModal')">×</button>  <!-- Adicionado manipulador de clique -->
-            </div>
-            <div class="modal-body">
-                <div class="door-control-info">
-                    <h4 id="controlDoorName">Nome da Porta</h4>
-                    <p id="controlDoorStatus">Status: <span></span></p>
+       <div class="modal-dialog"> <!-- Adicionado modal-dialog -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="controlModalTitle">Controlar Porta</h3>
+                    <button class="close-button" id="close-control-modal"> <!-- Alterado para close-button -->
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <div class="door-control-actions">
-                    <button id="lockDoorBtn" class="btn btn-danger"><i class="fas fa-lock"></i> Trancar</button>
-                    <button id="unlockDoorBtn" class="btn btn-success"><i class="fas fa-lock-open"></i> Destrancar</button>
+                <div class="modal-body">
+                    <div class="door-control-info">
+                        <h4 id="controlDoorName">Nome da Porta</h4>
+                        <p id="controlDoorStatus">Status: <span></span></p>
+                    </div>
+                    <div class="door-control-actions">
+                        <button id="lockDoorBtn" class="btn btn-danger"><i class="fas fa-lock"></i> Trancar</button>
+                        <button id="unlockDoorBtn" class="btn btn-success"><i class="fas fa-lock-open"></i> Destrancar</button>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button id="closeControlBtn" class="btn btn-secondary" onclick="closeModal('controlDoorModal')">Fechar</button> <!-- Adicionado manipulador de clique -->
+                <div class="modal-footer">
+                    <button id="closeControlBtn" class="btn btn-secondary">Fechar</button>
+                </div>
             </div>
         </div>
     </div>
+     <!-- Modal de Confirmação -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="confirm-modal-title">Confirmar Ação</h3>
+                    <button class="close-button" id="close-confirm-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-modal-message">Tem certeza que deseja realizar esta ação?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" id="cancel-confirm-btn">Cancelar</button>
+                    <button class="btn btn-danger" id="confirm-action-btn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Notification Container -->
     <div id="notificationContainer" class="notification-container"></div>
@@ -233,22 +290,29 @@
     <script src="../public/js/doors.js"></script>     <!-- Script específico para a lógica de portas -->
     <script>
         // Função genérica para fechar modais (melhora a reutilização)
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
+        //Removida, pois agora estamos lidando com isso via close-button e modal-dialog
 
         // Adicione event listeners para os botões de fechar modal *depois* que o DOM estiver carregado.
         document.addEventListener('DOMContentLoaded', function() {
-            const closeButtons = document.querySelectorAll('.close-modal');
+            const closeButtons = document.querySelectorAll('.close-button'); // Usa a classe close-button
             closeButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    // Encontra o modal mais próximo do botão clicado.
-                    const modal = this.closest('.modal');
+                     const modal = this.closest('.modal'); //Encontra modal via closest
                     if (modal) {
-                        closeModal(modal.id);
+                         modal.style.display = 'none';
                     }
                 });
             });
+            //Cancell buttons
+            document.getElementById("cancelBtn").addEventListener("click", ()=>{
+                const modal = document.getElementById("doorModal");
+                if(modal) modal.style.display = "none";
+            })
+
+             document.getElementById("closeControlBtn").addEventListener("click", ()=>{
+                const modal = document.getElementById("controlDoorModal");
+                if(modal) modal.style.display = "none";
+            })
 
             //Outros event listeners
              const sidebarToggle = document.getElementById('sidebar-toggle');
