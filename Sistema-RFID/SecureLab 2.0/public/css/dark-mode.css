@@ -99,23 +99,23 @@ html.dark-mode .status-unlocked {
 /* Correção para os ícones nas células da tabela */
 html.dark-mode .table td span[style*="color: #e74c3c"] i,
 html.dark-mode .table td span[style*="color: #dc3545"] i {
-    color: var(--danger-color) !important;
+    color: var(--success-color) !important;
 }
 
 html.dark-mode .table td span[style*="color: #2ecc71"] i,
 html.dark-mode .table td span[style*="color: #28a745"] i {
-    color: var(--success-color) !important;
+    color: var(--danger-color) !important;
 }
 
 /* Correção para o texto junto aos ícones */
 html.dark-mode .table td span[style*="color: #e74c3c"],
 html.dark-mode .table td span[style*="color: #dc3545"] {
-    color: var(--danger-color) !important;
+    color: var(--success-color) !important;
 }
 
 html.dark-mode .table td span[style*="color: #2ecc71"],
 html.dark-mode .table td span[style*="color: #28a745"] {
-    color: var(--success-color) !important;
+    color: var(--danger-color) !important;
 }
 
 /* Status de portas no dashboard */
