@@ -212,8 +212,12 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <div class="chart-placeholder">
-                                <img src="https://via.placeholder.com/800x300?text=Gráfico+de+Atividade+Diária" alt="Gráfico de atividade diária" class="placeholder-img">
+                            <div class="chart-placeholder" style="height: 300px;">
+                                <!-- O script irá substituir este conteúdo com o canvas do gráfico -->
+                                <div class="loading-chart">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <p>Carregando gráfico de atividade...</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -348,6 +352,17 @@
     <script src="js/common.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/mobile.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/activity-chart.js"></script>
+    <script>
+        // Inicializar o gráfico quando a página terminar de carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se a função initActivityChart está disponível
+            if (typeof initActivityChart === 'function') {
+                initActivityChart();
+            }
+        });
+    </script>
     
     <div class="mobile-overlay"></div> 
         
