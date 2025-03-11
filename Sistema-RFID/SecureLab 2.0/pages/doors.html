@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureLab RFID - Gerenciamento de Portas</title>
+    <!-- Estilos principais (agora unificados) -->
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <link rel="stylesheet" href="../public/css/utils.css">  <!-- Mantenha utils.css se tiver estilos específicos -->
+    <!-- <link rel="stylesheet" href="../public/css/components.css"> --> <!-- Remova se não for mais necessário -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Remoção dos estilos inline -->
+
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SecureLab</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="active">  <!-- Adicionado a classe active -->
+                        <a href="doors.html">
+                            <i class="fas fa-door-open"></i>
+                            <span>Portas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Usuários</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="devices.html">
+                            <i class="fas fa-microchip"></i>
+                            <span>Dispositivos</span>
+                        </a>
+                    </li>
+                     <li>
+                        <a href="logs.html">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Logs de Acesso</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="groups.html">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Grupos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="alerts.html">
+                            <i class="fas fa-bell"></i>
+                            <span>Alertas</span>
+                            <span class="badge" id="alerts-count">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" id="logout-btn">  <!-- Alterado para <a> e ID consistente -->
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar portas...">  <!-- Movido o ID para cá -->
+                </div>
+                <div class="header-right">
+                     <div class="notifications">
+                        <button class="icon-button">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge" id="header-alerts-count">0</span>
+                        </button>
+                    </div>
+                    <div class="user-menu">
+                        <img src="https://via.placeholder.com/40" alt="Avatar do usuário" class="avatar">
+                        <span class="user-name" id="current-user-name">Usuário</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+
+            <div class="content-wrapper"> <!-- Usando content-wrapper -->
+                <div class="page-header">
+                    <h1><i class="fas fa-door-open"></i> Gerenciamento de Portas</h1>
+                    <!-- Elementos do header, se necessário -->
+                </div>
+
+                <!-- Toolbar (dentro de um card) -->
+                 <div class="card">
+                    <div class="card-header">
+                         <h3>Ações</h3>
+                    </div>
+                     <div class="card-body">
+                        <div class="toolbar" style="justify-content: end;">
+                            <button id="addDoorBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Nova Porta</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Table (dentro de um card) -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Lista de Portas</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-table-container"> <!-- Manter o container se for usado para estilização extra -->
+                            <table id="doorsTable" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Localização</th>
+                                        <th>Status</th>
+                                        <th>Última Atividade</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Door data will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+     <!-- Modal for Adding/Editing Doors -->
+    <div id="doorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Adicionar Nova Porta</h3>
+                <button class="close-modal" onclick="closeModal('doorModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="doorForm">
+                    <div class="form-group">
+                        <label for="doorName">Nome</label>
+                        <input type="text" id="doorName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="doorLocation">Localização</label>
+                        <input type="text" id="doorLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="doorStatus">Status Inicial</label>
+                        <select id="doorStatus" required>
+                            <option value="locked">Trancada</option>
+                            <option value="unlocked">Destrancada</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelBtn" class="btn btn-secondary" onclick="closeModal('doorModal')">Cancelar</button>
+                <button id="saveDoorBtn" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Door Modal -->
+    <div id="controlDoorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="controlModalTitle">Controlar Porta</h3>
+                <button class="close-modal" onclick="closeModal('controlDoorModal')">×</button>  <!-- Adicionado manipulador de clique -->
+            </div>
+            <div class="modal-body">
+                <div class="door-control-info">
+                    <h4 id="controlDoorName">Nome da Porta</h4>
+                    <p id="controlDoorStatus">Status: <span></span></p>
+                </div>
+                <div class="door-control-actions">
+                    <button id="lockDoorBtn" class="btn btn-danger"><i class="fas fa-lock"></i> Trancar</button>
+                    <button id="unlockDoorBtn" class="btn btn-success"><i class="fas fa-lock-open"></i> Destrancar</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeControlBtn" class="btn btn-secondary" onclick="closeModal('controlDoorModal')">Fechar</button> <!-- Adicionado manipulador de clique -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+
+    <!-- Scripts (mantenha os mesmos do dashboard, ajuste os caminhos se necessário) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="../public/js/firebase-config.js"></script>
+    <script src="../public/js/auth.js"></script>      <!-- Mantenha se tiver autenticação -->
+    <script src="../public/js/common.js"></script>
+    <script src="../public/js/utils.js"></script>    <!-- Mantenha se tiver funções utilitárias -->
+    <script src="../public/js/doors.js"></script>     <!-- Script específico para a lógica de portas -->
+    <script>
+        // Função genérica para fechar modais (melhora a reutilização)
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Adicione event listeners para os botões de fechar modal *depois* que o DOM estiver carregado.
+        document.addEventListener('DOMContentLoaded', function() {
+            const closeButtons = document.querySelectorAll('.close-modal');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Encontra o modal mais próximo do botão clicado.
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            });
+
+            //Outros event listeners
+             const sidebarToggle = document.getElementById('sidebar-toggle');
+            const appContainer = document.querySelector('.app-container');
+
+            sidebarToggle.addEventListener('click', () => {
+                appContainer.classList.toggle('sidebar-collapsed');
+            });
+        });
+    </script>
+</body>
+</html>
