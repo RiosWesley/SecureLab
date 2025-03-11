@@ -114,45 +114,67 @@ function loadDashboardData() {
       .then(snapshot => {
         const logs = snapshot.val();
         const activityList = document.getElementById('activity-list');
-        
+
         // Limpar lista atual
         activityList.innerHTML = '';
-        
+
         if (logs) {
           // Converter para array e ordenar por timestamp (mais recente primeiro)
           const logsArray = Object.values(logs);
           logsArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-          
+
           // Contar acessos do dia
           const today = new Date().toISOString().split('T')[0];
           const todayLogs = logsArray.filter(log => log.timestamp.startsWith(today));
           const todayAccess = todayLogs.length;
-          const todayDenied = todayLogs.filter(log => log.action === 'access_denied').length;
-          
+          const todayDenied = todayLogs.filter(log => log.action === 'access_denied' || log.action === 'door_locked').length; // Conta door_locked como negado
+
           document.getElementById('today-access-count').textContent = todayAccess;
           document.getElementById('today-denied-count').textContent = `${todayDenied} acessos negados`;
-          
+
           // Simulação de tendência (em uma aplicação real, isso viria do banco de dados)
           document.getElementById('access-trend').textContent = '8%';
-          
+
           // Preencher lista de atividades recentes
           logsArray.forEach(log => {
             const li = document.createElement('li');
             const timestamp = new Date(log.timestamp);
             const timeFormatted = timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const dateFormatted = timestamp.toLocaleDateString('pt-BR');
-            
+
             let actionClass = '';
             let actionIcon = '';
-            
-            if (log.action === 'access_granted') {
-              actionClass = 'success';
-              actionIcon = 'fas fa-check-circle';
-            } else if (log.action === 'access_denied') {
-              actionClass = 'danger';
-              actionIcon = 'fas fa-times-circle';
+            let actionText = ''; // Variável para armazenar o texto da ação
+
+            // Usando switch para lidar com todas as ações
+            switch (log.action) {
+                case 'access_granted':
+                    actionClass = 'success';
+                    actionIcon = 'fas fa-check-circle';
+                    actionText = 'acesso permitido';
+                    break;
+                case 'access_denied':
+                    actionClass = 'danger';
+                    actionIcon = 'fas fa-times-circle';
+                    actionText = 'acesso negado';
+                    break;
+                case 'door_locked':
+                    actionClass = 'warning'; // Ou outra classe CSS que você preferir
+                    actionIcon = 'fas fa-lock'; // Ícone de cadeado
+                    actionText = 'porta trancada';
+                    break;
+                case 'door_unlocked':
+                    actionClass = 'info';  // Ou outra classe CSS
+                    actionIcon = 'fas fa-lock-open'; // Ícone de cadeado aberto
+                    actionText = 'porta destrancada';
+                    break;
+                default:
+                    actionClass = 'secondary'; // Classe padrão
+                    actionIcon = 'fas fa-question-circle'; // Ícone de interrogação
+                    actionText = 'ação desconhecida';
             }
-            
+
+
             li.innerHTML = `
               <div class="activity-icon ${actionClass}">
                 <i class="${actionIcon}"></i>
@@ -160,7 +182,7 @@ function loadDashboardData() {
               <div class="activity-info">
                 <div class="activity-title">
                   <span class="user-name">${log.user_name}</span> 
-                  <span class="${actionClass}-text">${log.action === 'access_granted' ? 'acesso permitido' : 'acesso negado'}</span>
+                  <span class="${actionClass}-text">${actionText}</span> 
                 </div>
                 <div class="activity-details">
                   ${log.door_name} - ${timeFormatted}, ${dateFormatted}
@@ -168,7 +190,7 @@ function loadDashboardData() {
                 ${log.reason ? `<div class="activity-reason">Motivo: ${log.reason}</div>` : ''}
               </div>
             `;
-            
+
             activityList.appendChild(li);
           });
         } else {

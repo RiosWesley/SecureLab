@@ -400,7 +400,9 @@ function deleteUser(userId) {
         });
 }
 
-// Salvar usuário (criar ou atualizar)
+/**
+ * Salvar usuário (criar ou atualizar)
+ */
 function saveUser() {
     // Validar formulário
     if (!validateUserForm()) {
@@ -420,6 +422,17 @@ function saveUser() {
     if (currentEditingUser) {
         // Atualizar usuário existente
         database.ref(`users/${currentEditingUser.id}`).update(userData)
+            .then(() => {
+                // Se o email do usuário em edição é o mesmo do usuário logado,
+                // atualizar o displayName
+                const currentUser = firebase.auth().currentUser;
+                if (currentUser && currentUser.email === userData.email) {
+                    return currentUser.updateProfile({
+                        displayName: userData.name
+                    });
+                }
+                return Promise.resolve();
+            })
             .then(() => {
                 showNotification('success', 'Usuário atualizado com sucesso');
                 closeModal('user-modal');
@@ -447,8 +460,13 @@ function saveUser() {
                 // Também criar no Firebase Authentication
                 firebase.auth().createUserWithEmailAndPassword(userData.email, userPasswordInput.value)
                     .then(userCredential => {
-                        // Salvar no Realtime Database
-                        return newUserRef.set(userData);
+                        // Atualizar o displayName com o nome do usuário
+                        return userCredential.user.updateProfile({
+                            displayName: userData.name
+                        }).then(() => {
+                            // Salvar no Realtime Database
+                            return newUserRef.set(userData);
+                        });
                     })
                     .then(() => {
                         showNotification('success', 'Usuário criado com sucesso');
