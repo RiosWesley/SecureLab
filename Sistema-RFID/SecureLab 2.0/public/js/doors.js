@@ -143,9 +143,6 @@ function loadDoors() {
 /**
  * Renderiza as portas na tabela
  */
-/**
- * Renderiza as portas na tabela
- */
 function renderDoors() {
     console.log('Renderizando portas na tabela...');
 
@@ -169,6 +166,13 @@ function renderDoors() {
             );
         }
     }
+
+    // Ordenar as portas por nome em ordem alfabética
+    displayDoors.sort((a, b) => {
+        const nameA = (a.name || 'Sem nome').toLowerCase();
+        const nameB = (b.name || 'Sem nome').toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
 
     // Verificar se há portas para exibir
     if (displayDoors.length === 0) {

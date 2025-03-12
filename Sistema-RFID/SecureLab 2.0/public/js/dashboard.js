@@ -53,7 +53,7 @@ function loadDashboardData() {
   
   // Função para carregar estatísticas das portas
   function loadDoorStats() {
-    database.ref('doors').once('value')
+    database.ref('doors').limitToLast(7).once('value')
       .then(snapshot => {
         const doors = snapshot.val();
         if (doors) {
@@ -67,13 +67,31 @@ function loadDashboardData() {
           document.getElementById('locked-doors-count').textContent = lockedDoors;
           document.getElementById('unlocked-doors-count').textContent = unlockedDoors;
           
+          // Converter para array com IDs
+          const doorsArray = Object.entries(doors).map(([id, door]) => ({
+            id,
+            ...door
+          }));
+          
+          // Ordenar por nome em ordem alfabética
+          doorsArray.sort((a, b) => {
+            const nameA = (a.name || '').toLowerCase();
+            const nameB = (b.name || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+          });
+          
+          // Converter de volta para objeto
+          const orderedDoors = {};
+          doorsArray.forEach(door => {
+            orderedDoors[door.id] = door;
+          });
+          
           // Atualizar lista de portas
-          updateDoorList(doors);
+          updateDoorList(orderedDoors);
         }
       })
       .catch(error => console.error('Erro ao carregar estatísticas de portas:', error));
   }
-  
   // Função para carregar estatísticas de dispositivos
   function loadDeviceStats() {
     database.ref('devices').once('value')
@@ -110,7 +128,7 @@ function loadDashboardData() {
   
   // Função para carregar logs de atividade recente
   function loadRecentActivity() {
-    database.ref('access_logs').orderByChild('timestamp').limitToLast(5).once('value')
+    database.ref('access_logs').orderByChild('timestamp').limitToLast(7).once('value')
       .then(snapshot => {
         const logs = snapshot.val();
         const activityList = document.getElementById('activity-list');
