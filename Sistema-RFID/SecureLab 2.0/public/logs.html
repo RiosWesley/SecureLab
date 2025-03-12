@@ -115,6 +115,26 @@
                     </div>
                 </div>
 
+                <div class="filters-container">
+                    <div class="filter-item">
+                        <label for="filter-user">Filtrar por Usuário:</label>
+                        <input type="text" id="filter-user" placeholder="Nome do usuário">
+                    </div>
+                    <div class="filter-item">
+                        <label for="filter-door">Filtrar por Porta:</label>
+                        <input type="text" id="filter-door" placeholder="Nome da porta">
+                    </div>
+                    <div class="filter-item">
+                        <label for="filter-action">Filtrar por Ação:</label>
+                        <select id="filter-action">
+                            <option value="">Todas as ações</option>
+                            <option value="access_granted">Acesso Permitido</option>
+                            <option value="access_denied">Acesso Negado</option>
+                            <option value="door_locked">Porta Trancada</option>
+                            <option value="door_unlocked">Porta Destrancada</option>
+                        </select>
+                    </div>
+                </div>
                 
                 <div class="log-grid">
                     <div class="log activity-card">
@@ -123,10 +143,8 @@
                                 <!-- As atividades serão carregadas dinamicamente via JavaScript -->
                                 <li class="no-data">Carregando atividades...</li>
                             </ul>
-
                         </div>
                     </div>
-
                 </div>
 
 
