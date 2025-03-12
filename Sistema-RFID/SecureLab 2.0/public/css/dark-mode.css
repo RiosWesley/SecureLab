@@ -15,6 +15,7 @@ html.dark-mode {
     /* Cores específicas do modo escuro */
     --dark-bg-color: #1a1d2a; /* Cor de fundo principal - mais escura para maior contraste */
     --dark-card-bg: #232736; /* Fundo de cards, elementos de UI */
+    --dark-log-bg: #232736; /* Fundo de log, elementos de UI */
     --dark-text-primary: #f0f2f5; /* Texto principal */
     --dark-text-secondary: #c9cdd4; /* Texto secundário */
     --dark-border-color: #3b4254; /* Cor de bordas */
@@ -174,6 +175,7 @@ html.dark-mode .header-search i {
 }
 
 /* Cards e tabelas */
+html.dark-mode .log,
 html.dark-mode .card,
 html.dark-mode .status-card {
     background-color: var(--dark-card-bg);
