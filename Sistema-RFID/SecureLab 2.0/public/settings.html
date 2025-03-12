@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureLab RFID | Configurações</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/utils.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/components.css">
+    <!-- Otimizações Mobile -->
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SecureLab</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="doors.html">
+                            <i class="fas fa-door-open"></i>
+                            <span>Portas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Usuários</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="devices.html">
+                            <i class="fas fa-microchip"></i>
+                            <span>Dispositivos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="logs.html">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Logs de Acesso</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="groups.html">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Grupos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="alerts.html">
+                            <i class="fas fa-bell"></i>
+                            <span>Alertas</span>
+                            <span class="badge" id="alerts-count">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <button class="mobile-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Pesquisar configurações...">
+                </div>
+                <div class="header-right">
+                    <div class="notifications">
+                        <button class="icon-button">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge" id="header-alerts-count">0</span>
+                        </button>
+                    </div>
+                    <div class="user-menu">
+                        <span class="user-name" id="current-user-name">Usuário</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1><i class="fas fa-cog"></i> Configurações do Sistema</h1>
+                </div>
+
+                <!-- Navegação por Tabs -->
+                <div class="settings-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="system-tab">Sistema</button>
+                        <button class="tab-btn" data-tab="security-tab">Segurança</button>
+                        <button class="tab-btn" data-tab="devices-tab">Dispositivos</button>
+                        <button class="tab-btn" data-tab="integration-tab">Integração</button>
+                        <button class="tab-btn" data-tab="notification-tab">Notificações</button>
+                        <button class="tab-btn" data-tab="appearance-tab">Aparência</button>
+                    </div>
+                </div>
+
+                <!-- Conteúdo das Tabs -->
+                <div class="tab-content">
+                    <!-- Tab: Sistema -->
+                    <div id="system-tab" class="tab-pane active">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Informações da Organização</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="org-info-form">
+                                    <div class="form-group">
+                                        <label for="org-name">Nome da Organização</label>
+                                        <input type="text" id="org-name" class="form-control" value="SecureLab RFID">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="org-address">Endereço</label>
+                                        <input type="text" id="org-address" class="form-control" value="Av. Tecnologia, 1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="org-email">Email de Contato</label>
+                                        <input type="email" id="org-email" class="form-control" value="contato@securelab.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="org-phone">Telefone</label>
+                                        <input type="text" id="org-phone" class="form-control" value="(11) 4000-0000">
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Configurações Regionais</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="regional-form">
+                                    <div class="form-group">
+                                        <label for="system-timezone">Fuso Horário</label>
+                                        <select id="system-timezone" class="form-control">
+                                            <option value="America/Sao_Paulo" selected>América/São Paulo (GMT-3)</option>
+                                            <option value="America/Manaus">América/Manaus (GMT-4)</option>
+                                            <option value="America/Fortaleza">América/Fortaleza (GMT-3)</option>
+                                            <option value="America/New_York">América/Nova York (GMT-5)</option>
+                                            <option value="Europe/London">Europa/Londres (GMT+0)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="date-format">Formato de Data</label>
+                                        <select id="date-format" class="form-control">
+                                            <option value="DD/MM/YYYY" selected>DD/MM/AAAA</option>
+                                            <option value="MM/DD/YYYY">MM/DD/AAAA</option>
+                                            <option value="YYYY-MM-DD">AAAA-MM-DD</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="time-format">Formato de Hora</label>
+                                        <select id="time-format" class="form-control">
+                                            <option value="24h" selected>24 horas</option>
+                                            <option value="12h">12 horas (AM/PM)</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Configurações de Email</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="email-settings-form">
+                                    <div class="form-group">
+                                        <label for="smtp-server">Servidor SMTP</label>
+                                        <input type="text" id="smtp-server" class="form-control" value="smtp.securelab.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="smtp-port">Porta</label>
+                                        <input type="number" id="smtp-port" class="form-control" value="587">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="smtp-username">Usuário</label>
+                                        <input type="text" id="smtp-username" class="form-control" value="notificacao@securelab.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="smtp-password">Senha</label>
+                                        <div class="password-input">
+                                            <input type="password" id="smtp-password" class="form-control" value="••••••••••">
+                                            <button type="button" class="password-toggle" id="toggle-smtp-password">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email-from">Email de Origem</label>
+                                        <input type="email" id="email-from" class="form-control" value="notificacao@securelab.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email-test">Email para Teste</label>
+                                        <div class="d-flex">
+                                            <input type="email" id="email-test" class="form-control" placeholder="Insira um email para teste">
+                                            <button type="button" class="btn btn-outline-primary ml-2" id="send-test-email">Enviar Teste</button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Segurança -->
+                    <div id="security-tab" class="tab-pane">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Políticas de Senha</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="password-policy-form">
+                                    <div class="form-group">
+                                        <label for="min-password-length">Tamanho Mínimo da Senha</label>
+                                        <input type="number" id="min-password-length" class="form-control" value="8" min="6" max="30">
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="require-uppercase" checked>
+                                                Exigir letras maiúsculas
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="require-lowercase" checked>
+                                                Exigir letras minúsculas
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="require-numbers" checked>
+                                                Exigir números
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="require-special-chars" checked>
+                                                Exigir caracteres especiais
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password-expiration">Expiração de Senha (dias)</label>
+                                        <input type="number" id="password-expiration" class="form-control" value="90" min="0" max="365">
+                                        <small class="text-muted">0 = sem expiração</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="max-failed-attempts">Bloqueio após Tentativas Falhas</label>
+                                        <input type="number" id="max-failed-attempts" class="form-control" value="5" min="0" max="10">
+                                        <small class="text-muted">0 = desativado</small>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Sessão e Autenticação</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="session-form">
+                                    <div class="form-group">
+                                        <label for="session-timeout">Tempo de Expiração da Sessão (minutos)</label>
+                                        <input type="number" id="session-timeout" class="form-control" value="30" min="5" max="1440">
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="enable-2fa" checked>
+                                                Habilitar autenticação de dois fatores (2FA)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="enforce-2fa-admins" checked>
+                                                Forçar 2FA para administradores
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Logs e Auditoria</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="audit-log-form">
+                                    <div class="form-group">
+                                        <label for="log-retention">Retenção de Logs (dias)</label>
+                                        <input type="number" id="log-retention" class="form-control" value="180" min="30" max="365">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Eventos para Registro</label>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="log-auth" checked>
+                                                Autenticação (login/logout)
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="log-access" checked>
+                                                Controle de acesso (portas)
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="log-user-mgmt" checked>
+                                                Gerenciamento de usuários
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="log-settings" checked>
+                                                Alterações de configuração
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="log-device-comm">
+                                                Comunicação com dispositivos
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Dispositivos -->
+                    <div id="devices-tab" class="tab-pane">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Configurações de Dispositivos RFID</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="rfid-device-form">
+                                    <div class="form-group">
+                                        <label for="rfid-protocol">Protocolo RFID</label>
+                                        <select id="rfid-protocol" class="form-control">
+                                            <option value="iso14443a" selected>ISO 14443A</option>
+                                            <option value="iso14443b">ISO 14443B</option>
+                                            <option value="iso15693">ISO 15693</option>
+                                            <option value="mifare">MIFARE Classic</option>
+                                            <option value="desfire">MIFARE DESFire</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reader-timeout">Tempo de Leitura (ms)</label>
+                                        <input type="number" id="reader-timeout" class="form-control" value="3000" min="1000" max="10000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="card-format">Formato do Cartão</label>
+                                        <select id="card-format" class="form-control">
+                                            <option value="decimal" selected>Decimal</option>
+                                            <option value="hex">Hexadecimal</option>
+                                            <option value="wiegand26">Wiegand-26</option>
+                                            <option value="wiegand34">Wiegand-34</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="encrypt-comm" checked>
+                                                Criptografar comunicação
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Configuração de Firmware</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="firmware-settings-form">
+                                    <div class="form-group">
+                                        <label for="current-firmware">Versão Atual</label>
+                                        <input type="text" id="current-firmware" class="form-control" value="v2.3.1" disabled>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="auto-update">Atualização Automática</label>
+                                        <select id="auto-update" class="form-control">
+                                            <option value="off">Desativada</option>
+                                            <option value="notify" selected>Apenas Notificar</option>
+                                            <option value="download">Baixar Automaticamente</option>
+                                            <option value="full">Instalar Automaticamente</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="update-schedule">Programação de Atualização</label>
+                                        <select id="update-schedule" class="form-control">
+                                            <option value="immediate">Imediato</option>
+                                            <option value="night" selected>Durante a Noite</option>
+                                            <option value="weekend">Final de Semana</option>
+                                            <option value="custom">Personalizado</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="update-channel">Canal de Atualização</label>
+                                        <select id="update-channel" class="form-control">
+                                            <option value="stable" selected>Estável</option>
+                                            <option value="beta">Beta</option>
+                                            <option value="dev">Desenvolvimento</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="firmware-upload">Atualização Manual</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="firmware-upload">
+                                            <label class="custom-file-label" for="firmware-upload">Escolher arquivo...</label>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                    <button type="button" class="btn btn-outline-primary ml-2">Verificar Atualizações</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Configuração de Fechaduras</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="lock-settings-form">
+                                    <div class="form-group">
+                                        <label for="default-lock-time">Tempo Padrão de Abertura (segundos)</label>
+                                        <input type="number" id="default-lock-time" class="form-control" value="5" min="1" max="60">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lock-fail-action">Ação em Caso de Falha</label>
+                                        <select id="lock-fail-action" class="form-control">
+                                            <option value="maintain" selected>Manter Estado Atual</option>
+                                            <option value="unlock">Destrancar (Falha Segura)</option>
+                                            <option value="lock">Trancar (Falha Segura)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="auto-relock" checked>
+                                                Retrancar automaticamente após abertura
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="extended-open-alarm" checked>
+                                                Alarme para porta aberta por tempo prolongado
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="extended-open-time">Tempo para Alarme (segundos)</label>
+                                        <input type="number" id="extended-open-time" class="form-control" value="30" min="5" max="300">
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Integração -->
+                    <div id="integration-tab" class="tab-pane">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>API e Webhooks</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="api-settings-form">
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="enable-api" checked>
+                                                Habilitar API
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="api-key">Chave da API</label>
+                                        <div class="input-group">
+                                            <input type="text" id="api-key" class="form-control" value="sk_live_C7hFD8s9X3G2vN5qL1Z6kP0mT4R7" readonly>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="button" id="copy-api-key">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <button class="btn btn-outline-primary" type="button" id="regenerate-api-key">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="api-rate-limit">Limite de Requisições (por minuto)</label>
+                                        <input type="number" id="api-rate-limit" class="form-control" value="100" min="10" max="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="webhook-url">URL do Webhook</label>
+                                        <input type="url" id="webhook-url" class="form-control" value="https://exemplo.com/webhook/securelab">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="webhook-secret">Segredo do Webhook</label>
+                                        <div class="password-input">
+                                            <input type="password" id="webhook-secret" class="form-control" value="wh_secret_abc123xyz456">
+                                            <button type="button" class="password-toggle" id="toggle-webhook-secret">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Eventos para Webhook</label>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="webhook-access" checked>
+                                                Eventos de acesso
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="webhook-users" checked>
+                                                Alterações de usuários
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="webhook-doors" checked>
+                                                Alterações de portas
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="webhook-alerts" checked>
+                                                Alertas
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                    <button type="button" class="btn btn-outline-primary ml-2" id="test-webhook">Testar Webhook</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Integração com Sistemas Externos</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="external-integration-form">
+                                    <div class="form-group">
+                                        <label>Sistemas Integrados</label>
+                                        <div class="integration-item">
+                                            <div class="integration-header">
+                                                <div class="integration-title">
+                                                    <i class="fas fa-video"></i>
+                                                    <span>Sistema de CCTV</span>
+                                                </div>
+                                                <div class="integration-status">
+                                                    <span class="badge-status badge-success">Ativo</span>
+                                                    <div class="toggle-switch">
+                                                        <input type="checkbox" id="cctv-integration" checked>
+                                                        <label for="cctv-integration"></label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="integration-details">
+                                                <div class="form-row">
+                                                    <div class="form-group col-md-6">
+                                                        <label for="cctv-url">URL da API</label>
+                                                        <input type="url" id="cctv-url" class="form-control" value="https://cctv.exemplo.com/api">
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label for="cctv-key">Chave de API</label>
+                                                        <input type="password" id="cctv-key" class="form-control" value="••••••••••••••••">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="integration-item">
+                                            <div class="integration-header">
+                                                <div class="integration-title">
+                                                    <i class="fas fa-fire-extinguisher"></i>
+                                                    <span>Sistema de Alarme de Incêndio</span>
+                                                </div>
+                                                <div class="integration-status">
+                                                    <span class="badge-status badge-secondary">Inativo</span>
+                                                    <div class="toggle-switch">
+                                                        <input type="checkbox" id="fire-integration">
+                                                        <label for="fire-integration"></label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="integration-details">
+                                                <div class="form-row">
+                                                    <div class="form-group col-md-6">
+                                                        <label for="fire-url">URL da API</label>
+                                                        <input type="url" id="fire-url" class="form-control" value="">
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label for="fire-key">Chave de API</label>
+                                                        <input type="password" id="fire-key" class="form-control" value="">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="integration-item">
+                                            <div class="integration-header">
+                                                <div class="integration-title">
+                                                    <i class="fas fa-building"></i>
+                                                    <span>Sistema BMS (Automação Predial)</span>
+                                                </div>
+                                                <div class="integration-status">
+                                                    <span class="badge-status badge-success">Ativo</span>
+                                                    <div class="toggle-switch">
+                                                        <input type="checkbox" id="bms-integration" checked>
+                                                        <label for="bms-integration"></label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="integration-details">
+                                                <div class="form-row">
+                                                    <div class="form-group col-md-6">
+                                                        <label for="bms-url">URL da API</label>
+                                                        <input type="url" id="bms-url" class="form-control" value="https://bms.exemplo.com/api">
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label for="bms-key">Chave de API</label>
+                                                        <input type="password" id="bms-key" class="form-control" value="••••••••••••••••">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Notificações -->
+                    <div id="notification-tab" class="tab-pane">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Configurações de Alertas</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="alerts-config-form">
+                                    <div class="form-group">
+                                        <label>Eventos para Alertas</label>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="alert-access-denied" checked>
+                                                Acesso negado
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="alert-door-forced" checked>
+                                                Porta forçada
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="alert-door-held-open" checked>
+                                                Porta mantida aberta
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="alert-device-offline" checked>
+                                                Dispositivo offline
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="alert-access-after-hours" checked>
+                                                Acesso fora do horário
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="alert-multiple-attempts" checked>
+                                                Múltiplas tentativas de acesso
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="alert-retention">Retenção de Alertas (dias)</label>
+                                        <input type="number" id="alert-retention" class="form-control" value="90" min="30" max="365">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="auto-clear">Limpeza Automática</label>
+                                        <select id="auto-clear" class="form-control">
+                                            <option value="none">Desativada</option>
+                                            <option value="resolved" selected>Após resolução</option>
+                                            <option value="24h">Após 24 horas</option>
+                                            <option value="7d">Após 7 dias</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Canais de Notificação</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="notification-channels-form">
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="toggle-switch mr-3">
+                                                <input type="checkbox" id="email-notification" checked>
+                                                <label for="email-notification"></label>
+                                            </div>
+                                            <span class="channel-label">Notificações por Email</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="notification-emails">Destinatários</label>
+                                            <input type="text" id="notification-emails" class="form-control" 
+                                                value="admin@securelab.com, seguranca@securelab.com">
+                                            <small class="text-muted">Separar emails por vírgula</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>SMS</label>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="toggle-switch mr-3">
+                                                <input type="checkbox" id="sms-notification" checked>
+                                                <label for="sms-notification"></label>
+                                            </div>
+                                            <span class="channel-label">Notificações por SMS</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="notification-phones">Números de Telefone</label>
+                                            <input type="text" id="notification-phones" class="form-control" 
+                                                value="+5511987654321, +5511912345678">
+                                            <small class="text-muted">Separar números por vírgula</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Webhook</label>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="toggle-switch mr-3">
+                                                <input type="checkbox" id="webhook-notification" checked>
+                                                <label for="webhook-notification"></label>
+                                            </div>
+                                            <span class="channel-label">Notificações por Webhook</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="notification-webhook">URL do Webhook</label>
+                                            <input type="url" id="notification-webhook" class="form-control" 
+                                                value="https://exemplo.com/webhook/alertas">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Aplicativo Mobile</label>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="toggle-switch mr-3">
+                                                <input type="checkbox" id="push-notification" checked>
+                                                <label for="push-notification"></label>
+                                            </div>
+                                            <span class="channel-label">Notificações Push</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                    <button type="button" class="btn btn-outline-primary ml-2" id="test-notification">Enviar Notificação de Teste</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Escalonamento de Alertas</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="escalation-form">
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="enable-escalation" checked>
+                                                Habilitar escalonamento de alertas
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="escalation-levels">
+                                        <div class="escalation-level">
+                                            <div class="level-header">
+                                                <span class="level-title">Nível 1 (15 minutos)</span>
+                                                <div class="level-actions">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary">Editar</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger">Remover</button>
+                                                </div>
+                                            </div>
+                                            <div class="level-recipients">
+                                                <span class="recipient">seguranca@securelab.com</span>
+                                                <span class="recipient">+5511987654321</span>
+                                            </div>
+                                        </div>
+                                        <div class="escalation-level">
+                                            <div class="level-header">
+                                                <span class="level-title">Nível 2 (30 minutos)</span>
+                                                <div class="level-actions">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary">Editar</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger">Remover</button>
+                                                </div>
+                                            </div>
+                                            <div class="level-recipients">
+                                                <span class="recipient">supervisor@securelab.com</span>
+                                                <span class="recipient">+5511912345678</span>
+                                            </div>
+                                        </div>
+                                        <div class="escalation-level">
+                                            <div class="level-header">
+                                                <span class="level-title">Nível 3 (1 hora)</span>
+                                                <div class="level-actions">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary">Editar</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger">Remover</button>
+                                                </div>
+                                            </div>
+                                            <div class="level-recipients">
+                                                <span class="recipient">gerencia@securelab.com</span>
+                                                <span class="recipient">+5511999999999</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="button" class="btn btn-outline-primary" id="add-escalation-level">
+                                            <i class="fas fa-plus"></i> Adicionar Nível
+                                        </button>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Aparência -->
+                    <div id="appearance-tab" class="tab-pane">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Tema e Cores</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="theme-form">
+                                    <div class="form-group">
+                                        <label>Modo de Cor</label>
+                                        <div class="theme-options">
+                                            <div class="theme-option">
+                                                <input type="radio" name="theme-mode" id="theme-light" value="light">
+                                                <label for="theme-light" class="theme-preview light-theme">
+                                                    <div class="theme-name">Claro</div>
+                                                </label>
+                                            </div>
+                                            <div class="theme-option">
+                                                <input type="radio" name="theme-mode" id="theme-dark" value="dark">
+                                                <label for="theme-dark" class="theme-preview dark-theme">
+                                                    <div class="theme-name">Escuro</div>
+                                                </label>
+                                            </div>
+                                            <div class="theme-option">
+                                                <input type="radio" name="theme-mode" id="theme-auto" value="auto" checked>
+                                                <label for="theme-auto" class="theme-preview auto-theme">
+                                                    <div class="theme-name">Automático</div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Cor Principal</label>
+                                        <div class="color-options">
+                                            <div class="color-option">
+                                                <input type="radio" name="primary-color" id="color-blue" value="blue" checked>
+                                                <label for="color-blue" class="color-preview" style="background-color: #4a6cf7;"></label>
+                                            </div>
+                                            <div class="color-option">
+                                                <input type="radio" name="primary-color" id="color-green" value="green">
+                                                <label for="color-green" class="color-preview" style="background-color: #28a745;"></label>
+                                            </div>
+                                            <div class="color-option">
+                                                <input type="radio" name="primary-color" id="color-red" value="red">
+                                                <label for="color-red" class="color-preview" style="background-color: #dc3545;"></label>
+                                            </div>
+                                            <div class="color-option">
+                                                <input type="radio" name="primary-color" id="color-purple" value="purple">
+                                                <label for="color-purple" class="color-preview" style="background-color: #6f42c1;"></label>
+                                            </div>
+                                            <div class="color-option">
+                                                <input type="radio" name="primary-color" id="color-orange" value="orange">
+                                                <label for="color-orange" class="color-preview" style="background-color: #fd7e14;"></label>
+                                            </div>
+                                            <div class="color-option">
+                                                <input type="radio" name="primary-color" id="color-teal" value="teal">
+                                                <label for="color-teal" class="color-preview" style="background-color: #20c997;"></label>
+                                            </div>
+                                            <div class="color-option custom-color">
+                                                <input type="radio" name="primary-color" id="color-custom" value="custom">
+                                                <label for="color-custom" class="color-preview custom-color-label">
+                                                    <input type="color" id="custom-color-picker" value="#4a6cf7">
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Fonte do Sistema</label>
+                                        <select id="system-font" class="form-control">
+                                            <option value="segoe-ui" selected>Segoe UI</option>
+                                            <option value="roboto">Roboto</option>
+                                            <option value="open-sans">Open Sans</option>
+                                            <option value="helvetica">Helvetica</option>
+                                            <option value="arial">Arial</option>
+                                            <option value="verdana">Verdana</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                    <button type="button" class="btn btn-outline-secondary ml-2">Restaurar Padrões</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Logotipo e Branding</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="branding-form">
+                                    <div class="form-group">
+                                        <label>Logotipo Atual</label>
+                                        <div class="current-logo">
+                                            <img src="https://via.placeholder.com/200x80?text=SecureLab+Logo" alt="Logo atual">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="logo-upload">Carregar Novo Logotipo</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="logo-upload" accept="image/*">
+                                            <label class="custom-file-label" for="logo-upload">Escolher arquivo...</label>
+                                        </div>
+                                        <small class="text-muted">Formato recomendado: PNG ou SVG com fundo transparente, dimensões mínimas de 200x80 pixels.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="system-name">Nome do Sistema</label>
+                                        <input type="text" id="system-name" class="form-control" value="SecureLab RFID">
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="show-logo-login" checked>
+                                                Exibir logotipo na tela de login
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="show-logo-header" checked>
+                                                Exibir logotipo no cabeçalho
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3>Layout da Interface</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="layout-form">
+                                    <div class="form-group">
+                                        <label>Posição da Barra Lateral</label>
+                                        <div class="layout-options">
+                                            <div class="layout-option">
+                                                <input type="radio" name="sidebar-position" id="sidebar-left" value="left" checked>
+                                                <label for="sidebar-left" class="layout-preview sidebar-left">
+                                                    <div class="layout-name">Esquerda</div>
+                                                </label>
+                                            </div>
+                                            <div class="layout-option">
+                                                <input type="radio" name="sidebar-position" id="sidebar-right" value="right">
+                                                <label for="sidebar-right" class="layout-preview sidebar-right">
+                                                    <div class="layout-name">Direita</div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Modo da Barra Lateral</label>
+                                        <div class="layout-options">
+                                            <div class="layout-option">
+                                                <input type="radio" name="sidebar-mode" id="sidebar-expanded" value="expanded" checked>
+                                                <label for="sidebar-expanded" class="layout-preview sidebar-expanded">
+                                                    <div class="layout-name">Expandida</div>
+                                                </label>
+                                            </div>
+                                            <div class="layout-option">
+                                                <input type="radio" name="sidebar-mode" id="sidebar-collapsed" value="collapsed">
+                                                <label for="sidebar-collapsed" class="layout-preview sidebar-collapsed">
+                                                    <div class="layout-name">Recolhida</div>
+                                                </label>
+                                            </div>
+                                            <div class="layout-option">
+                                                <input type="radio" name="sidebar-mode" id="sidebar-auto" value="auto">
+                                                <label for="sidebar-auto" class="layout-preview sidebar-auto">
+                                                    <div class="layout-name">Automático</div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Layout do Dashboard</label>
+                                        <div class="layout-options">
+                                            <div class="layout-option">
+                                                <input type="radio" name="dashboard-layout" id="dashboard-grid" value="grid" checked>
+                                                <label for="dashboard-grid" class="layout-preview dashboard-grid">
+                                                    <div class="layout-name">Grade</div>
+                                                </label>
+                                            </div>
+                                            <div class="layout-option">
+                                                <input type="radio" name="dashboard-layout" id="dashboard-list" value="list">
+                                                <label for="dashboard-list" class="layout-preview dashboard-list">
+                                                    <div class="layout-name">Lista</div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="confirm-modal-title">Confirmar Ação</h3>
+                    <button class="close-button" id="close-confirm-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-modal-message">Tem certeza que deseja aplicar estas alterações?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" id="cancel-confirm-btn">Cancelar</button>
+                    <button class="btn btn-primary" id="confirm-action-btn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/mobile.js"></script>
+    <script src="js/theme-switcher.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicialização das tabs
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remover classe ativa de todos os botões e painéis
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+
+                    // Adicionar classe ativa ao botão clicado
+                    this.classList.add('active');
+
+                    // Ativar o painel correspondente
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Navegação pelo teclado para as tabs
+            tabButtons.forEach((button, index) => {
+                button.addEventListener('keydown', function(e) {
+                    if (e.key === 'ArrowRight') {
+                        e.preventDefault();
+                        const nextTab = tabButtons[(index + 1) % tabButtons.length];
+                        nextTab.click();
+                        nextTab.focus();
+                    } else if (e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        const prevTab = tabButtons[(index - 1 + tabButtons.length) % tabButtons.length];
+                        prevTab.click();
+                        prevTab.focus();
+                    }
+                });
+            });
+
+            // Toggle de senha para campos de senha
+            const passwordToggles = document.querySelectorAll('.password-toggle');
+            passwordToggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const passwordField = this.previousElementSibling;
+                    const type = passwordField.type === 'password' ? 'text' : 'password';
+                    passwordField.type = type;
+                    
+                    // Alterar ícone
+                    const icon = this.querySelector('i');
+                    icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+                });
+            });
+
+            // Copiar chave da API
+            const copyApiKeyBtn = document.getElementById('copy-api-key');
+            if (copyApiKeyBtn) {
+                copyApiKeyBtn.addEventListener('click', function() {
+                    const apiKey = document.getElementById('api-key');
+                    navigator.clipboard.writeText(apiKey.value).then(() => {
+                        showNotification('Chave da API copiada com sucesso', 'success');
+                    }).catch(err => {
+                        showNotification('Erro ao copiar chave da API', 'error');
+                    });
+                });
+            }
+
+            // Mostrar nome do arquivo ao selecionar
+            const fileInputs = document.querySelectorAll('.custom-file-input');
+            fileInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const fileName = this.files[0]?.name;
+                    const label = this.nextElementSibling;
+                    
+                    if (fileName) {
+                        label.textContent = fileName;
+                    } else {
+                        label.textContent = 'Escolher arquivo...';
+                    }
+                });
+            });
+
+            // Função para exibir notificações
+            function showNotification(message, type = 'info') {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification(message, type);
+                    return;
+                }
+
+                // Fallback caso a função global não esteja disponível
+                const container = document.getElementById('notificationContainer');
+                if (!container) return;
+
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                
+                // Ícone com base no tipo
+                let icon = '';
+                switch (type) {
+                    case 'success': icon = '<i class="fas fa-check-circle"></i>'; break;
+                    case 'error': icon = '<i class="fas fa-times-circle"></i>'; break;
+                    case 'warning': icon = '<i class="fas fa-exclamation-triangle"></i>'; break;
+                    default: icon = '<i class="fas fa-info-circle"></i>';
+                }
+                
+                notification.innerHTML = `
+                    <div class="notification-icon">${icon}</div>
+                    <div class="notification-message">${message}</div>
+                    <button class="notification-close"><i class="fas fa-times"></i></button>
+                `;
+                
+                container.appendChild(notification);
+                
+                // Mostrar com animação
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                // Adicionar evento para fechar
+                const closeBtn = notification.querySelector('.notification-close');
+                closeBtn.addEventListener('click', () => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        container.removeChild(notification);
+                    }, 300);
+                });
+                
+                // Auto-fechar após 5 segundos
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.classList.remove('show');
+                        setTimeout(() => {
+                            if (notification.parentNode) {
+                                container.removeChild(notification);
+                            }
+                        }, 300);
+                    }
+                }, 5000);
+            }
+        });
+    </script>
+
+    <style>
+        /* Estilos específicos para a página de configurações */
+        .settings-tabs {
+            margin-bottom: 20px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-switch label {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-switch label:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + label {
+            background-color: var(--primary-color);
+        }
+
+        .toggle-switch input:focus + label {
+            box-shadow: 0 0 1px var(--primary-color);
+        }
+
+        .toggle-switch input:checked + label:before {
+            transform: translateX(24px);
+        }
+
+        /* Estilo para itens de integração */
+        .integration-item {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .integration-header {
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .integration-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .integration-title i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .integration-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .integration-details {
+            padding: 15px;
+        }
+
+        /* Estilo para checkbox-group */
+        .checkbox-group {
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        /* Estilo para escalation levels */
+        .escalation-levels {
+            margin-top: 15px;
+        }
+
+        .escalation-level {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .level-header {
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .level-title {
+            font-weight: 500;
+        }
+
+        .level-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .level-recipients {
+            padding: 10px 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .recipient {
+            padding: 5px 10px;
+            background-color: #e9ecef;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* Estilo para opções de tema */
+        .theme-options,
+        .color-options,
+        .layout-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .theme-option input[type="radio"],
+        .color-option input[type="radio"],
+        .layout-option input[type="radio"] {
+            display: none;
+        }
+
+        .theme-preview {
+            width: 100px;
+            height: 80px;
+            border-radius: 5px;
+            border: 2px solid #dee2e6;
+            display: flex;
+            align-items: flex-end;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .light-theme {
+            background-color: #f8f9fa;
+        }
+
+        .dark-theme {
+            background-color: #343a40;
+        }
+
+        .auto-theme {
+            background: linear-gradient(to right, #f8f9fa 50%, #343a40 50%);
+        }
+
+        .theme-name {
+            width: 100%;
+            padding: 5px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .dark-theme .theme-name {
+            background-color: rgba(52, 58, 64, 0.8);
+            color: white;
+        }
+
+        .auto-theme .theme-name {
+            background-color: rgba(74, 108, 247, 0.8);
+            color: white;
+        }
+
+        .theme-option input[type="radio"]:checked + .theme-preview,
+        .layout-option input[type="radio"]:checked + .layout-preview {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-option input[type="radio"]:checked + .color-preview {
+            border-color: black;
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .custom-color-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: conic-gradient(
+                red, orange, yellow, green, blue, indigo, violet, red
+            );
+        }
+
+        #custom-color-picker {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        /* Layout previews */
+        .layout-preview {
+            width: 100px;
+            height: 80px;
+            border-radius: 5px;
+            border: 2px solid #dee2e6;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .layout-name {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 5px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .sidebar-left:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20%;
+            height: 100%;
+            background-color: #4a6cf7;
+        }
+
+        .sidebar-right:before {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 20%;
+            height: 100%;
+            background-color: #4a6cf7;
+        }
+
+        .sidebar-expanded:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 30%;
+            height: 100%;
+            background-color: #4a6cf7;
+        }
+
+        .sidebar-collapsed:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 15%;
+            height: 100%;
+            background-color: #4a6cf7;
+        }
+
+        .sidebar-auto:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 30%;
+            height: 100%;
+            background: linear-gradient(to right, #4a6cf7 50%, #4a6cf7 50%, transparent 50%);
+            background-size: 200% 100%;
+            animation: sidebar-toggle 3s infinite;
+        }
+
+        @keyframes sidebar-toggle {
+            0% { background-position: 0% 0; }
+            45% { background-position: 0% 0; }
+            55% { background-position: 100% 0; }
+            95% { background-position: 100% 0; }
+            100% { background-position: 0% 0; }
+        }
+
+        .dashboard-grid:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(#4a6cf7 10%, transparent 10%, transparent 90%, #4a6cf7 90%),
+                            linear-gradient(90deg, #4a6cf7 10%, transparent 10%, transparent 90%, #4a6cf7 90%);
+            background-size: 20px 20px;
+            opacity: 0.5;
+        }
+
+        .dashboard-list:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(#4a6cf7 10%, transparent 10%, transparent 30%, #4a6cf7 30%, 
+                            transparent 30%, transparent 50%, #4a6cf7 50%, transparent 50%, 
+                            transparent 70%, #4a6cf7 70%, transparent 70%, transparent 90%, #4a6cf7 90%);
+            background-size: 100% 20px;
+            opacity: 0.5;
+        }
+
+        /* Estilo para visualização de logo atual */
+        .current-logo {
+            padding: 15px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .current-logo img {
+            max-width: 100%;
+            max-height: 80px;
+        }
+
+        /* Adaptações para modo escuro */
+        html.dark-mode .tab-btn {
+            background-color: var(--dark-card-bg);
+            border-color: var(--dark-border-color);
+            color: var(--dark-text-primary);
+        }
+
+        html.dark-mode .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        html.dark-mode .integration-header,
+        html.dark-mode .level-header {
+            background-color: var(--dark-input-bg);
+            border-color: var(--dark-border-color);
+        }
+
+        html.dark-mode .integration-item,
+        html.dark-mode .escalation-level {
+            border-color: var(--dark-border-color);
+        }
+
+        html.dark-mode .recipient {
+            background-color: var(--dark-input-bg);
+            color: var(--dark-text-secondary);
+        }
+
+        html.dark-mode .current-logo {
+            background-color: var(--dark-input-bg);
+        }
+
+        html.dark-mode .theme-name {
+            background-color: rgba(35, 39, 54, 0.8);
+            color: var(--dark-text-primary);
+        }
+
+        html.dark-mode .light-theme .theme-name {
+            color: #212529;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        html.dark-mode .color-preview {
+            border-color: var(--dark-border-color);
+        }
+
+        html.dark-mode .layout-name {
+            background-color: rgba(35, 39, 54, 0.8);
+            color: var(--dark-text-primary);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .tab-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .tab-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .theme-options,
+            .color-options,
+            .layout-options {
+                justify-content: center;
+            }
+
+            .integration-header,
+            .level-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .integration-status,
+            .level-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+
+    <div class="mobile-overlay"></div>
+</body>
+</html>
