@@ -175,9 +175,7 @@
   
   /* Ajustes para telas muito pequenas (smartphones) */
   @media (max-width: 480px) {
-    .user-name {
-      display: none; /* Oculta nome do usuário em telas muito pequenas */
-    }
+  
   
     .card-grid {
       gap: 12px;
