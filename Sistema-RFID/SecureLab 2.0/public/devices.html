@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureLab RFID | Dispositivos</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/utils.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/components.css">
+    <!-- Otimizações Mobile -->
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SecureLab</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="doors.html">
+                            <i class="fas fa-door-open"></i>
+                            <span>Portas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Usuários</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="devices.html">
+                            <i class="fas fa-microchip"></i>
+                            <span>Dispositivos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="logs.html">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Logs de Acesso</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <button class="mobile-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar dispositivos...">
+                </div>
+                <div class="header-right">
+                    <div class="notifications">
+                        <button class="icon-button">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge" id="header-alerts-count">0</span>
+                        </button>
+                    </div>
+                    <div class="user-menu">
+                        <span class="user-name" id="current-user-name">Usuário</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1><i class="fas fa-microchip"></i> Gerenciamento de Dispositivos</h1>
+                    <button id="addDeviceBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Novo Dispositivo</button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="mb-0">Filtros</h3>
+                            <button class="btn btn-sm btn-outline-primary" id="reset-filters-btn">
+                                <i class="fas fa-sync-alt"></i> Limpar Filtros
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-status">Status</label>
+                                <select id="filter-status" class="form-control">
+                                    <option value="">Todos</option>
+                                    <option value="online">Online</option>
+                                    <option value="offline">Offline</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-type">Tipo</label>
+                                <select id="filter-type" class="form-control">
+                                    <option value="">Todos</option>
+                                    <option value="rfid-reader">Leitor RFID</option>
+                                    <option value="controller">Controlador</option>
+                                    <option value="gateway">Gateway IoT</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-firmware">Versão de Firmware</label>
+                                <select id="filter-firmware" class="form-control">
+                                    <option value="">Todas</option>
+                                    <option value="v2.3.1">v2.3.1</option>
+                                    <option value="v2.2.5">v2.2.5</option>
+                                    <option value="outdated">Desatualizado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dispositivos Cards -->
+                <div class="card-grid mb-4">
+                    <!-- Card: Dispositivos Ativos -->
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <h3>Dispositivos Online</h3>
+                            <i class="fas fa-wifi card-icon"></i>
+                        </div>
+                        <div class="status-card-body">
+                            <div class="status-count" id="online-devices-count">8</div>
+                            <div class="status-label">de 12 dispositivos</div>
+                        </div>
+                        <div class="status-card-footer">
+                            <span class="status-trend positive">
+                                <i class="fas fa-arrow-up"></i> <span id="devices-trend">3%</span>
+                            </span>
+                            <span class="status-period">desde ontem</span>
+                        </div>
+                    </div>
+
+                    <!-- Card: Necessitam Atualização -->
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <h3>Necessitam Atualização</h3>
+                            <i class="fas fa-download card-icon"></i>
+                        </div>
+                        <div class="status-card-body">
+                            <div class="status-count" id="outdated-devices-count">2</div>
+                            <div class="status-label">dispositivos desatualizados</div>
+                        </div>
+                        <div class="status-card-footer">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 83%;"></div>
+                            </div>
+                            <span>83% atualizados</span>
+                        </div>
+                    </div>
+
+                    <!-- Card: Última Manutenção -->
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <h3>Última Manutenção</h3>
+                            <i class="fas fa-tools card-icon"></i>
+                        </div>
+                        <div class="status-card-body">
+                            <div class="status-count" id="last-maintenance">15/02</div>
+                            <div class="status-label">Há 26 dias</div>
+                        </div>
+                        <div class="status-card-footer">
+                            <span class="status-trend negative">
+                                <i class="fas fa-exclamation-triangle"></i> Agendada
+                            </span>
+                            <span class="status-period">para 29/03</span>
+                        </div>
+                    </div>
+
+                    <!-- Card: Bateria Crítica -->
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <h3>Bateria Crítica</h3>
+                            <i class="fas fa-battery-quarter card-icon"></i>
+                        </div>
+                        <div class="status-card-body">
+                            <div class="status-count" id="low-battery-count">1</div>
+                            <div class="status-label">dispositivo com bateria baixa</div>
+                        </div>
+                        <div class="status-card-footer">
+                            <span class="status-trend negative">
+                                <i class="fas fa-arrow-down"></i> Leitor RFID #03
+                            </span>
+                            <span class="status-period">15% restante</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Dispositivos -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Lista de Dispositivos</h3>
+                        <div class="card-actions">
+                            <button class="icon-button" id="refresh-devices">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <div class="dropdown">
+                                <button class="icon-button" id="export-dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu" id="export-menu">
+                                    <a href="#" class="dropdown-item" id="export-csv">
+                                        <i class="fas fa-file-csv"></i> Exportar CSV
+                                    </a>
+                                    <a href="#" class="dropdown-item" id="export-pdf">
+                                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                                    </a>
+                                    <a href="#" class="dropdown-item" id="export-config">
+                                        <i class="fas fa-download"></i> Exportar Configurações
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Tipo</th>
+                                        <th>Localização</th>
+                                        <th>Status</th>
+                                        <th>Firmware</th>
+                                        <th>Última Atividade</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="devices-table-body">
+                                    <!-- Dados de exemplo -->
+                                    <tr>
+                                        <td>Leitor RFID #01</td>
+                                        <td>Leitor RFID</td>
+                                        <td>Entrada Principal</td>
+                                        <td><span class="badge-status badge-success">Online</span></td>
+                                        <td>v2.3.1</td>
+                                        <td>13/03/2025 09:32</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn action-btn-edit" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Reiniciar">
+                                                    <i class="fas fa-redo-alt"></i>
+                                                </button>
+                                                <button class="action-btn" title="Configurar">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Leitor RFID #02</td>
+                                        <td>Leitor RFID</td>
+                                        <td>Laboratório A</td>
+                                        <td><span class="badge-status badge-success">Online</span></td>
+                                        <td>v2.3.1</td>
+                                        <td>13/03/2025 09:45</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn action-btn-edit" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Reiniciar">
+                                                    <i class="fas fa-redo-alt"></i>
+                                                </button>
+                                                <button class="action-btn" title="Configurar">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Leitor RFID #03</td>
+                                        <td>Leitor RFID</td>
+                                        <td>Sala de Servidores</td>
+                                        <td><span class="badge-status badge-warning">Bateria Baixa</span></td>
+                                        <td>v2.3.1</td>
+                                        <td>13/03/2025 08:57</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn action-btn-edit" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Reiniciar">
+                                                    <i class="fas fa-redo-alt"></i>
+                                                </button>
+                                                <button class="action-btn" title="Configurar">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Controlador #01</td>
+                                        <td>Controlador</td>
+                                        <td>Corredor Principal</td>
+                                        <td><span class="badge-status badge-success">Online</span></td>
+                                        <td>v2.3.1</td>
+                                        <td>13/03/2025 09:50</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn action-btn-edit" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Reiniciar">
+                                                    <i class="fas fa-redo-alt"></i>
+                                                </button>
+                                                <button class="action-btn" title="Configurar">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Gateway IoT #01</td>
+                                        <td>Gateway IoT</td>
+                                        <td>Sala Técnica</td>
+                                        <td><span class="badge-status badge-success">Online</span></td>
+                                        <td>v2.3.1</td>
+                                        <td>13/03/2025 09:55</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn action-btn-edit" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Reiniciar">
+                                                    <i class="fas fa-redo-alt"></i>
+                                                </button>
+                                                <button class="action-btn" title="Configurar">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Controlador #02</td>
+                                        <td>Controlador</td>
+                                        <td>Área Restrita</td>
+                                        <td><span class="badge-status badge-success">Online</span></td>
+                                        <td>v2.3.1</td>
+                                        <td>13/03/2025 09:22</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn action-btn-edit" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Reiniciar">
+                                                    <i class="fas fa-redo-alt"></i>
+                                                </button>
+                                                <button class="action-btn" title="Configurar">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Leitor RFID #04</td>
+                                        <td>Leitor RFID</td>
+                                        <td>Entrada Secundária</td>
+                                        <td><span class="badge-status badge-success">Online</span></td>
+                                        <td>v2.2.5</td>
+                                        <td>13/03/2025 09:40</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn action-btn-edit" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Reiniciar">
+                                                    <i class="fas fa-redo-alt"></i>
+                                                </button>
+                                                <button class="action-btn" title="Configurar">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Leitor RFID #05</td>
+                                        <td>Leitor RFID</td>
+                                        <td>Laboratório B</td>
+                                        <td><span class="badge-status badge-danger">Offline</span></td>
+                                        <td>v2.2.5</td>
+                                        <td>12/03/2025 16:22</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn action-btn-edit" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Diagnóstico">
+                                                    <i class="fas fa-stethoscope"></i>
+                                                </button>
+                                                <button class="action-btn" title="Configurar">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Paginação -->
+                        <div class="pagination-container mt-4">
+                            <div class="pagination-info">
+                                Exibindo <span id="pagination-start">1</span> - <span id="pagination-end">8</span> de <span id="pagination-total">12</span> dispositivos
+                            </div>
+                            <div class="pagination">
+                                <button class="pagination-btn" id="prev-page" disabled>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div id="pagination-numbers">
+                                    <button class="page-number active">1</button>
+                                    <button class="page-number">2</button>
+                                </div>
+                                <button class="pagination-btn" id="next-page">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Dispositivo -->
+    <div class="modal" id="deviceModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Adicionar Novo Dispositivo</h3>
+                    <button class="close-button" id="close-device-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="deviceForm">
+                        <div class="form-group">
+                            <label for="deviceName">Nome</label>
+                            <input type="text" id="deviceName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="deviceType">Tipo</label>
+                            <select id="deviceType" class="form-control" required>
+                                <option value="">Selecione um tipo</option>
+                                <option value="rfid-reader">Leitor RFID</option>
+                                <option value="controller">Controlador</option>
+                                <option value="gateway">Gateway IoT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="deviceLocation">Localização</label>
+                            <input type="text" id="deviceLocation" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="deviceIP">Endereço IP</label>
+                            <input type="text" id="deviceIP" class="form-control" pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" placeholder="192.168.1.100">
+                        </div>
+                        <div class="form-group">
+                            <label for="deviceMAC">Endereço MAC</label>
+                            <input type="text" id="deviceMAC" class="form-control" pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$" placeholder="00:11:22:33:44:55">
+                        </div>
+                        <div class="form-group">
+                            <label for="deviceFirmware">Versão do Firmware</label>
+                            <select id="deviceFirmware" class="form-control">
+                                <option value="v2.3.1">v2.3.1 (Mais recente)</option>
+                                <option value="v2.2.5">v2.2.5</option>
+                                <option value="v2.1.8">v2.1.8 (Legado)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Configurações Avançadas</label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="autoUpdate" checked>
+                                    Atualização automática de firmware
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="scheduleReboot" checked>
+                                    Reinicialização programada semanal
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="enableLogging" checked>
+                                    Registro detalhado de diagnóstico
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" id="cancelDeviceBtn">Cancelar</button>
+                    <button class="btn btn-primary" id="saveDeviceBtn">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Configuração de Dispositivo -->
+    <div class="modal" id="configModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="configModalTitle">Configurar Dispositivo</h3>
+                    <button class="close-button" id="close-config-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs de Configuração -->
+                    <div class="settings-tabs">
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" data-tab="general-tab">Geral</button>
+                            <button class="tab-btn" data-tab="network-tab">Rede</button>
+                            <button class="tab-btn" data-tab="security-tab">Segurança</button>
+                            <button class="tab-btn" data-tab="maintenance-tab">Manutenção</button>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo das Tabs -->
+                    <div class="tab-content">
+                        <!-- Tab: Geral -->
+                        <div id="general-tab" class="tab-pane active">
+                            <div class="form-group">
+                                <label for="config-device-name">Nome do Dispositivo</label>
+                                <input type="text" id="config-device-name" class="form-control" value="Leitor RFID #01">
+                            </div>
+                            <div class="form-group">
+                                <label for="config-device-location">Localização</label>
+                                <input type="text" id="config-device-location" class="form-control" value="Entrada Principal">
+                            </div>
+                            <div class="form-group">
+                                <label for="config-device-description">Descrição</label>
+                                <textarea id="config-device-description" class="form-control" rows="2">Leitor RFID na entrada principal do prédio. Controla acesso geral.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="power-mode">Modo de Energia</label>
+                                <select id="power-mode" class="form-control">
+                                    <option value="normal" selected>Normal</option>
+                                    <option value="low-power">Baixo Consumo</option>
+                                    <option value="ultra-low-power">Ultra Baixo Consumo</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="led-brightness">Brilho do LED</label>
+                                <input type="range" id="led-brightness" class="form-control" min="0" max="100" value="75">
+                            </div>
+                        </div>
+
+                        <!-- Tab: Rede -->
+                        <div id="network-tab" class="tab-pane">
+                            <div class="form-group">
+                                <label>Modo de Conexão</label>
+                                <div class="radio-group">
+                                    <label>
+                                        <input type="radio" name="network-mode" value="wifi" checked> Wi-Fi
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="network-mode" value="ethernet"> Ethernet
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="wifi-settings">
+                                <div class="form-group">
+                                    <label for="wifi-ssid">Nome da Rede (SSID)</label>
+                                    <input type="text" id="wifi-ssid" class="form-control" value="SecureLab-Network">
+                                </div>
+                                <div class="form-group">
+                                    <label for="wifi-password">Senha</label>
+                                    <div class="password-input">
+                                        <input type="password" id="wifi-password" class="form-control" value="••••••••••">
+                                        <button type="button" class="password-toggle" id="toggle-wifi-password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Configuração IP</label>
+                                <div class="radio-group">
+                                    <label>
+                                        <input type="radio" name="ip-config" value="dhcp" checked> DHCP (Automático)
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="ip-config" value="static"> IP Estático
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="static-ip-settings" style="display: none;">
+                                <div class="form-group">
+                                    <label for="static-ip">Endereço IP</label>
+                                    <input type="text" id="static-ip" class="form-control" placeholder="192.168.1.100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="subnet-mask">Máscara de Sub-rede</label>
+                                    <input type="text" id="subnet-mask" class="form-control" placeholder="255.255.255.0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="default-gateway">Gateway Padrão</label>
+                                    <input type="text" id="default-gateway" class="form-control" placeholder="192.168.1.1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="dns-server">Servidor DNS</label>
+                                    <input type="text" id="dns-server" class="form-control" placeholder="8.8.8.8">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab: Segurança -->
+                        <div id="security-tab" class="tab-pane">
+                            <div class="form-group">
+                                <label for="security-level">Nível de Segurança</label>
+                                <select id="security-level" class="form-control">
+                                    <option value="high" selected>Alto</option>
+                                    <option value="medium">Médio</option>
+                                    <option value="low">Baixo</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="api-token">Token de API</label>
+                                <div class="input-group">
+                                    <input type="text" id="api-token" class="form-control" value="sk_4a6cf7bda3c82d9e15f3b7a8" readonly>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button" id="copy-api-token">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                        <button class="btn btn-outline-primary" type="button" id="regenerate-api-token">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Protocolos de Comunicação Permitidos</label>
+                                <div class="checkbox-group">
+                                    <label>
+                                        <input type="checkbox" id="allow-http" checked>
+                                        HTTP
+                                    </label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <label>
+                                        <input type="checkbox" id="allow-https" checked>
+                                        HTTPS
+                                    </label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <label>
+                                        <input type="checkbox" id="allow-mqtt" checked>
+                                        MQTT
+                                    </label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <label>
+                                        <input type="checkbox" id="allow-coap">
+                                        CoAP
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Acesso Remoto</label>
+                                <div class="checkbox-group">
+                                    <label>
+                                        <input type="checkbox" id="enable-remote-access">
+                                        Habilitar acesso remoto
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab: Manutenção -->
+                        <div id="maintenance-tab" class="tab-pane">
+                            <div class="form-group">
+                                <label for="firmware-version">Versão do Firmware</label>
+                                <div class="input-group">
+                                    <input type="text" id="firmware-version" class="form-control" value="v2.3.1" readonly>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="button" id="check-firmware-updates">
+                                            Verificar Atualizações
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="last-update">Última Atualização</label>
+                                <input type="text" id="last-update" class="form-control" value="01/03/2025 08:32" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="update-schedule">Programação de Atualização</label>
+                                <select id="update-schedule" class="form-control">
+                                    <option value="immediate">Imediato</option>
+                                    <option value="night" selected>Durante a Noite</option>
+                                    <option value="weekend">Final de Semana</option>
+                                    <option value="custom">Personalizado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Ações de Manutenção</label>
+                                <div class="maintenance-actions">
+                                    <button class="btn btn-outline-primary mb-2 w-100" id="restart-device">
+                                        <i class="fas fa-redo-alt"></i> Reiniciar Dispositivo
+                                    </button>
+                                    <button class="btn btn-outline-primary mb-2 w-100" id="factory-reset">
+                                        <i class="fas fa-trash-alt"></i> Restaurar Configurações de Fábrica
+                                    </button>
+                                    <button class="btn btn-outline-primary mb-2 w-100" id="download-logs">
+                                        <i class="fas fa-file-download"></i> Baixar Logs de Diagnóstico
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" id="closeConfigBtn">Cancelar</button>
+                    <button class="btn btn-primary" id="saveConfigBtn">Salvar Configurações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="confirm-modal-title">Confirmar Ação</h3>
+                    <button class="close-button" id="close-confirm-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-modal-message">Tem certeza que deseja realizar esta ação?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" id="cancel-confirm-btn">Cancelar</button>
+                    <button class="btn btn-danger" id="confirm-action-btn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <!-- Scripts da aplicação -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/devices.js"></script>
+    <script src="js/mobile.js"></script>
+    <script src="js/theme-switcher.js"></script>
+
+    <div class="mobile-overlay"></div>
+</body>
+</html>
