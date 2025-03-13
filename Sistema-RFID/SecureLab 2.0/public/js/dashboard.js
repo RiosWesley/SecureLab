@@ -92,7 +92,7 @@ function loadDoorStats() {
     })
     .catch(error => console.error('Erro ao carregar estatísticas de portas:', error));
 }
-/// Função para carregar estatísticas de dispositivos com métricas de benchmark
+// Função para carregar estatísticas de dispositivos com métricas de benchmark
 function loadDeviceStats() {
   database.ref('devices').once('value')
     .then(snapshot => {
@@ -101,25 +101,26 @@ function loadDeviceStats() {
         const deviceCount = Object.keys(devices).length;
         const onlineDevices = Object.values(devices).filter(device => device.status === 'online');
         const onlineCount = onlineDevices.length;
-
+        
         // Atualizar contador de dispositivos
         document.getElementById('devices-status').textContent = `${onlineCount}/${deviceCount}`;
-
+        
         // Calcular porcentagem de dispositivos online
         const onlinePercentage = Math.round((onlineCount / deviceCount) * 100);
         document.getElementById('devices-progress').style.width = `${onlinePercentage}%`;
         document.getElementById('devices-percentage').textContent = `${onlinePercentage}% online`;
-
+        
         // Atualizar estatísticas detalhadas de dispositivos
         document.getElementById('online-devices').textContent = `${onlineCount}/${deviceCount}`;
         document.getElementById('offline-devices').textContent = deviceCount - onlineCount;
-
+        
         // Obter versão do firmware (assumindo que todos usam a mesma versão)
         if (onlineCount > 0) {
-          document.getElementById('firmware-version').textContent =
+          document.getElementById('firmware-version').textContent = 
             onlineDevices[0].firmware_version || '-';
         }
-
+        
+        
         // Atualizar métricas de benchmark
         updateBenchmarkMetrics(onlineDevices);
       }
@@ -137,35 +138,30 @@ function updateBenchmarkMetrics(onlineDevices) {
     resetBenchmarkMetrics();
     return;
   }
-
-  // Calcular médias das métricas
-  const cpuSum = onlineDevices.reduce((sum, device) => sum + (device.cpu_usage || 0), 0);
-  const ramSum = onlineDevices.reduce((sum, device) => sum + (device.ram_usage || 0), 0);
-  const tempSum = onlineDevices.reduce((sum, device) => sum + (device.temperature || 0), 0);
-  const latencySum = onlineDevices.reduce((sum, device) => sum + (device.latency || 0), 0);
-
-  const cpuAvg = Math.round(cpuSum / onlineDevices.length);
-  const ramAvg = Math.round(ramSum / onlineDevices.length);
-  const tempAvg = Math.round(tempSum / onlineDevices.length);
-  const latencyAvg = Math.round(latencySum / onlineDevices.length);
-
-  // Atualizar barras e valores
-  updateBenchmarkBar('cpu-usage', cpuAvg, '%');
-  updateBenchmarkBar('ram-usage', ramAvg, '%');
-  updateBenchmarkBar('temp-value', tempAvg, '°C');
-  updateBenchmarkBar('latency-value', latencyAvg, 'ms');
-
+  
   // Encontrar o dispositivo mais sobrecarregado (usando CPU como referência)
-  const hotspotDevice = onlineDevices.reduce((max, device) =>
+  const hotspotDevice = onlineDevices.reduce((max, device) => 
     (device.cpu_usage || 0) > (max.cpu_usage || 0) ? device : max, onlineDevices[0]);
-
+  
+  // Usar métricas do dispositivo mais sobrecarregado para as barras
+  const cpuValue = hotspotDevice.cpu_usage || 0;
+  const ramValue = hotspotDevice.ram_usage || 0;
+  const tempValue = hotspotDevice.temperature || 0;
+  const latencyValue = hotspotDevice.latency || 0;
+  
+  // Atualizar barras e valores
+  updateBenchmarkBar('cpu-usage', cpuValue, '%');
+  updateBenchmarkBar('ram-usage', ramValue, '%');
+  updateBenchmarkBar('temp-value', tempValue, '°C');
+  updateBenchmarkBar('latency-value', latencyValue, 'ms');
+  
   // Atualizar informações do dispositivo mais sobrecarregado
   const hotspotName = document.getElementById('hotspot-device-name');
   const hotspotLoad = document.getElementById('hotspot-device-load');
-
+  
   if (hotspotName && hotspotLoad && hotspotDevice) {
     hotspotName.textContent = hotspotDevice.name || `Dispositivo ${hotspotDevice.id.substr(0, 6)}`;
-    hotspotLoad.textContent = `CPU: ${hotspotDevice.cpu_usage || 0}% | RAM: ${hotspotDevice.ram_usage || 0}%`;
+    hotspotLoad.textContent = `CPU: ${cpuValue}% | RAM: ${ramValue}%`;
   }
 }
 
@@ -177,37 +173,67 @@ function updateBenchmarkMetrics(onlineDevices) {
  */
 function updateBenchmarkBar(id, value, unit) {
   const bar = document.getElementById(`${id}-bar`);
-  const valueEl = document.getElementById(`${id}`);
-
+  
+  // Correção aqui: para temperatura e latência, o ID já inclui "value" na base
+  const valueElId = id.includes('value') ? id : `${id}-value`;
+  const valueEl = document.getElementById(valueElId);
+  
   if (bar && valueEl) {
+    // Garantir que o valor seja pelo menos 1 para visualização
+    let displayWidth = Math.max(1, value); // pelo menos 1% de width para visibilidade
+    
     // Definir largura máxima da barra dependendo da métrica
     let maxValue = 100; // Padrão para CPU e RAM
-
+    
     if (id === 'temp-value') {
-      maxValue = 100; // Temperatura máxima considerada (100°C)
+      maxValue = 80; // Temperatura máxima considerada (80°C)
     } else if (id === 'latency-value') {
       maxValue = 200; // Latência máxima considerada boa (200ms)
     }
-
+    
     // Calcular porcentagem para a largura da barra
-    const percentage = Math.min(100, Math.max(0, (value / maxValue) * 100));
-
+    const percentage = Math.min(100, Math.max(1, (displayWidth / maxValue) * 100));
+    
     // Atualizar a barra
     bar.style.width = `${percentage}%`;
-
+    
     // Adicionar classes baseadas no valor para indicar criticidade
     bar.className = 'benchmark-bar';
-
-    if (percentage > 80) {
-      bar.classList.add('critical');
-    } else if (percentage > 60) {
-      bar.classList.add('warning');
-    } else {
-      bar.classList.add('normal');
+    
+    // Regras específicas por tipo de métrica
+    if (id === 'cpu-usage' || id === 'ram-usage') {
+      if (value > 80) {
+        bar.classList.add('critical');
+      } else if (value > 60) {
+        bar.classList.add('warning');
+      } else {
+        bar.classList.add('normal');
+      }
+    } else if (id === 'temp-value') {
+      if (value > 65) {
+        bar.classList.add('critical');
+      } else if (value > 50) {
+        bar.classList.add('warning');
+      } else {
+        bar.classList.add('normal');
+      }
+    } else if (id === 'latency-value') {
+      if (value > 100) {
+        bar.classList.add('critical');
+      } else if (value > 50) {
+        bar.classList.add('warning');
+      } else {
+        bar.classList.add('normal');
+      }
     }
-
+    
     // Atualizar o texto do valor
     valueEl.textContent = `${value}${unit}`;
+    
+    // Verificar se o valor foi realmente atualizado (debug)
+    console.log(`Atualizando ${id}: valor=${value}${unit}, largura=${percentage}%, elemento=${valueElId}`);
+  } else {
+    console.warn(`Elemento não encontrado: bar=${id}-bar, value=${valueElId}`);
   }
 }
 
@@ -219,12 +245,12 @@ function resetBenchmarkMetrics() {
   document.getElementById('ram-usage-bar').style.width = '0%';
   document.getElementById('temp-value-bar').style.width = '0%';
   document.getElementById('latency-value-bar').style.width = '0%';
-
+  
   document.getElementById('cpu-usage-value').textContent = '0%';
   document.getElementById('ram-usage-value').textContent = '0%';
   document.getElementById('temp-value').textContent = '0°C';
   document.getElementById('latency-value').textContent = '0ms';
-
+  
   document.getElementById('hotspot-device-name').textContent = '-';
   document.getElementById('hotspot-device-load').textContent = '-';
 }
