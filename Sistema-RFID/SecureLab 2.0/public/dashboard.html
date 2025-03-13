@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/utils.css">
     <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <!-- Otimizações Mobile -->
     <link rel="stylesheet" href="css/mobile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -239,11 +240,15 @@
 
                 <!-- Additional Widgets -->
                 <div class="card-row">
-                    <!-- Device Status -->
+                    <!-- Device Status Card (Atualizado) -->
                     <div class="card device-status-card">
                         <div class="card-header">
                             <h3>Status dos Dispositivos</h3>
-                            
+                            <div class="card-actions">
+                                <button class="icon-button" id="refresh-device-stats">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="device-stats">
@@ -260,16 +265,63 @@
                                     <div class="stat-label">Firmware</div>
                                 </div>
                             </div>
-                            <div class="device-chart-placeholder">
-                                <div class="donut-chart">
-                                    <div class="donut-hole"></div>
-                                    <div class="donut-ring">
-                                        <div class="donut-segment" id="device-donut-segment"
-                                            style="clip-path: polygon(50% 50%, 100% 50%, 100% 0, 50% 0)"></div>
+                    
+                            <!-- Novo: Benchmarks dos dispositivos -->
+                            <div class="benchmark-container">
+                                <h4 class="benchmark-title">Performance dos Dispositivos</h4>
+                    
+                                <div class="benchmark-metrics">
+                                    <div class="benchmark-item">
+                                        <div class="benchmark-label">
+                                            <i class="fas fa-microchip"></i> CPU
+                                        </div>
+                                        <div class="benchmark-bar-container">
+                                            <div class="benchmark-bar" id="cpu-usage-bar" style="width: 0%"></div>
+                                            <div class="benchmark-value" id="cpu-usage-value">0%</div>
+                                        </div>
                                     </div>
-                                    <div class="donut-text" id="device-percentage">0%</div>
+                    
+                                    <div class="benchmark-item">
+                                        <div class="benchmark-label">
+                                            <i class="fas fa-memory"></i> RAM
+                                        </div>
+                                        <div class="benchmark-bar-container">
+                                            <div class="benchmark-bar" id="ram-usage-bar" style="width: 0%"></div>
+                                            <div class="benchmark-value" id="ram-usage-value">0%</div>
+                                        </div>
+                                    </div>
+                    
+                                    <div class="benchmark-item">
+                                        <div class="benchmark-label">
+                                            <i class="fas fa-thermometer-half"></i> Temperatura
+                                        </div>
+                                        <div class="benchmark-bar-container">
+                                            <div class="benchmark-bar" id="temp-value-bar" style="width: 0%"></div>
+                                            <div class="benchmark-value" id="temp-value">0°C</div>
+                                        </div>
+                                    </div>
+                    
+                                    <div class="benchmark-item">
+                                        <div class="benchmark-label">
+                                            <i class="fas fa-network-wired"></i> Latência
+                                        </div>
+                                        <div class="benchmark-bar-container">
+                                            <div class="benchmark-bar" id="latency-value-bar" style="width: 0%"></div>
+                                            <div class="benchmark-value" id="latency-value">0ms</div>
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                                <!-- Dispositivo mais sobrecarregado -->
+                                <div class="hotspot-device">
+                                    <div class="hotspot-title">Dispositivo mais sobrecarregado:</div>
+                                    <div class="hotspot-info">
+                                        <span id="hotspot-device-name">-</span>
+                                        <span id="hotspot-device-load">-</span>
+                                    </div>
                                 </div>
                             </div>
+                    
                             <div class="card-actions center">
                                 <a href="devices.html" class="btn btn-link">Ver Dispositivos</a>
                             </div>
