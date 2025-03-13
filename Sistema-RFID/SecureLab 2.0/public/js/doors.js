@@ -23,10 +23,7 @@
 }]
 
 
-/**
- * doors.js - Gerenciamento de portas para o sistema SecureLab RFID
- * Versão corrigida
- */
+/
 
 // Garantir que o DOM foi carregado antes de inicializar
 document.addEventListener('DOMContentLoaded', initDoorManagement);
@@ -584,7 +581,7 @@ function controlDoor(action) {
         const user = firebase.auth().currentUser;
         if (user) {
             // Buscar o nome do usuário no banco de dados
-            return firebase.database().ref('users').orderByChild('email').equalTo(user.email).once('value')  // Corrigido para firebase.database()
+            return firebase.database().ref('users').orderByChild('email').equalTo(user.email).once('value') 
                 .then(snapshot => {
                     let userName = user.email; // Fallback para o email
 

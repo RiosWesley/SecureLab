@@ -525,6 +525,7 @@ function resetFilters() {
 
 /**
  * Exporta os logs no formato especificado
+ * @param {string} format - Formato de exportação ('csv' ou 'pdf')
  */
 function exportLogs(format) {
     if (filteredLogs.length === 0) {
@@ -532,12 +533,78 @@ function exportLogs(format) {
         return;
     }
     
-    // Em uma aplicação real, implementaríamos a exportação para CSV/PDF aqui
     showNotification(`Exportando ${filteredLogs.length} registros para ${format.toUpperCase()}...`, 'info');
     
-    setTimeout(() => {
+    if (format === 'csv') {
+        exportCSV();
+    } else if (format === 'pdf') {
+        // Aqui você chamaria a função de exportação de PDF se tiver a biblioteca
+        // Mas por enquanto, vamos mostrar uma notificação informando que não está disponível
+        showNotification('Exportação PDF não implementada. Use CSV.', 'warning');
+    } else {
+        showNotification(`Formato de exportação "${format}" não suportado`, 'error');
+    }
+}
+
+/**
+ * Exporta os logs filtrados para um arquivo CSV
+ */
+function exportCSV() {
+    try {
+        // Definir cabeçalhos do CSV
+        const headers = ["Data/Hora", "Usuário", "Porta", "Ação", "Método", "Motivo"];
+        
+        // Converter logs para linhas CSV
+        const rows = filteredLogs.map(log => [
+            new Date(log.timestamp).toLocaleString('pt-BR'),
+            log.user_name || 'Desconhecido',
+            log.door_name || 'Desconhecida',
+            formatActionForExport(log.action),
+            log.method || 'Desconhecido',
+            log.reason || ''
+        ]);
+        
+        // Juntar cabeçalhos e linhas
+        const csvContent = [headers, ...rows]
+            .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+        
+        // Criar blob e URL para download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        
+        // Criar link de download e clicar nele
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().substring(0, 19).replace(/[T:]/g, '-');
+        link.href = url;
+        link.setAttribute('download', `logs-acesso-${timestamp}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Revogar URL para liberar memória
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        
         showNotification(`${filteredLogs.length} registros exportados com sucesso!`, 'success');
-    }, 1500);
+    } catch (error) {
+        console.error('Erro ao exportar CSV:', error);
+        showNotification('Erro ao exportar CSV: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Formata a ação para exibição no arquivo exportado
+ * @param {string} action - Código da ação
+ * @return {string} Texto formatado da ação
+ */
+function formatActionForExport(action) {
+    switch (action) {
+        case 'access_granted': return 'Acesso Permitido';
+        case 'access_denied': return 'Acesso Negado';
+        case 'door_locked': return 'Porta Trancada';
+        case 'door_unlocked': return 'Porta Destrancada';
+        default: return action || 'Desconhecido';
+    }
 }
 
 /**
