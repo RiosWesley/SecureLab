@@ -6,7 +6,7 @@
 // Configuração da API Gemini
 const GEMINI_CONFIG = {
     apiKey: "AIzaSyB_zYq8J9iAGLjqjLvHa5JaR6MvdLvPp4k", // Substitua pela sua API key do Gemini
-    apiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+    apiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp-01-21:generateContent",
     maxTokens: 1024,
     temperature: 0.7,
     systemInstruction: "Responda diretamente às perguntas do usuário sem mostrar seu processo de pensamento. Forneça apenas a resposta final.",
