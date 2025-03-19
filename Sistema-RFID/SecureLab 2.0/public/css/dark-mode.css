@@ -377,6 +377,15 @@ html.dark-mode .donut-ring {
     background-color: #3b4254;
 }
 
+/* Estilos de modo escuro para Gemini */
+html.dark-mode #gemini-toggle-btn {
+    color: var(--dark-text-secondary);
+}
+
+html.dark-mode #gemini-toggle-btn:hover {
+    color: var(--primary-color);
+}
+
 /* Cor para números e estado de dispositivos */
 html.dark-mode .stat-value, 
 html.dark-mode .stat-label,

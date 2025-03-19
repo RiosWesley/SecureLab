@@ -48,7 +48,7 @@ Sistema-RFID/SecureLab 2.0/
 │   │
 │   ├── /js/                        # Scripts JavaScript
 │       ├── firebase-config.js      # Configuração do Firebase
-│       ├── auth.js                 # Lógica de autenticação
+│       ├── auth.service.js                 # Lógica de autenticação
 │       ├── common.js               # Funções comuns
 │       ├── utils.js                # Utilitários para manipulação do DOM
 │       ├── dashboard.js            # Lógica do dashboard

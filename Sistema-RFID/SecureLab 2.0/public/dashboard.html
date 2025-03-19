@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="css/utils.css">
     <link rel="stylesheet" href="css/dark-mode.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/gemini-assistant.css">
+    <link rel="stylesheet" href="css/gemini-insights.css">
     <!-- Otimizações Mobile -->
     <link rel="stylesheet" href="css/mobile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -329,24 +331,21 @@
                     </div>
 
                     <!-- Alerts Card -->
-                    <div class="card alerts-card">
-                        <div class="card-header">
-                            <h3>Alertas Ativos</h3>
-                        </div>
-                        <div class="card-body">
-                            <ul class="alerts-list" id="alerts-list">
-                                <!-- Os alertas serão carregados dinamicamente via JavaScript -->
-                                <li class="no-data">Carregando alertas...</li>
-                            </ul>
-                            <div class="card-actions center">
-                                <a href="alerts.html" class="btn btn-link">Ver Todos os Alertas</a>
-                            </div>
+                    <div class="card insights-card">
+                        <div class="card-body p-0" id="gemini-insights-container">
+                            <!-- O componente gemini-insights será renderizado aqui -->
                         </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
+
+
+    <!-- Scripts GEMINI -->
+    <script src="js/gemini-service.js"></script>
+    <script src="js/gemini-insights.js"></script>
+    <script src="js/gemini-assistant.js"></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -368,6 +367,22 @@
             if (typeof initActivityChart === 'function') {
                 initActivityChart();
             }
+        });
+    </script>
+
+    <!-- Inicialização dos componentes Gemini -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar o componente de insights quando a página carregar
+            setTimeout(() => {
+                if (window.geminiInsights) {
+                    window.geminiInsights.init('gemini-insights-container', {
+                        autoRefresh: true,
+                        refreshInterval: 15 * 60 * 1000, // 15 minutos
+                        maxInsights: 4
+                    });
+                }
+            }, 1500); // Pequeno atraso para garantir que o Firebase esteja inicializado
         });
     </script>
 
