@@ -117,6 +117,10 @@ class GeminiInsights {
     /**
      * Atualiza os insights
      */
+    /**
+     * Método corrigido para atualizar insights com timeout adequado
+     * para modelos Gemini Thinking
+     */
     async refreshInsights() {
         if (this.loading) return;
 
@@ -127,27 +131,54 @@ class GeminiInsights {
             // Coletar dados para análise
             const systemData = await this.collectSystemData();
 
-            // Gerar insights via Gemini (explicitamente indicando que não é uma conversa)
+            // Gerar insights via Gemini com prompt aprimorado
             const prompt = `Analise os seguintes dados do sistema SecureLab e forneça insights relevantes.
-        
-        ${JSON.stringify(systemData, null, 2)}
-        
-        IMPORTANTE: Responda APENAS com um JSON válido no seguinte formato sem nenhum texto adicional antes ou depois:
-        {
-            "summary": "Resumo geral da análise em uma frase",
-            "insights": [
-                {
-                    "type": "anomaly|pattern|recommendation",
-                    "title": "Título breve do insight",
-                    "description": "Descrição detalhada",
-                    "priority": "high|medium|low",
-                    "relatedItems": []
-                }
-            ]
-        }`;
 
-            const response = await window.geminiService.sendMessage(prompt, {}, { isConversation: false });
-            const insights = this.extractJSONFromResponse(response);
+${JSON.stringify(systemData, null, 2)}
+
+IMPORTANTE: Você DEVE responder APENAS com um objeto JSON válido e bem-formado no formato abaixo.
+NÃO inclua comentários explicativos ou texto adicional antes ou depois do JSON.
+NÃO use blocos de código (\`\`\`) - retorne apenas o JSON puro.
+Verifique cuidadosamente que o JSON está bem formatado sem vírgulas extras ou campos malformados.
+
+Formato esperado:
+{
+  "summary": "Uma frase resumindo sua análise principal",
+  "insights": [
+    {
+      "type": "anomaly",
+      "title": "Título curto do insight",
+      "description": "Descrição detalhada do insight",
+      "priority": "high",
+      "relatedItems": ["item1", "item2"]
+    },
+    {
+      "type": "pattern",
+      "title": "Outro insight identificado",
+      "description": "Descrição detalhada",
+      "priority": "medium",
+      "relatedItems": []
+    }
+  ]
+}
+
+Certifique-se de que o JSON é completamente válido. Não use valores extras ou chaves não especificadas.`;
+
+            // Usar a opção isConversation: false para indicar que queremos dados estruturados
+            // A configuração de timeout já deve estar definida no método sendMessage
+            const response = await window.geminiService.sendMessage(prompt, {}, {
+                isConversation: false,
+                timeout: 180000 // Especificar timeout de 3 minutos para esta chamada específica
+            });
+
+            // Tentar processar a resposta, mesmo se parecer truncada
+            let processedResponse = response;
+            if (window.geminiService.processModelResponse) {
+                processedResponse = await window.geminiService.processModelResponse(response, false);
+            }
+
+            // Usar o método corrigido para extrair JSON da resposta
+            const insights = this.extractJSONFromResponse(processedResponse);
 
             // Exibir insights
             this.displayInsights(insights);
@@ -156,7 +187,7 @@ class GeminiInsights {
             this.updateTimestamp();
         } catch (error) {
             console.error('Erro ao atualizar insights:', error);
-            this.displayError('Não foi possível gerar insights. Tente novamente mais tarde.');
+            this.displayError(`Não foi possível gerar insights. Tente novamente mais tarde.`);
         } finally {
             this.loading = false;
             this.showLoading(false);
@@ -164,6 +195,7 @@ class GeminiInsights {
     }
 
 // Adicionar um novo método para extração de JSON
+    // Método aprimorado para extrair JSON da resposta, tratando formatos inválidos
     extractJSONFromResponse(response) {
         try {
             // Primeiro, tentar analisar a resposta inteira como JSON
@@ -171,13 +203,46 @@ class GeminiInsights {
         } catch (firstParseError) {
             // Se falhar, tentar extrair JSON de um bloco de código
             try {
+                // Tentar várias abordagens para encontrar conteúdo JSON válido
                 const jsonMatch = response.match(/```(?:json)?\s*\n([\s\S]*?)\n```/) ||
                     response.match(/```([\s\S]*?)```/) ||
                     response.match(/\{[\s\S]*\}/);
 
                 if (jsonMatch) {
-                    const jsonContent = jsonMatch[0].startsWith('{') ? jsonMatch[0] : jsonMatch[1];
-                    return JSON.parse(jsonContent);
+                    let jsonContent = jsonMatch[0].startsWith('{') ? jsonMatch[0] : jsonMatch[1];
+
+                    // Tentar limpar o JSON antes de parsear
+                    // Remover caracteres de controle que possam ter sido adicionados
+                    jsonContent = jsonContent.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+
+                    // Corrigir problemas comuns em respostas JSON malformadas
+                    // 1. Remover vírgulas extras em arrays
+                    jsonContent = jsonContent.replace(/,\s*(\])/g, '$1');
+
+                    // 2. Remover vírgulas extras em objetos
+                    jsonContent = jsonContent.replace(/,\s*(\})/g, '$1');
+
+                    // 3. Adicionar aspas a chaves de objetos sem aspas
+                    jsonContent = jsonContent.replace(/(\{|\,)\s*(\w+)\s*\:/g, '$1"$2":');
+
+                    try {
+                        return JSON.parse(jsonContent);
+                    } catch (jsonError) {
+                        console.warn('Falha ao limpar e parsear JSON. Usando fallback.', jsonError);
+                        // Último recurso: tentar remover a linha problemática
+                        // Com base no erro, que indica problema na linha/coluna 22:6
+                        const lines = jsonContent.split('\n');
+                        if (lines.length > 21) {
+                            // Remover a linha problemática e tentar novamente
+                            lines.splice(21, 1);
+                            const fixedContent = lines.join('\n');
+                            try {
+                                return JSON.parse(fixedContent);
+                            } catch (finalError) {
+                                console.error('Todas as tentativas de correção JSON falharam:', finalError);
+                            }
+                        }
+                    }
                 }
 
                 // Nenhum JSON encontrado, usar fallback
@@ -218,19 +283,38 @@ class GeminiInsights {
      * Coleta dados do sistema para análise
      * @returns {Promise<Object>} Dados do sistema
      */
+    /**
+     * Coleta dados do sistema para análise, com acesso expandido aos logs
+     * @returns {Promise<Object>} Dados do sistema
+     */
     async collectSystemData() {
         try {
-            // Coletar estatísticas diversas do Firebase
+            // Definir um período maior para coletar logs (últimos 30 dias)
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
+
+            // Coletar estatísticas diversas do Firebase com maior quantidade de logs
             const [usersSnapshot, doorsSnapshot, devicesSnapshot, logsSnapshot] = await Promise.all([
                 firebase.database().ref('users').once('value'),
                 firebase.database().ref('doors').once('value'),
                 firebase.database().ref('devices').once('value'),
-                firebase.database().ref('access_logs').limitToLast(100).once('value')
+                // Buscar mais logs e ordenar por timestamp
+                firebase.database().ref('access_logs')
+                    .orderByChild('timestamp')
+                    .startAt(thirtyDaysAgoISO)
+                    .limitToLast(300) // Aumentar o limite para 300 logs
+                    .once('value')
             ]);
 
             const systemData = {
                 timestamp: new Date().toISOString(),
-                stats: {}
+                stats: {},
+                dataRange: {
+                    start: thirtyDaysAgoISO,
+                    end: new Date().toISOString(),
+                    description: "Dados dos últimos 30 dias"
+                }
             };
 
             // Processamento de usuários
@@ -281,6 +365,23 @@ class GeminiInsights {
                 const logs = logsSnapshot.val();
                 const logsArray = Object.values(logs);
 
+                // Adicionar informação sobre o período dos logs
+                if (logsArray.length > 0) {
+                    // Ordenar logs por timestamp
+                    logsArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                    // Determinar o período real dos logs
+                    const firstLogDate = new Date(logsArray[0].timestamp);
+                    const lastLogDate = new Date(logsArray[logsArray.length - 1].timestamp);
+
+                    systemData.dataRange = {
+                        start: firstLogDate.toISOString(),
+                        end: lastLogDate.toISOString(),
+                        description: `Dados de ${firstLogDate.toLocaleDateString()} até ${lastLogDate.toLocaleDateString()}`,
+                        totalLogs: logsArray.length
+                    };
+                }
+
                 // Agrupar logs por tipo de ação
                 const logsByAction = {
                     access_granted: logsArray.filter(log => log.action === 'access_granted').length,
@@ -294,6 +395,29 @@ class GeminiInsights {
                 const denialRate = totalAccessAttempts > 0
                     ? (logsByAction.access_denied / totalAccessAttempts) * 100
                     : 0;
+
+                // Agrupar logs por dia para análise de tendências
+                const accessByDay = {};
+                logsArray.forEach(log => {
+                    if (log.timestamp) {
+                        const date = new Date(log.timestamp).toISOString().split('T')[0];
+                        accessByDay[date] = accessByDay[date] || {
+                            total: 0,
+                            access_granted: 0,
+                            access_denied: 0,
+                            door_locked: 0,
+                            door_unlocked: 0
+                        };
+
+                        accessByDay[date].total += 1;
+
+                        // Incrementar contador específico por tipo de ação
+                        if (log.action === 'access_granted') accessByDay[date].access_granted += 1;
+                        else if (log.action === 'access_denied') accessByDay[date].access_denied += 1;
+                        else if (log.action === 'door_locked') accessByDay[date].door_locked += 1;
+                        else if (log.action === 'door_unlocked') accessByDay[date].door_unlocked += 1;
+                    }
+                });
 
                 // Identificar períodos de pico
                 const accessByHour = {};
@@ -314,18 +438,72 @@ class GeminiInsights {
                     }
                 });
 
+                // Agrupar acessos por usuário e porta para identificar padrões
+                const accessByUser = {};
+                const accessByDoor = {};
+
+                logsArray.forEach(log => {
+                    if (log.user_id) {
+                        accessByUser[log.user_id] = accessByUser[log.user_id] || {
+                            user_name: log.user_name || log.user_id,
+                            total: 0,
+                            granted: 0,
+                            denied: 0
+                        };
+
+                        accessByUser[log.user_id].total += 1;
+                        if (log.action === 'access_granted') {
+                            accessByUser[log.user_id].granted += 1;
+                        } else if (log.action === 'access_denied') {
+                            accessByUser[log.user_id].denied += 1;
+                        }
+                    }
+
+                    if (log.door_id) {
+                        accessByDoor[log.door_id] = accessByDoor[log.door_id] || {
+                            door_name: log.door_name || log.door_id,
+                            total: 0,
+                            granted: 0,
+                            denied: 0,
+                            locked: 0,
+                            unlocked: 0
+                        };
+
+                        accessByDoor[log.door_id].total += 1;
+                        if (log.action === 'access_granted') {
+                            accessByDoor[log.door_id].granted += 1;
+                        } else if (log.action === 'access_denied') {
+                            accessByDoor[log.door_id].denied += 1;
+                        } else if (log.action === 'door_locked') {
+                            accessByDoor[log.door_id].locked += 1;
+                        } else if (log.action === 'door_unlocked') {
+                            accessByDoor[log.door_id].unlocked += 1;
+                        }
+                    }
+                });
+
                 systemData.stats.access = {
                     total: logsArray.length,
                     byAction: logsByAction,
                     denialRate: denialRate.toFixed(2),
                     peakHour,
-                    peakCount
+                    peakCount,
+                    byDay: accessByDay,
+                    byUser: accessByUser,
+                    byDoor: accessByDoor
                 };
 
-                // Adicionar logs mais recentes para análise detalhada
+                // Adicionar logs mais recentes para análise detalhada (limitados a 50 para não sobrecarregar)
                 systemData.recentLogs = logsArray
                     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                    .slice(0, 20);
+                    .slice(0, 50);
+
+                // Adicionar amostra de logs mais antigos para dar contexto histórico
+                if (logsArray.length > 100) {
+                    systemData.olderLogs = logsArray
+                        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+                        .slice(0, 20);
+                }
             } else {
                 systemData.stats.access = {
                     total: 0,
@@ -343,7 +521,6 @@ class GeminiInsights {
             throw new Error('Falha ao coletar dados para análise');
         }
     }
-
     /**
      * Exibe os insights gerados
      * @param {Object} insights - Insights gerados pelo Gemini

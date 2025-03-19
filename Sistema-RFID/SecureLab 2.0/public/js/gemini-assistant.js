@@ -407,6 +407,251 @@ class GeminiAssistant {
             `);
         }
     }
+    /**
+     * Função para processar mais logs diretamente no chat
+     * Adicione esta função ao arquivo gemini-assistant.js
+     */
+    async _executeLogsAnalysisCommand(processedCommand, messageElement) {
+        // Mostrar indicador de carregamento
+        this._updateMessage(messageElement, 'assistant', 'Analisando logs de acesso, isso pode levar alguns segundos...');
+
+        try {
+            // Parâmetros para busca de logs
+            const daysToLookBack = 30; // Buscar logs dos últimos 30 dias
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - daysToLookBack);
+            const startDateISO = startDate.toISOString();
+
+            // Buscar logs de acesso com limite expandido
+            const logsSnapshot = await firebase.database().ref('access_logs')
+                .orderByChild('timestamp')
+                .startAt(startDateISO)
+                .limitToLast(500) // Aumentar significativamente o limite de logs
+                .once('value');
+
+            if (!logsSnapshot.exists()) {
+                this._updateMessage(messageElement, 'assistant', 'Não encontrei nenhum log de acesso para análise.');
+                return;
+            }
+
+            // Converter para array e processar
+            const logs = logsSnapshot.val();
+            const logsArray = Object.values(logs);
+
+            // Ordenar por timestamp
+            logsArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+            // Determinar período dos logs
+            const firstLog = logsArray[0];
+            const lastLog = logsArray[logsArray.length - 1];
+            const firstDate = new Date(firstLog.timestamp);
+            const lastDate = new Date(lastLog.timestamp);
+
+            // Formatar datas para exibição
+            const formatDate = (date) => {
+                return date.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            };
+
+            const formatDateTime = (date) => {
+                return date.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+
+            // Estatísticas gerais
+            const totalLogs = logsArray.length;
+            const accessGranted = logsArray.filter(log => log.action === 'access_granted').length;
+            const accessDenied = logsArray.filter(log => log.action === 'access_denied').length;
+            const doorLocked = logsArray.filter(log => log.action === 'door_locked').length;
+            const doorUnlocked = logsArray.filter(log => log.action === 'door_unlocked').length;
+
+            // Agrupar por dia para análise de tendências
+            const logsByDay = {};
+            logsArray.forEach(log => {
+                const day = new Date(log.timestamp).toISOString().split('T')[0];
+                logsByDay[day] = logsByDay[day] || {
+                    total: 0,
+                    access_granted: 0,
+                    access_denied: 0,
+                    door_locked: 0,
+                    door_unlocked: 0
+                };
+
+                logsByDay[day].total++;
+
+                if (log.action === 'access_granted') logsByDay[day].access_granted++;
+                else if (log.action === 'access_denied') logsByDay[day].access_denied++;
+                else if (log.action === 'door_locked') logsByDay[day].door_locked++;
+                else if (log.action === 'door_unlocked') logsByDay[day].door_unlocked++;
+            });
+
+            // Converter para array ordenado por data
+            const logsByDayArray = Object.entries(logsByDay).map(([date, stats]) => ({
+                date,
+                ...stats
+            })).sort((a, b) => a.date.localeCompare(b.date));
+
+            // Obter os dias únicos para exibição
+            const uniqueDays = logsByDayArray.map(entry => {
+                const date = new Date(entry.date);
+                return formatDate(date);
+            });
+
+            // Contagem de acessos por usuário
+            const userAccessCounts = {};
+            logsArray.forEach(log => {
+                if (log.user_name) {
+                    userAccessCounts[log.user_name] = userAccessCounts[log.user_name] || {
+                        granted: 0,
+                        denied: 0,
+                        total: 0
+                    };
+
+                    userAccessCounts[log.user_name].total++;
+                    if (log.action === 'access_granted') {
+                        userAccessCounts[log.user_name].granted++;
+                    } else if (log.action === 'access_denied') {
+                        userAccessCounts[log.user_name].denied++;
+                    }
+                }
+            });
+
+            // Obter os usuários mais ativos
+            const topUsers = Object.entries(userAccessCounts)
+                .map(([name, stats]) => ({ name, ...stats }))
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 5);
+
+            // Contagem de acessos por porta
+            const doorAccessCounts = {};
+            logsArray.forEach(log => {
+                if (log.door_name) {
+                    doorAccessCounts[log.door_name] = doorAccessCounts[log.door_name] || {
+                        granted: 0,
+                        denied: 0,
+                        locked: 0,
+                        unlocked: 0,
+                        total: 0
+                    };
+
+                    doorAccessCounts[log.door_name].total++;
+
+                    if (log.action === 'access_granted') {
+                        doorAccessCounts[log.door_name].granted++;
+                    } else if (log.action === 'access_denied') {
+                        doorAccessCounts[log.door_name].denied++;
+                    } else if (log.action === 'door_locked') {
+                        doorAccessCounts[log.door_name].locked++;
+                    } else if (log.action === 'door_unlocked') {
+                        doorAccessCounts[log.door_name].unlocked++;
+                    }
+                }
+            });
+
+            // Obter as portas mais acessadas
+            const topDoors = Object.entries(doorAccessCounts)
+                .map(([name, stats]) => ({ name, ...stats }))
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 5);
+
+            // Construir resposta em HTML
+            const result = `
+        <h4>Análise de Logs de Acesso</h4>
+        
+        <p>Analisei um total de <strong>${totalLogs} logs</strong> no período de <strong>${formatDate(firstDate)}</strong> a <strong>${formatDate(lastDate)}</strong>.</p>
+        
+        <div class="gemini-dashboard">
+            <div class="gemini-stat-card">
+                <div class="gemini-stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="gemini-stat-value">${accessGranted}</div>
+                <div class="gemini-stat-label">Acessos Permitidos</div>
+            </div>
+            
+            <div class="gemini-stat-card">
+                <div class="gemini-stat-icon"><i class="fas fa-times-circle"></i></div>
+                <div class="gemini-stat-value">${accessDenied}</div>
+                <div class="gemini-stat-label">Acessos Negados</div>
+            </div>
+            
+            <div class="gemini-stat-card">
+                <div class="gemini-stat-icon"><i class="fas fa-lock"></i></div>
+                <div class="gemini-stat-value">${doorLocked}</div>
+                <div class="gemini-stat-label">Portas Trancadas</div>
+            </div>
+            
+            <div class="gemini-stat-card">
+                <div class="gemini-stat-icon"><i class="fas fa-lock-open"></i></div>
+                <div class="gemini-stat-value">${doorUnlocked}</div>
+                <div class="gemini-stat-label">Portas Destrancadas</div>
+            </div>
+        </div>
+        
+        <h5>Distribuição por Dia</h5>
+        <p>Analisei a distribuição de acessos por dia e identifiquei os seguintes padrões:</p>
+        
+        <div class="gemini-chart">
+            ${logsByDayArray.length > 0 ? logsByDayArray.map(dayStats => {
+                const date = new Date(dayStats.date);
+                const formattedDate = formatDate(date);
+                const denialRate = dayStats.access_denied > 0 ?
+                    ((dayStats.access_denied / (dayStats.access_granted + dayStats.access_denied)) * 100).toFixed(1) + '%' :
+                    '0%';
+
+                return `
+                <div class="gemini-chart-bar-container">
+                    <div class="gemini-chart-label">${formattedDate}</div>
+                    <div class="gemini-chart-bar" style="width: ${Math.min(100, dayStats.total * 2)}%; background-color: #4a6cf7;">
+                        <span>${dayStats.total} acessos (${denialRate} negados)</span>
+                    </div>
+                </div>`;
+            }).join('') : '<p>Não há dados suficientes para mostrar distribuição por dia.</p>'}
+        </div>
+        
+        <h5>Usuários mais Ativos</h5>
+        <div class="gemini-insights">
+            ${topUsers.map(user => `
+            <div class="gemini-insight">
+                <i class="fas fa-user"></i>
+                <div>
+                    <h5>${user.name}</h5>
+                    <p>${user.total} acessos totais (${user.granted} permitidos, ${user.denied} negados)</p>
+                </div>
+            </div>
+            `).join('')}
+        </div>
+        
+        <h5>Portas mais Acessadas</h5>
+        <div class="gemini-insights">
+            ${topDoors.map(door => `
+            <div class="gemini-insight">
+                <i class="fas fa-door-open"></i>
+                <div>
+                    <h5>${door.name}</h5>
+                    <p>${door.total} acessos totais (${door.granted} permitidos, ${door.denied} negados)</p>
+                </div>
+            </div>
+            `).join('')}
+        </div>
+        
+        <p>Estes dados abrangem um período de ${Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24))} dias com registros. Se você precisar de uma análise mais específica ou detalhada, por favor me informe.</p>
+        `;
+
+            // Atualizar a mensagem com o resultado
+            this._updateMessage(messageElement, 'assistant', result);
+
+        } catch (error) {
+            console.error('Erro ao analisar logs:', error);
+            this._updateMessage(messageElement, 'assistant-error', 'Ocorreu um erro ao analisar os logs. Por favor, tente novamente mais tarde.');
+        }
+    }
 
     /**
      * Executa um comando de consulta
@@ -512,50 +757,8 @@ class GeminiAssistant {
             case 'acessos_recentes':
             case 'acessos_recusados':
             case 'mostrar_logs':
-                const logsSnapshot = await firebase.database().ref('access_logs').limitToLast(10).once('value');
-                const logs = logsSnapshot.val();
-
-                if (logs) {
-                    // Filtrar os logs se for acessos recusados
-                    let filteredLogs = Object.entries(logs);
-                    if (processedCommand.action === 'acessos_recusados') {
-                        filteredLogs = filteredLogs.filter(([id, log]) => log.action === 'access_denied');
-                    }
-
-                    if (filteredLogs.length > 0) {
-                        result = `<h4>${processedCommand.action === 'acessos_recusados' ? 'Acessos Recusados' : 'Logs de Acesso Recentes'}</h4>
-                        <table class="gemini-table">
-                            <thead>
-                                <tr>
-                                    <th>Usuário</th>
-                                    <th>Porta</th>
-                                    <th>Ação</th>
-                                    <th>Data/Hora</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${filteredLogs.map(([id, log]) => `
-                                    <tr>
-                                        <td>${log.user_name || 'N/A'}</td>
-                                        <td>${log.door_name || 'N/A'}</td>
-                                        <td>${log.action === 'access_granted' ? '✅ Permitido' :
-                            log.action === 'access_denied' ? '❌ Negado' :
-                                log.action === 'door_locked' ? '🔒 Trancada' :
-                                    log.action === 'door_unlocked' ? '🔓 Destrancada' : log.action}</td>
-                                        <td>${log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>`;
-                    } else {
-                        result = processedCommand.action === 'acessos_recusados' ?
-                            'Não encontrei acessos recusados recentemente.' :
-                            'Não encontrei logs de acesso recentes.';
-                    }
-                } else {
-                    result = 'Não encontrei logs de acesso no sistema.';
-                }
-                break;
+                await this._executeLogsAnalysisCommand(processedCommand, messageElement);
+                return;
 
             case 'resumo_sistema':
             case 'status_sistema':

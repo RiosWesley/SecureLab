@@ -84,6 +84,10 @@ class GeminiService {
      * @param {boolean} options.isConversation - Se é uma conversa natural (não estruturada)
      * @returns {Promise<string>} Resposta do Gemini
      */
+    /**
+     * Função que envia mensagens ao modelo Gemini, modificada para
+     * garantir respostas em linguagem natural no chat
+     */
     async sendMessage(message, context = {}, options = {}) {
         try {
             // Definir se é uma conversa natural ou uma solicitação estruturada
@@ -104,13 +108,14 @@ class GeminiService {
                 let systemPrompt = "";
 
                 if (isConversation) {
-                    // Para conversas naturais, instruir o modelo a responder diretamente
+                    // Para conversas naturais, instruir o modelo a responder em linguagem natural
                     systemPrompt = `Você é o assistente virtual do sistema SecureLab RFID, um sistema de controle de acesso. 
                 
-                IMPORTANTE: Responda diretamente às perguntas do usuário de forma clara e conversacional.
-                NÃO inclua seu processo de pensamento interno ou passos analíticos.
-                NÃO use frases como "o usuário está perguntando sobre..."
-                NÃO liste os passos que você usaria para resolver o problema.
+                IMPORTANTE: Responda diretamente às perguntas do usuário de forma natural e conversacional.
+                - NUNCA responda em formato JSON, a menos que o usuário explicitamente solicite.
+                - NUNCA inclua seu processo de pensamento interno ou passos analíticos.
+                - NUNCA use frases como "o usuário está perguntando sobre..."
+                - SEMPRE forneça a resposta diretamente em linguagem natural, como um assistente humano faria.
                 
                 Conhecimentos:
                 - Você tem conhecimento sobre o sistema SecureLab, incluindo gestão de usuários, portas, dispositivos RFID e logs de acesso.
@@ -119,12 +124,12 @@ class GeminiService {
                 Comportamento:
                 - Seja amigável e direto em suas respostas.
                 - Use linguagem natural e fácil de entender.
-                - Evite usar formatos técnicos como JSON nas suas respostas.
-                - Forneça apenas a resposta final, como se fosse um assistente humano.`;
+                - Se for perguntado sobre insights ou análises, explique os padrões ou anomalias encontrados em linguagem conversacional.`;
                 } else {
-                    // Para análises estruturadas
+                    // Para análises estruturadas que explicitamente pedem JSON
                     systemPrompt = `Você é o assistente analítico do sistema SecureLab RFID. 
-                Forneça análises técnicas e estruturadas conforme solicitado.`;
+                Forneça análises técnicas e estruturadas conforme solicitado.
+                IMPORTANTE: Responda APENAS com o JSON válido solicitado, sem texto explicativo antes ou depois.`;
                 }
 
                 // Adicionar contexto do sistema se disponível
@@ -146,7 +151,7 @@ class GeminiService {
             const payload = {
                 contents: contents,
                 generationConfig: {
-                    temperature: isConversation ? 0.7 : 0.4, // Temperatura mais baixa para respostas estruturadas
+                    temperature: isConversation ? 0.7 : 0.2, // Temperatura mais baixa para respostas estruturadas
                     maxOutputTokens: GEMINI_CONFIG.maxTokens,
                     topP: 0.95,
                     topK: 64
@@ -154,14 +159,18 @@ class GeminiService {
                 safetySettings: GEMINI_CONFIG.safetySettings
             };
 
-            // Enviar requisição
+            // Configurar um timeout maior para o modelo Gemini Thinking
+            // Aumentar para 120 segundos (2 minutos) para dar mais tempo ao modelo thinking
+            const timeoutDuration = 120000; // 120 segundos para processamento de modelos thinking
+
+            // Enviar requisição com timeout aumentado
             const response = await fetch(`${this.apiEndpoint}?key=${this.apiKey}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload),
-                signal: AbortSignal.timeout(60000) // 60 segundos de timeout
+                signal: AbortSignal.timeout(timeoutDuration)
             });
 
             // Verificar se a resposta foi bem-sucedida
@@ -178,11 +187,17 @@ class GeminiService {
 
             const geminiResponse = data.candidates[0].content.parts[0].text;
 
-            // Se for uma conversa, verificar se a resposta contém raciocínio interno e limpar
+            // Se for uma conversa, verificar se a resposta contém JSON ou raciocínio interno e limpar
             let cleanedResponse = geminiResponse;
             if (isConversation) {
-                // Verificar por padrões de raciocínio interno e removê-los
-                cleanedResponse = this._removeThinkingProcess(geminiResponse);
+                // Verificar se a resposta parece ser JSON
+                if (this._looksLikeJSON(cleanedResponse)) {
+                    // Tentar extrair o conteúdo relevante do JSON e convertê-lo em texto natural
+                    cleanedResponse = this._convertJSONToNaturalText(cleanedResponse);
+                } else {
+                    // Se não for JSON, remover padrões de raciocínio interno
+                    cleanedResponse = this._removeThinkingProcess(geminiResponse);
+                }
             }
 
             // Adicionar resposta do Gemini à conversa
@@ -200,6 +215,89 @@ class GeminiService {
         } catch (error) {
             console.error('Erro ao comunicar com a API Gemini:', error);
             return `Erro de comunicação: ${error.message}`;
+        }
+    }
+    /**
+     * Verifica se uma string parece conter JSON
+     * @param {string} text - Texto a ser verificado
+     * @returns {boolean} True se parece conter JSON
+     */
+    _looksLikeJSON(text) {
+        // Verifica se o texto começa com { ou [ e termina com } ou ]
+        // ou se contém blocos de código com JSON
+        return (
+            /^\s*[\{\[]/.test(text) && /[\}\]]\s*$/.test(text) ||
+            /```(?:json)?\s*\n\s*[\{\[]/.test(text)
+        );
+    }
+
+    /**
+     * Converte respostas JSON em texto natural
+     * @param {string} jsonText - Texto contendo JSON
+     * @returns {string} Texto em linguagem natural
+     */
+    _convertJSONToNaturalText(jsonText) {
+        try {
+            // Extrair a parte JSON
+            let jsonContent = jsonText;
+
+            // Se estiver em um bloco de código, extrair apenas a parte JSON
+            const jsonMatch = jsonText.match(/```(?:json)?\s*\n([\s\S]*?)\n```/);
+            if (jsonMatch) {
+                jsonContent = jsonMatch[1];
+            }
+
+            // Tentar parsear o JSON
+            const jsonData = JSON.parse(jsonContent);
+
+            // Converter para texto natural
+            let naturalText = "";
+
+            // Se tiver um resumo, começar com ele
+            if (jsonData.summary) {
+                naturalText += jsonData.summary + "\n\n";
+            }
+
+            // Se tiver insights, adicionar cada um
+            if (jsonData.insights && Array.isArray(jsonData.insights)) {
+                jsonData.insights.forEach(insight => {
+                    // Criar título baseado no tipo e prioridade
+                    let title = insight.title || "Insight";
+                    let prefix = "";
+
+                    if (insight.type === "anomaly") {
+                        prefix = "⚠️ Anomalia: ";
+                    } else if (insight.type === "pattern") {
+                        prefix = "📊 Padrão: ";
+                    } else if (insight.type === "recommendation") {
+                        prefix = "💡 Recomendação: ";
+                    }
+
+                    // Adicionar ícone de prioridade
+                    if (insight.priority === "high") {
+                        prefix = "🔴 " + prefix;
+                    } else if (insight.priority === "medium") {
+                        prefix = "🟠 " + prefix;
+                    }
+
+                    naturalText += prefix + title + "\n";
+
+                    // Adicionar descrição
+                    if (insight.description) {
+                        naturalText += insight.description + "\n\n";
+                    }
+                });
+            } else {
+                // Se não conseguir extrair insights específicos, usar o JSON bruto como texto
+                naturalText = "Análise do sistema:\n\n" + JSON.stringify(jsonData, null, 2);
+            }
+
+            return naturalText.trim();
+        } catch (error) {
+            console.warn("Erro ao converter JSON para texto natural:", error);
+            // Retornar texto original se falhar
+            return "Desculpe, encontrei dados estruturados na minha resposta. Aqui está a informação em formato legível:\n\n" +
+                jsonText.replace(/```json\n|```/g, '').trim();
         }
     }
 
@@ -343,7 +441,7 @@ class GeminiService {
      */
     async processCommand(command, systemState) {
         try {
-            const prompt = `Processe o seguinte comando em linguagem natural para o sistema SecureLab:
+            const prompt = `Ao analisar logs, considere todo o período disponível nos dados, que pode abranger vários dias ou semanas. Mencione sempre o intervalo de datas dos logs analisados. Processe o seguinte comando em linguagem natural para o sistema SecureLab:
             
             "${command}"
             
@@ -394,6 +492,106 @@ class GeminiService {
                 intent: "error",
                 error: `Erro ao processar o comando: ${error.message}`
             };
+        }
+    }
+    /**
+     * Adicione esta função ao gemini-service.js para detectar e tratar
+     * respostas truncadas do modelo Gemini Thinking
+     */
+    async processModelResponse(response, isConversation = true) {
+        // Verificar se a resposta parece estar truncada
+        const isTruncated = this._checkForTruncation(response);
+
+        // Se for uma resposta JSON para análise e estiver truncada, tente corrigir
+        if (!isConversation && isTruncated) {
+            console.warn('Resposta possivelmente truncada detectada:', response.slice(-100));
+
+            // Tentar completar o JSON truncado
+            const fixedResponse = this._fixTruncatedJSON(response);
+            console.log('Tentativa de correção de JSON:', fixedResponse.length > 100 ? '(resposta longa)' : fixedResponse);
+
+            return fixedResponse;
+        }
+
+        return response;
+    }
+
+    /**
+     * Verifica se a resposta parece estar truncada
+     * @param {string} response - Resposta do modelo
+     * @returns {boolean} True se parece truncada
+     */
+    _checkForTruncation(response) {
+        // Sinais de que a resposta JSON pode estar truncada
+        const jsonTruncationMarkers = [
+            // Termina no meio de um objeto JSON
+            /\{[^}]*$/,
+            // Termina no meio de um array
+            /\[[^\]]*$/,
+            // Termina com uma chave não fechada
+            /"[^"]*$/,
+            // Termina com um separador de JSON mas nada depois
+            /[:,]\s*$/
+        ];
+
+        return jsonTruncationMarkers.some(marker => marker.test(response));
+    }
+
+    /**
+     * Tenta consertar JSON truncado
+     * @param {string} truncatedJSON - JSON possivelmente truncado
+     * @returns {string} JSON consertado ou original
+     */
+    _fixTruncatedJSON(truncatedJSON) {
+        try {
+            // Tentar detectar onde começa o JSON válido
+            const jsonStartMatch = truncatedJSON.match(/(\{|\[)/);
+            if (!jsonStartMatch) {
+                return truncatedJSON; // Não parece ser JSON
+            }
+
+            const jsonStart = truncatedJSON.indexOf(jsonStartMatch[0]);
+            let jsonContent = truncatedJSON.slice(jsonStart);
+
+            // Contar chaves e colchetes abertos
+            let openBraces = (jsonContent.match(/\{/g) || []).length;
+            let closeBraces = (jsonContent.match(/\}/g) || []).length;
+            let openBrackets = (jsonContent.match(/\[/g) || []).length;
+            let closeBrackets = (jsonContent.match(/\]/g) || []).length;
+
+            // Verificar se temos tags não fechadas ou mal pareadas
+            if (openBraces > closeBraces) {
+                // Adicionar as chaves fechantes faltantes
+                jsonContent += '}}'.repeat(openBraces - closeBraces);
+            }
+
+            if (openBrackets > closeBrackets) {
+                // Adicionar os colchetes fechantes faltantes
+                jsonContent += ']]'.repeat(openBrackets - closeBrackets);
+            }
+
+            // Tentar analisar o JSON para ver se ele é válido agora
+            JSON.parse(jsonContent);
+
+            return jsonContent;
+        } catch (error) {
+            console.error('Falha ao consertar JSON truncado:', error);
+
+            // Para um caso extremo, criar um JSON básico de fallback
+            const fallbackJSON = {
+                summary: "Análise incompleta - resposta truncada",
+                insights: [
+                    {
+                        type: "error",
+                        title: "Erro de processamento",
+                        description: "O modelo gerou uma resposta truncada que não pôde ser recuperada completamente.",
+                        priority: "medium",
+                        relatedItems: []
+                    }
+                ]
+            };
+
+            return JSON.stringify(fallbackJSON);
         }
     }
 }
