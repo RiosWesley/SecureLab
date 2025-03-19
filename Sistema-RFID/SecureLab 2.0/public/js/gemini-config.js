@@ -6,10 +6,11 @@
 // Configuração da API Gemini
 const GEMINI_CONFIG = {
     // Sua chave API do Gemini - https://aistudio.google.com/app/apikey
-    apiKey: "SUA_API_KEY_AQUI",
+    apiKey: "AIzaSyB_zYq8J9iAGLjqjLvHa5JaR6MvdLvPp4k",
 
     // Endpoint para o modelo Gemini Pro
-    apiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+    apiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/\n" +
+        "gemini-2.0-flash-thinking-exp-01-21:generateContent",
 
     // Configurações padrão
     maxTokens: 1024,           // Tamanho máximo da resposta

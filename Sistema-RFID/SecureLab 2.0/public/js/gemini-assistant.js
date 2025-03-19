@@ -243,6 +243,7 @@ class GeminiAssistant {
      * Lida com o envio de mensagem do usuário
      * @private
      */
+    // Função que lida com o envio de mensagem do usuário
     async _handleSendMessage() {
         const message = this.inputField.value.trim();
         if (!message) return;
@@ -264,23 +265,26 @@ class GeminiAssistant {
         // Carregar dados adicionais do sistema se necessário
         const systemContext = await this._loadSystemData();
 
-        // Verificar se parece com um comando
-        if (this._isCommand(message)) {
-            await this._processCommand(message, systemContext);
-        } else {
-            // Mostrar indicador de carregamento
-            const loadingMsg = this._addMessage('assistant', '<div class="gemini-typing-indicator"><span></span><span></span><span></span></div>');
+        // Mostrar indicador de carregamento
+        const loadingMsg = this._addMessage('assistant', '<div class="gemini-typing-indicator"><span></span><span></span><span></span></div>');
 
-            try {
-                // Enviar mensagem para o serviço Gemini
-                const response = await window.geminiService.sendMessage(message, systemContext);
+        try {
+            // Verificar se parece com um comando
+            if (this._isCommand(message)) {
+                // Para comandos, processar via método específico
+                await this._processCommand(message, systemContext);
+            } else {
+                // Para conversas normais, enviar ao Gemini solicitando resposta em linguagem natural
+                const response = await window.geminiService.sendMessage(message, systemContext, {
+                    isConversation: true // Sinalizador para indicar que é uma conversa natural
+                });
 
                 // Substituir indicador de carregamento pela resposta
                 this._updateMessage(loadingMsg, 'assistant', this._formatResponse(response));
-            } catch (error) {
-                console.error('Erro ao enviar mensagem para o Gemini:', error);
-                this._updateMessage(loadingMsg, 'assistant-error', 'Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.');
             }
+        } catch (error) {
+            console.error('Erro ao processar mensagem:', error);
+            this._updateMessage(loadingMsg, 'assistant-error', 'Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.');
         }
 
         // Rolar para o final da conversa
@@ -1062,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Para uso em um ambiente modular (como com webpack, rollup, etc.)
-export default geminiAssistant;
+//export default geminiAssistant;
 
 // Para uso com scripts regulares
 window.geminiAssistant = geminiAssistant;
