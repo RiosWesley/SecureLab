@@ -13,7 +13,7 @@ const GEMINI_CONFIG = {
         "gemini-2.0-flash-thinking-exp-01-21:generateContent",
 
     // Configurações padrão
-    maxTokens: 1024,           // Tamanho máximo da resposta
+    maxTokens: 8192,           // Tamanho máximo da resposta
     temperature: 0.7,          // Criatividade da resposta (0.0 a 1.0)
 
     // Configurações de segurança

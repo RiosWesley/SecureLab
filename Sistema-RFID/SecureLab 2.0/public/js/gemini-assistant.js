@@ -54,9 +54,7 @@ class GeminiAssistant {
                 <div class="gemini-conversation"></div>
             </div>
             <div class="gemini-suggestions">
-                <button class="gemini-suggestion">Mostrar dispositivos offline</button>
                 <button class="gemini-suggestion">Analisar logs de acesso recentes</button>
-                <button class="gemini-suggestion">Sugerir melhorias de segurança</button>
             </div>
             <div class="gemini-input-container">
                 <textarea class="gemini-input" placeholder="Pergunte algo ou digite um comando..." rows="1"></textarea>

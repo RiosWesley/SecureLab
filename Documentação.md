@@ -1,448 +1,617 @@
-# Documentação Atualizada - Sistema de Controle de Acesso RFID
-## SecureLab 2.0 (Março 2025)
+# SecureLab 2.0 - Sistema de Controle de Acesso com RFID e IoT
+## Documentação Técnica Detalhada
 
-## Índice
-1. [Visão Geral](#visão-geral)
-2. [Estrutura de Pastas](#estrutura-de-pastas)
-3. [Módulos e Componentes](#módulos-e-componentes)
-4. [Status de Implementação](#status-de-implementação)
-5. [Arquitetura e Tecnologias](#arquitetura-e-tecnologias)
-6. [Integração com Firebase](#integração-com-firebase)
-7. [Otimização Mobile](#otimização-mobile)
-8. [Modo Escuro](#modo-escuro)
-9. [Limitações Conhecidas](#limitações-conhecidas)
-10. [Atualizações Recentes](#atualizações-recentes)
-11. [Próximos Passos](#próximos-passos)
+## 1. Visão Geral do Sistema
 
-## Visão Geral
+### 1.1 Introdução
 
-O Sistema de Controle de Acesso RFID (SecureLab 2.0) é uma solução para gerenciamento de acessos em instalações que utiliza tecnologia RFID, integrada a uma plataforma web. Atualmente, o sistema se encontra em fase de desenvolvimento, com a interface web de administração funcional e otimizada para visualização em dispositivos móveis.
+O SecureLab 2.0 é um sistema avançado de controle de acesso baseado em tecnologia RFID e IoT, projetado para proporcionar autenticação segura, monitoramento em tempo real e gerenciamento completo de acessos em instalações. O sistema integra hardware RFID com uma plataforma web e aplicativo móvel, oferecendo uma solução abrangente para segurança física.
 
-O sistema está implementado como uma aplicação web integrada ao Firebase para autenticação e armazenamento de dados. Ele permite gerenciar usuários e portas, visualizar estatísticas básicas e monitorar atividades de acesso.
+### 1.2 Objetivos
 
-## Estrutura de Pastas
+- Autenticação segura de usuários via tecnologia RFID
+- Monitoramento e controle de pontos de acesso em tempo real
+- Gerenciamento centralizado de usuários, portas e dispositivos
+- Geração de logs detalhados para auditoria e análise
+- Interface intuitiva para administradores e usuários
+- Integração com sistemas de segurança existentes
+- Notificações e alertas em tempo real
+- Dashboard com análises e estatísticas
+- Suporte a configurações avançadas de segurança
 
-A estrutura atual do projeto é a seguinte:
+### 1.3 Escopo
+
+O sistema SecureLab 2.0 engloba:
+
+- Plataforma web administrativa
+- Aplicativo móvel para gerenciamento remoto
+- Hardware RFID para leitura de cartões/tags
+- Controladores de portas eletrônicas
+- Banco de dados em tempo real
+- Sistema de autenticação e autorização
+- Módulo de análise e relatórios
+
+### 1.4 Arquitetura de Alto Nível
+
+O SecureLab 2.0 segue uma arquitetura cliente-servidor com componentes IoT:
+
+1. **Camada de Hardware**: Leitores RFID e controladores de portas 
+2. **Camada de Backend**: Sistema de autenticação e banco de dados
+3. **Camada de Frontend**: Interface web administrativa
+4. **Camada de Comunicação**: Protocolos seguros para transferência de dados entre componentes
+
+## 2. Arquitetura Técnica
+```
+SecureLab 2.0/
+├── .firebase/                  # Pasta de arquivos de configuração e implantação do Firebase (backend como serviço).
+├── node_modules/              # Pasta que contém as dependências do projeto Node.js (bibliotecas e módulos externos).
+├── public/                     # Pasta que contém todos os arquivos estáticos que serão servidos para o navegador (frontend).
+│   ├── css/                    # Pasta para arquivos de folha de estilo em cascata (CSS) para design e layout da interface web.
+│   │   ├── components.css       # Estilos CSS para componentes reutilizáveis da interface (botões, cards, etc.).
+│   │   ├── dark-mode.css        # Estilos CSS específicos para o modo escuro da interface.
+│   │   ├── dashboard.css        # Estilos CSS específicos para a página do painel de controle (dashboard).
+│   │   ├── devices.css          # Estilos CSS específicos para a página de gerenciamento de dispositivos RFID.
+│   │   ├── gemini-assistant.css # Estilos CSS para a integração com o Gemini Assistant (possivelmente uma IA assistente).
+│   │   ├── gemini-insights.css  # Estilos CSS para visualização de insights gerados pelo Gemini (possivelmente análise de dados).
+│   │   ├── logs.css             # Estilos CSS específicos para a página de visualização de logs/registros do sistema.
+│   │   ├── mobile.css           # Estilos CSS para otimizar a interface para dispositivos móveis (design responsivo).
+│   │   ├── styles.css           # Arquivo CSS principal com estilos globais e base para a aplicação.
+│   │   └── utils.css            # Estilos CSS utilitários, como classes para espaçamento, cores, etc.
+│   ├── js/                     # Pasta para arquivos JavaScript (JS) que controlam a interatividade e lógica do frontend.
+│   │   ├── activity-chart.js    # JavaScript para gerar e controlar gráficos de atividade (ex: uso do sistema).
+│   │   ├── common.js            # JavaScript com funções e utilitários comuns usados em várias partes do frontend.
+│   │   ├── dashboard.js         # JavaScript específico para a lógica e interatividade da página do painel de controle.
+│   │   ├── devices.js           # JavaScript específico para a lógica e interatividade da página de gerenciamento de dispositivos RFID.
+│   │   ├── doors.js             # JavaScript específico para a lógica e interatividade da página de gerenciamento de portas (controle de acesso).
+│   │   ├── firebase-config.js   # JavaScript para configurar e inicializar a conexão com o Firebase.
+│   │   ├── gemini-assistant.js  # JavaScript para a integração e interação com o Gemini Assistant.
+│   │   ├── gemini-config.js     # JavaScript para configurar o Gemini (possivelmente chaves de API ou configurações).
+│   │   ├── gemini-service.js    # JavaScript para serviços relacionados ao Gemini, como chamadas à API.
+│   │   ├── logs.js              # JavaScript específico para a lógica e interatividade da página de visualização de logs.
+│   │   ├── mobile.js            # JavaScript específico para funcionalidades ou ajustes para dispositivos móveis.
+│   │   ├── simplified-gemini-insights.js # JavaScript para gerar insights simplificados usando o Gemini (análise de dados mais simples).
+│   │   ├── theme-switcher.js    # JavaScript para controlar a troca de temas (ex: claro/escuro) na interface.
+│   │   ├── users.js             # JavaScript específico para a lógica e interatividade da página de gerenciamento de usuários.
+│   │   └── utils.js             # JavaScript com funções utilitárias diversas para o frontend.
+│   ├── 404.html               # Página HTML personalizada para erro 404 (Página Não Encontrada).
+│   ├── dashboard.html         # Página HTML do painel de controle principal do sistema SecureLab 2.0.
+│   ├── devices.html           # Página HTML para gerenciamento de dispositivos RFID cadastrados no sistema.
+│   ├── doors.html             # Página HTML para gerenciamento e monitoramento de portas controladas pelo sistema.
+│   ├── index.html             # Página HTML inicial ou página principal da aplicação web (possivelmente a página de boas-vindas ou login).
+│   ├── login.html             # Página HTML para autenticação de usuários (login no sistema).
+│   ├── logs.html              # Página HTML para visualização de logs de eventos e atividades do sistema.
+│   ├── settings.html          # Página HTML para configurações gerais do sistema e perfil do usuário.
+│   └── users.html             # Página HTML para gerenciamento de usuários do sistema (cadastro, edição, permissões).
+├── .env                       # Arquivo para variáveis de ambiente sensíveis (chaves de API, senhas, etc.), não versionado.
+├── .firebaserc                 # Arquivo de configuração para a ferramenta de linha de comando do Firebase (Firebase CLI).
+├── .gitignore                 # Arquivo para especificar arquivos e pastas que o Git deve ignorar no controle de versão.
+├── firebase.json              # Arquivo de configuração principal para o Firebase Hosting e outras funcionalidades do Firebase.
+├── Documentação.md            # Arquivo Markdown para documentação detalhada do projeto.
+└── README.md                  # Arquivo Markdown com informações gerais sobre o projeto (descrição, como rodar, etc.).
+```
+### 2.1 Componentes do Sistema
+
+#### 2.1.1 Hardware
+
+- **Leitores RFID**: Dispositivos para leitura de cartões/tags RFID
+- **Controladores de Porta**: Hardware que gerencia o estado físico das fechaduras
+
+
+#### 2.1.2 Backend
+
+- **Serviço de Autenticação**: Firebase Authentication
+- **Banco de Dados**: Firebase Realtime Database
+
+#### 2.1.3 Frontend
+
+- **Interface Web**: Implementada com HTML, CSS e JavaScript
+
+### 2.3 Tecnologias Utilizadas
+
+- **Frontend Web**: HTML5, CSS3, JavaScript
+- **Backend**: JavaScript
+- **Banco de Dados**: Firebase Realtime Database
+- **Autenticação**: Firebase Authentication
+- **IoT**: ESP32
+- **Cloud**: Firebase Hosting, Firebase Cloud Functions
+- **Visualização de Dados**: Chart.js
+
+## 3. Banco de Dados
+
+### 3.1 Estrutura do Firebase
+
+O Firebase Realtime Database é organizado nas seguintes coleções:
 
 ```
-Sistema-RFID/SecureLab 2.0/
-│
-├── /public/                        # Todos os arquivos da aplicação web
-│   ├── index.html                  # Redirecionamento para login
-│   ├── login.html                  # Página de login
-│   ├── dashboard.html              # Painel principal
-│   ├── users.html                  # Gerenciamento de usuários
-│   ├── doors.html                  # Gerenciamento de portas
-│   ├── logs.html                   # Logs de acesso (COMPLETO)
-│   ├── settings.html               # Configurações do sistema (NOVO)
-│   ├── reports.html                # Relatórios e análises (NOVO)
-│   ├── 404.html                    # Página de erro
-│   │
-│   ├── /css/                       # Estilos CSS
-│   │   ├── styles.css              # Estilos principais
-│   │   ├── utils.css               # Classes utilitárias
-│   │   ├── components.css          # Componentes reutilizáveis
-│   │   ├── mobile.css              # Otimizações para dispositivos móveis
-│   │   ├── dark-mode.css           # Estilos para o modo escuro
-│   │   ├── logs.css                # Estilos específicos para página de logs
-│   │
-│   ├── /js/                        # Scripts JavaScript
-│       ├── firebase-config.js      # Configuração do Firebase
-│       ├── auth.service.js                 # Lógica de autenticação
-│       ├── common.js               # Funções comuns
-│       ├── utils.js                # Utilitários para manipulação do DOM
-│       ├── dashboard.js            # Lógica do dashboard
-│       ├── activity-chart.js       # Implementação do gráfico de atividade
-│       ├── users.js                # Gerenciamento de usuários
-│       ├── doors.js                # Gerenciamento de portas
-│       ├── logs.js                 # Lógica completa para página de logs
-│       ├── mobile.js               # Funcionalidades para dispositivos móveis
-│       ├── theme-switcher.js       # Controle do tema claro/escuro
-│
-├── .firebaserc                     # Configuração do projeto Firebase
-├── .gitignore                      # Arquivos ignorados pelo Git
-├── firebase.json                   # Configuração de hosting do Firebase
+/users                  # Informações de usuários
+/doors                  # Configurações de portas
+/devices                # Informações de dispositivos
+/access_logs            # Registros de tentativas de acesso
+/device_logs            # Logs de atividade de dispositivos
+/settings               # Configurações do sistema
+/permissions            # Matriz de permissões de acesso
+/schedules              # Agendamentos de acesso
 ```
 
-## Módulos e Componentes
+### 3.2 Modelos de Dados
 
-### Módulos Implementados
+#### 3.2.1 Modelo de Usuário
 
-#### 1. Autenticação de Usuários
-- **Implementação**: Completa via Firebase Authentication
-- **Funcionalidades**:
-  - Login com email/senha
-  - Verificação de autenticação em todas as páginas
-  - Logout
-
-#### 2. Gerenciamento de Usuários
-- **Implementação**: Completa
-- **Funcionalidades**:
-  - Listagem de usuários com filtros e paginação
-  - Adição de novos usuários
-  - Edição de usuários existentes
-  - Exclusão de usuários
-  - Gerenciamento básico de permissões (admin/user)
-
-#### 3. Gerenciamento de Portas
-- **Implementação**: Completa
-- **Funcionalidades**:
-  - Listagem de portas
-  - Adição de novas portas
-  - Edição de portas existentes
-  - Controle de portas (trancar/destrancar)
-  - Visualização do status das portas
-
-#### 4. Dashboard
-- **Implementação**: Aprimorada
-- **Funcionalidades**:
-  - Exibição de estatísticas gerais (usuários, portas, dispositivos)
-  - Visualização de atividades recentes
-  - Visualização do status das portas
-  - Visualização simplificada de alertas
-  - Gráfico interativo de atividade diária por porta
-
-#### 5. Logs de Acesso
-- **Implementação**: Completa
-- **Funcionalidades**:
-  - Visualização detalhada de todos os logs de acesso do sistema
-  - Filtragem avançada por múltiplos critérios (usuário, porta, ação, método)
-  - Filtragem por períodos pré-definidos ou personalizados (incluindo hora)
-  - Exibição de informações detalhadas de cada acesso (usuário, data/hora, método)
-  - Paginação completa para navegação eficiente
-  - Interface intuitiva com elementos visuais para identificação rápida
-  - Exportação de logs filtrados para diferentes formatos
-
-#### 6. Otimização Mobile
-- **Implementação**: Funcional Básica
-- **Funcionalidades**:
-  - Interface adaptável para dispositivos móveis
-  - Menu lateral colapsável via botão hamburger
-  - Tabelas com rolagem horizontal em telas pequenas
-  - Ajustes de layout para melhor visualização em dispositivos móveis
-
-#### 7. Modo Escuro
-- **Implementação**: Completa
-- **Funcionalidades**:
-  - Alternância entre temas claro e escuro
-  - Detecção automática da preferência do sistema
-  - Persistência da escolha do usuário
-  - Interface adaptada para melhor visualização em ambientes com pouca luz
-  - Suporte a todos os elementos da interface, incluindo tabelas, gráficos e modais
-
-#### 8. Configurações do Sistema (NOVO)
-- **Implementação**: Frontend Completo (sem backend)
-- **Funcionalidades**:
-  - Interface organizada por abas (Sistema, Segurança, Dispositivos, Integração, Notificações, Aparência)
-  - Formulários para configuração de todos os aspectos do sistema
-  - Opções de personalização visual (temas, cores, layout)
-  - Configurações de segurança e autenticação
-  - Gerenciamento de integrações com sistemas externos
-  - Configurações para dispositivos RFID e fechaduras
-
-#### 9. Relatórios (NOVO)
-- **Implementação**: Frontend Básico (sem backend)
-- **Funcionalidades**:
-  - Visualização de relatórios de acesso
-  - Opções de filtros e parâmetros para relatórios
-  - Opções de exportação de dados
-  - Interface para análise de dados históricos
-
-### Componentes UI
-
-1. **Sidebar**: Navegação principal
-2. **Header**: Barra superior com pesquisa e informações do usuário
-3. **Cards**: Exibição de informações em blocos
-4. **Tabelas**: Listagem de dados com opções de ordenação
-5. **Modais**: Formulários e confirmações em janelas sobrepostas
-6. **Formulários**: Entrada de dados com validação
-7. **Notificações**: Sistema de feedback para ações do usuário
-8. **Menu Mobile**: Navegação adaptada para dispositivos móveis
-9. **Gráficos Interativos**: Visualização de dados em formato de gráficos
-10. **Botão de Tema**: Alternância entre modos claro e escuro
-11. **Navegação por abas**: Organização de conteúdo em categorias
-12. **Toggle Switches**: Controles para opções binárias
-13. **Upload de arquivos**: Interface para envio de arquivos
-14. **Filtros Avançados**: Sistema de filtragem de dados com múltiplos critérios 
-15. **Paginação**: Sistema de navegação entre páginas de resultados
-
-## Status de Implementação
-
-### Frontend (Interface Web)
-
-| Módulo/Página | Status | Observações |
-|---------------|--------|-------------|
-| Login | ✅ Funcional | Integrado com Firebase |
-| Dashboard | ✅ Aprimorado | Exibe estatísticas, atividades recentes e gráfico de atividade |
-| Usuários | ✅ Funcional | CRUD completo implementado |
-| Portas | ✅ Funcional | CRUD completo e controle implementados |
-| Logs | ✅ Completo | Interface e funcionalidade completas com filtros avançados, paginação e visualização detalhada |
-| Grupos | 🗑️ Removido | Módulo removido do escopo do projeto |
-| Alertas | 🗑️ Removido | Módulo removido do escopo do projeto |
-| Configurações | ✅ Frontend Completo | Interface completa implementada, sem backend |
-| Relatórios | ✅ Frontend Básico | Interface básica implementada, sem backend |
-| Dispositivos | ❌ Não implementado | Apenas como link na navegação |
-| Otimização Mobile | ✅ Funcional Básica | Implementado nas principais páginas |
-| Modo Escuro | ✅ Funcional | Sistema completo de alternância de temas |
-
-### Outros Componentes
-
-| Componente | Status | Observações |
-|------------|--------|-------------|
-| Aplicativo Mobile | ❌ Não iniciado | Não há código para desenvolvimento mobile |
-| Firmware para ESP32 | ❌ Não iniciado | Não há código para dispositivos RFID |
-
-## Arquitetura e Tecnologias
-
-A arquitetura do sistema é baseada em uma integração direta entre o frontend e o Firebase:
-
-### Tecnologias Utilizadas
-- **HTML/CSS/JavaScript** puro (sem frameworks como React, Vue, etc.)
-- **Chart.js** para visualizações de dados em gráficos
-- **Design responsivo** para adaptação a diferentes dispositivos
-- **Estilização modular** com separação de estilos em diferentes arquivos CSS
-- **Sistema de temas** baseado em variáveis CSS para o modo escuro
-- **Navegação por abas** para organização de conteúdo em categorias
-- **Firebase Authentication** para gerenciamento de usuários e autenticação
-- **Firebase Realtime Database** para armazenamento e sincronização de dados em tempo real
-- **Firebase Hosting** para publicação da aplicação web
-
-### Padrões de Projeto
-- **Singleton** para conexão com Firebase e instâncias de componentes
-- **Observer** para reação a mudanças de dados em tempo real
-- **MVC simplificado** com separação entre visualização (HTML), controle (JS) e modelo (Firebase)
-- **Theme Provider** para gerenciamento do modo escuro/claro
-- **Tab Controller** para gerenciamento de navegação por abas
-- **Filter Pattern** para filtragem de dados em múltiplos critérios
-
-## Integração com Firebase
-
-### Estrutura do Banco de Dados
-```
-/users
-  /{user_id}
-    - name
-    - email
-    - role
-    - department
-    - status
-    - created_at
-    
-/doors
-  /{door_id}
-    - name
-    - location
-    - status
-    - last_status_change
-    
-/access_logs
-  /{log_id}
-    - user_id
-    - user_name
-    - door_id
-    - door_name
-    - action
-    - method
-    - timestamp
-    - reason (opcional)
+```json
+{
+  "id": "user-123",
+  "name": "João Silva",
+  "email": "joao@exemplo.com",
+  "role": "user",
+  "department": "TI",
+  "status": "active",
+  "created_at": "2025-03-15T10:30:00Z",
+  "last_login": "2025-03-20T08:45:30Z"
+}
 ```
 
-### Regras de Segurança
-- Não implementadas explicitamente; usando configurações padrão do Firebase
+#### 3.2.2 Modelo de Porta
 
-## Otimização Mobile
+```json
+{
+  "id": "door-456",
+  "name": "Entrada Principal",
+  "location": "Recepção",
+  "status": "locked",
+  "last_status_change": "2025-03-20T07:30:00Z",
+  "device_id": "device-789",
+  "access_schedule": {
+    "weekdays": ["1", "2", "3", "4", "5"],
+    "start_time": "08:00",
+    "end_time": "18:00"
+  }
+}
+```
 
-A interface do sistema foi otimizada para uso em dispositivos móveis, com as seguintes características:
+#### 3.2.3 Modelo de Dispositivo
 
-### Principais Funcionalidades Mobile
-- **Menu lateral colapsável**: Em dispositivos móveis, a barra lateral é substituída por um menu deslizante que pode ser aberto/fechado com o botão hamburger
-- **Layout responsivo**: Ajustes automáticos para diferentes tamanhos de tela
-- **Tabelas otimizadas**: Tabelas com rolagem horizontal para visualização completa dos dados
-- **Formulários adaptados**: Ajustes nos formulários para melhor usabilidade em telas pequenas
-- **Alvos de toque ampliados**: Botões e elementos interativos dimensionados para facilitar o uso em telas touch
+```json
+{
+  "id": "device-789",
+  "name": "Leitor RFID #01",
+  "type": "rfid-reader",
+  "typeCode": "rfid-reader",
+  "location": "Entrada Principal",
+  "status": "online",
+  "ip": "192.168.1.101",
+  "mac": "00:1A:2B:3C:4D:5E",
+  "firmware": "v2.3.1",
+  "last_activity": "2025-03-20T09:32:15Z",
+  "battery_level": 85,
+  "signal_strength": 92
+}
+```
 
-### Implementação Técnica
-- **CSS**: Regras específicas para dispositivos móveis usando media queries
-- **JavaScript**: Detecção de dispositivos e manipulação de elementos da interface
-- **HTML**: Estrutura semântica que permite adaptação a diferentes tamanhos de tela
+#### 3.2.4 Modelo de Log de Acesso
 
-### Status da Implementação Mobile
-- ✅ Funcional na página de portas (doors.html)
-- ✅ Funcional no dashboard (dashboard.html)
-- ✅ Funcional na página de configurações (settings.html)
-- ✅ Funcional na página de relatórios (reports.html)
-- ✅ Funcional na página de logs (logs.html)
-- ✅ Botão hamburger implementado e funcional
-- ✅ Menu lateral adaptável para dispositivos móveis
+```json
+{
+  "id": "log-012",
+  "user_id": "user-123",
+  "user_name": "João Silva",
+  "door_id": "door-456",
+  "door_name": "Entrada Principal",
+  "action": "access_granted",
+  "method": "rfid",
+  "timestamp": "2025-03-20T08:45:30Z",
+  "device_id": "device-789"
+}
+```
 
-## Modo Escuro
+## 4. Frontend Web
 
-O sistema conta com um modo escuro completo que melhora a experiência do usuário em ambientes com pouca luz e reduz a fadiga visual.
+### 4.1 Interface de Administração
 
-### Principais Características
-- **Alternância de tema**: Botão dedicado no cabeçalho para alternar entre os modos claro e escuro
-- **Preferência do sistema**: Detecção automática da preferência de tema do sistema operacional do usuário
-- **Persistência**: A escolha do usuário é salva no localStorage e mantida entre sessões
-- **Transição suave**: Mudanças de tema com animações suaves para melhor experiência visual
-- **Contraste aprimorado**: Cores cuidadosamente selecionadas para manter a legibilidade e o contraste adequado
+A interface web administrativa é organizada em seções principais:
 
-### Implementação Técnica
-- **Variáveis CSS**: Sistema baseado em variáveis CSS para facilitar a manutenção
-- **JavaScript**: Controle dinâmico do tema com detecção de preferências do sistema
-- **LocalStorage**: Armazenamento da preferência do usuário no navegador
-- **Integração com Chart.js**: Ajustes específicos para gráficos funcionarem corretamente no modo escuro
-- **Componentes adaptáveis**: Todos os componentes da interface respondem ao tema atual
+- Dashboard
+- Gerenciamento de Usuários
+- Gerenciamento de Portas
+- Gerenciamento de Dispositivos
+- Logs de Acesso
+- Configurações
 
-### Arquivos Envolvidos
-- **dark-mode.css**: Redefinições de variáveis CSS e ajustes específicos para o modo escuro
-- **theme-switcher.js**: Lógica de alternância, detecção de preferências e persistência
+### 4.2 Dashboard
 
-### Status da Implementação
-- ✅ Funcional em todas as páginas principais
-- ✅ Integração completa com tabelas e formulários
-- ✅ Integração com gráficos e visualizações
-- ✅ Suporte a modais e formulários
-- ✅ Botão de alternância no cabeçalho de fácil acesso
-- ✅ Implementado na página de configurações
-- ✅ Implementado na página de relatórios
-- ✅ Implementado na página de logs
+O dashboard fornece uma visão geral do sistema com:
 
-## Limitações Conhecidas
+- Estatísticas de usuários ativos
+- Status das portas (trancadas/destrancadas)
+- Status dos dispositivos (online/offline)
+- Gráfico de atividade diária
+- Atividades recentes
+- Alertas e notificações
+- Métricas de desempenho de dispositivos
 
-### Limitações do Sistema
-- **Funcionalidade parcial**: Algumas páginas têm apenas o frontend implementado (configurações, relatórios, etc.)
-- **Sem backend para novas páginas**: As páginas de configurações e relatórios não possuem backend implementado
-- **Segurança básica**: Implementação limitada de regras de segurança no Firebase
-- **Sem integração com hardware**: O sistema ainda não se integra com dispositivos RFID reais
+### 4.3 Gestão de Usuários
 
-### Limitações da Interface Mobile
-- **Menu mobile**: O menu lateral fecha apenas ao clicar no botão hamburger, não ao clicar fora dele
-- **Tabelas grandes**: Algumas tabelas podem ser difíceis de navegar em dispositivos muito pequenos
-- **Modais**: Alguns modais podem não se ajustar perfeitamente em dispositivos com telas muito pequenas
+A interface de gerenciamento de usuários permite:
 
-### Limitações do Gráfico de Atividade
-- **Período fixo**: Atualmente, o gráfico mostra apenas os últimos 7 dias, sem opção de personalização
-- **Atualização não automática**: É necessário recarregar a página para atualizar o gráfico com novos dados
-- **Dados simulados**: Sem integração com hardware real, os dados de acesso são limitados aos gerados manualmente
+- Visualização de todos os usuários
+- Adição de novos usuários
+- Edição de usuários existentes
+- Desativação/reativação de usuários
+- Atribuição de permissões
+- Exportação de dados de usuários
 
-### Limitações das Novas Páginas
-- **Sem persistência de configurações**: As configurações na página de settings não são salvas
-- **Sem geração real de relatórios**: A página de relatórios não gera relatórios reais a partir dos dados
-- **Interface sem funcionalidade completa**: Vários elementos de interface nas novas páginas são apenas visuais, sem funcionalidade real
-- **Escopo reduzido**: Remoção dos módulos de Grupos e Alertas simplifica o sistema, mas limita alguns casos de uso
+### 4.4 Gestão de Portas
 
-## Atualizações Recentes
+A interface de gerenciamento de portas oferece:
 
-### Implementação Completa da Página de Logs (Março 2025)
+- Visualização de todas as portas
+- Adição de novas portas
+- Configuração de restrições de acesso
+- Controle remoto (trancar/destrancar)
+- Monitoramento de status em tempo real
+- Programação de acesso baseado em horários
 
-Foi realizada uma reformulação completa da página de logs, transformando-a de uma implementação parcial para uma solução completa e integrada ao sistema:
+### 4.5 Gestão de Dispositivos
 
-1. **Interface Aprimorada**:
-   - Design totalmente renovado, seguindo o padrão visual do sistema
-   - Layout em cards para melhor organização da informação
-   - Elementos visuais (ícones, badges) para identificação rápida de ações
-   - Suporte completo ao modo escuro
+A interface de gerenciamento de dispositivos inclui:
 
-2. **Sistema de Filtragem Avançada**:
-   - Filtros por múltiplos critérios simultaneamente (usuário, porta, ação, método)
-   - Filtros de período com opções pré-definidas (hoje, ontem, últimos 7/30 dias)
-   - Filtros de período personalizado com suporte a data e hora específicas
-   - Botões para aplicar e limpar filtros
+- Listagem de todos os dispositivos
+- Status de cada dispositivo
+- Configuração remota
+- Atualização de firmware
+- Diagnóstico e estatísticas
+- Gestão de bateria para dispositivos móveis
 
-3. **Paginação e Navegação**:
-   - Sistema completo de paginação para navegar entre os registros
-   - Indicadores de quantidade total de registros e página atual
-   - Interface intuitiva para navegação entre páginas
+### 4.6 Logs e Relatórios
 
-4. **Visualização Detalhada**:
-   - Exibição completa de informações de cada log (usuário, porta, ação, data/hora, método)
-   - Formatação visual diferenciada para cada tipo de ação
-   - Indicadores visuais do método de acesso (RFID, web, app)
+A seção de logs e relatórios fornece:
 
-5. **Funcionalidades Adicionais**:
-   - Exportação de logs filtrados para diferentes formatos (CSV, PDF)
-   - Botão para atualizar logs em tempo real
-   - Contagem de registros encontrados após aplicação de filtros
+- Histórico completo de acessos
+- Filtros avançados por data, usuário, porta e resultado
+- Gráficos e visualizações
+- Detecção de anomalias
+- Relatórios personalizados
 
-6. **Melhorias de Performance**:
-   - Carregamento otimizado de logs para evitar sobrecarga
-   - Limitação inteligente da quantidade de logs carregados inicialmente
-   - Renderização eficiente apenas dos logs visíveis na página atual
+## 5. Hardware e IoT
 
-7. **Responsividade**:
-   - Interface totalmente responsiva para dispositivos móveis
-   - Ajustes automáticos de layout para diferentes tamanhos de tela
-   - Melhorias na legibilidade em telas pequenas
+### 5.1 Especificações do Hardware
 
-Estas melhorias transformaram a página de logs de uma implementação parcial para um componente completo e integrado do sistema, oferecendo funcionalidades avançadas de filtragem, visualização e análise dos registros de acesso.
+#### 5.1.1 Leitores RFID
 
-### Implementação do Modo Escuro (Março 2025)
+- Frequência: 13.56 MHz (MIFARE)
+- Interfaces: UART, SPI, I2C
+- Microcontrolador: ESP32
+- Conectividade: Wi-Fi, Bluetooth
+- Alimentação: 5V DC ou bateria com gestão de energia
 
-Foi implementado um sistema completo de tema escuro para melhorar a experiência do usuário:
+#### 5.1.2 Controladores de Porta
 
-- **Sistema de tema**: Alternância entre modo claro e escuro com botão dedicado no cabeçalho
-- **Detecção de preferências**: Reconhecimento automático das preferências do sistema do usuário
-- **Consistência visual**: Todos os elementos da interface são ajustados de forma coerente
-- **Melhoria na experiência**: Redução da fadiga visual em ambientes com pouca luz
-- **Acessibilidade**: Melhor contraste para usuários com necessidades visuais específicas
+- Microcontrolador: ESP32
+- Relés: 2 (fechadura e alarme)
+- Entradas: Sensor de porta, botão de saída
+- Conectividade: Wi-Fi, Bluetooth
+- Alimentação: 12V DC com backup de bateria
 
-### Implementação do Gráfico de Atividade Diária (Março 2025)
+## 6. Backend
 
-Foi implementado um novo gráfico interativo no dashboard que visualiza o acesso às portas. Este gráfico:
+### 6.1 Autenticação e Autorização
 
-- Mostra dados de acesso por porta ao longo dos últimos 7 dias
-- Usa barras empilhadas com cores diferentes para cada porta/sala
-- Exibe tooltips detalhados ao passar o mouse sobre as barras
-- Processa dados do Firebase para agrupar acessos por dia e por porta
-- Se adapta automaticamente a diferentes tamanhos de tela
+O sistema utiliza Firebase Authentication para gerenciar identidades de usuários:
 
-### Otimização Mobile (Março 2025)
-- **Interface responsiva**: Adaptação da interface para dispositivos móveis
-- **Menu mobile**: Implementação de menu lateral colapsável com botão hamburger
-- **Layout adaptável**: Ajustes automáticos para diferentes tamanhos de tela
-- **UX aprimorada**: Melhorias na usabilidade em dispositivos touch
+- Autenticação por email/senha
+- Controle de acesso baseado em perfis (admin, user)
+- Gerenciamento de sessões seguras
+- Recuperação de senha
 
-### Correções na Página de Portas (11/03/2025)
-- **Estilização Corrigida**: Resolvidos problemas de estilo nos modais e botões
-- **Funcionalidade Restaurada**: Corrigido o JavaScript para permitir adição, edição e controle de portas
-- **Melhorias na Interface**: Reimplementada a estrutura HTML dos modais
+### 6.2 Integração com Firebase
 
-## Próximos Passos
+O backend integra-se com serviços Firebase:
 
-### Implementação de Backend para Novas Páginas
-1. Desenvolver backend para persistência das configurações
-2. Implementar lógica para geração real de relatórios
-3. Conectar formulários de configuração com o Firebase
-4. Implementar exportação de relatórios em diferentes formatos
+- **Firebase Authentication**: Para autenticação de usuários
+- **Firebase Realtime Database**: Para armazenamento e sincronização de dados
+- **Firebase Hosting**: Para hospedagem da interface web
 
-### Melhorias no Modo Escuro
-1. Implementar ajustes finos em componentes específicos
-2. Adicionar animações mais elaboradas durante a transição de temas
-3. Permitir programação de horários para alternância automática de tema
-4. Adicionar mais opções de personalização de cores
 
-### Melhorias no Gráfico de Atividade Diária
-1. Implementar opções para personalizar o período de visualização (7, 14, 30 dias)
-2. Adicionar filtros por porta/sala específica
-3. Implementar atualização em tempo real sem necessidade de recarregar a página
-4. Adicionar opções de exportação de dados do gráfico para CSV/Excel
+## 7. Componentes do Sistema e Funções Principais
 
-### Melhorias da Interface Mobile
-1. Implementar fechamento do menu ao clicar fora dele
-2. Otimizar a visualização de tabelas em dispositivos muito pequenos
-3. Melhorar a adaptação dos modais em diferentes tamanhos de tela
+### 7.1 Utilitários (utils.js)
 
-### Desenvolvimento do Sistema
-1. Implementar a página de gerenciamento de dispositivos
-2. Preparar MVP para demonstração
+| Função | Descrição |
+|--------|-----------|
+| `safeDOM(id, callback)` | Verifica se um elemento DOM existe antes de acessá-lo |
+| `safeTextContent(id, text)` | Define o conteúdo de texto de um elemento com segurança |
+| `safeInnerHTML(id, html)` | Define o HTML interno de um elemento com segurança |
+| `safeValue(id, value)` | Define o valor de um elemento com segurança |
+| `safeSetAttribute(id, attribute, value)` | Define um atributo de um elemento com segurança |
+| `safeStyle(id, property, value)` | Define o estilo de um elemento com segurança |
+| `safeAddClass(id, className)` | Adiciona uma classe a um elemento com segurança |
+| `safeRemoveClass(id, className)` | Remove uma classe de um elemento com segurança |
+| `getCurrentPage()` | Obtém o nome da página atual a partir da URL |
+| `isPage(pageName)` | Verifica se a página atual corresponde ao nome fornecido |
 
-### Médio Prazo (8-12 semanas)
-1. Iniciar desenvolvimento do aplicativo mobile
-2. Prototipar o firmware para ESP32 com integração direta ao Firebase
-3. Implementar comunicação segura entre dispositivos e Firebase
+### 7.2 Funções Comuns (common.js)
 
-### Longo Prazo (16+ semanas)
-1. Implementar funcionalidades avançadas (relatórios, análises)
-2. Integrar totalmente hardware e software
-3. Realizar testes de escalabilidade e segurança
-4. Preparar para lançamento em produção
+| Função | Descrição |
+|--------|-----------|
+| `checkAuth()` | Verifica se o usuário está autenticado e redireciona se necessário |
+| `loadCurrentUserName()` | Carrega o nome do usuário atual do Firebase |
+| `loadAlertsCount()` | Carrega a contagem de alertas ativos |
+| `initSidebar()` | Inicializa o comportamento da barra lateral |
+| `initLogout()` | Configura o botão de logout |
+| `showNotification(type, message, duration)` | Exibe uma notificação na interface |
+| `closeNotification(notification)` | Fecha uma notificação específica |
+| `setupModal(modalId, openBtn, closeBtn, cancelBtn)` | Configura o comportamento de um modal |
+| `openModal(modalId)` | Abre um modal específico |
+| `closeModal(modalId)` | Fecha um modal específico |
+| `formatDate(isoString)` | Formata uma data ISO para exibição |
+| `formatDateTime(isoString)` | Formata uma data e hora ISO para exibição |
+| `formatStatus(status)` | Converte códigos de status em texto legível |
+| `getStatusClass(status)` | Obtém a classe CSS correspondente a um status |
+| `capitalize(string)` | Capitaliza a primeira letra de uma string |
+| `translateRole(role)` | Traduz códigos de função para texto legível |
+| `isValidEmail(email)` | Valida um endereço de email |
+| `isValidPassword(password)` | Valida uma senha |
+
+### 7.3 Gerenciamento de Temas (theme-switcher.js)
+
+| Função | Descrição |
+|--------|-----------|
+| `initThemeSwitcher()` | Inicializa o controle de tema claro/escuro |
+| `createThemeToggleButton()` | Cria o botão de alternância de tema |
+| `getPreferredTheme()` | Obtém o tema preferido do usuário |
+| `applyTheme(theme)` | Aplica o tema especificado à interface |
+| `toggleTheme()` | Alterna entre os temas claro e escuro |
+| `updateCharts(theme)` | Atualiza os gráficos para se adequarem ao tema atual |
+| `increaseBrightness(color, percent)` | Aumenta o brilho de uma cor para melhor visibilidade |
+
+### 7.4 Mobile (mobile.js)
+
+| Função | Descrição |
+|--------|-----------|
+| `handleResize()` | Manipula o redimensionamento da tela |
+| `createMobileElements()` | Cria os elementos necessários para a interface mobile |
+| `setupMobileMenuBehavior()` | Configura o comportamento do menu mobile |
+| `toggleMobileMenu()` | Alterna a visibilidade do menu mobile |
+| `closeMobileMenu()` | Fecha o menu mobile |
+| `isTouchDevice()` | Detecta se o dispositivo é touch |
+
+### 7.5 Dashboard (dashboard.js)
+
+| Função | Descrição |
+|--------|-----------|
+| `loadDashboardData()` | Carrega os dados principais do dashboard |
+| `loadUserStats()` | Carrega estatísticas de usuários |
+| `loadDoorStats()` | Carrega estatísticas das portas |
+| `loadDeviceStats()` | Carrega estatísticas de dispositivos |
+| `updateBenchmarkMetrics(onlineDevices)` | Atualiza as métricas de benchmark dos dispositivos |
+| `updateBenchmarkBar(id, value, unit)` | Atualiza uma barra de benchmark específica |
+| `resetBenchmarkMetrics()` | Reseta todas as métricas de benchmark |
+| `loadRecentActivity()` | Carrega logs de atividade recente |
+| `updateDoorList(doors)` | Atualiza a lista de portas |
+| `setupDoorActionButtons()` | Configura botões de ação das portas |
+| `toggleDoorLock(doorId, action)` | Alterna estado de tranca da porta |
+| `loadAlerts()` | Carrega alertas ativos |
+| `formatDateTime(isoString)` | Formata uma data e hora ISO para exibição |
+
+### 7.6 Gráfico de Atividade (activity-chart.js)
+
+| Função | Descrição |
+|--------|-----------|
+| `initActivityChart()` | Inicializa e configura o gráfico de atividade diária |
+| `loadActivityData()` | Carrega e processa os dados de atividade do Firebase |
+| `processActivityData(accessLogs)` | Processa os logs de acesso agrupando por dia e por porta |
+| `getChartThemeOptions()` | Determina as cores e opções do gráfico com base no tema atual |
+| `createActivityChart(data)` | Cria ou atualiza o gráfico com os dados processados |
+| `generateDoorColors(count)` | Gera um array de cores para as portas |
+| `hslToHex(h, s, l)` | Converte uma cor HSL para formato hexadecimal |
+| `adjustColorBrightness(hexColor, percent)` | Ajusta o brilho de uma cor hexadecimal |
+
+### 7.7 Gerenciamento de Usuários (users.js)
+
+| Função | Descrição |
+|--------|-----------|
+| `initDOMElements()` | Inicializa elementos do DOM de forma segura |
+| `setupFilters()` | Configura eventos de filtro |
+| `setupExport()` | Configura eventos de exportação |
+| `setupForm()` | Configura eventos de formulário |
+| `loadUsers()` | Carrega usuários do Firebase |
+| `renderUsers()` | Renderiza usuários na tabela |
+| `setupActionButtons()` | Configura botões de ação para edição e exclusão |
+| `editUser(userId)` | Abre modal para editar usuário |
+| `confirmDelete(userId)` | Confirma exclusão de usuário |
+| `deleteUser(userId)` | Exclui usuário |
+| `saveUser()` | Salva usuário (criar ou atualizar) |
+| `validateUserForm()` | Valida formulário de usuário |
+| `resetForm()` | Reseta formulário |
+| `applyFilters()` | Aplica filtros e busca |
+| `exportUsers(format)` | Exporta usuários |
+| `updatePaginationInfo(start, end, total)` | Atualiza informações de paginação |
+| `updatePagination()` | Atualiza controles de paginação |
+| `debounce(func, wait)` | Função para debounce (evitar múltiplas chamadas rápidas) |
+
+### 7.8 Gerenciamento de Portas (doors.js)
+
+| Função | Descrição |
+|--------|-----------|
+| `initDoorManagement()` | Inicializa a página de gerenciamento de portas |
+| `setupEventListeners()` | Configura todos os event listeners da página |
+| `loadDoors()` | Carrega as portas do Firebase |
+| `renderDoors()` | Renderiza as portas na tabela |
+| `confirmDeleteDoor(door)` | Confirma exclusão de uma porta |
+| `deleteDoor(doorId)` | Exclui uma porta |
+| `openDoorModal(door)` | Abre o modal para adicionar ou editar uma porta |
+| `handleDoorFormSubmit()` | Manipula o envio do formulário de porta |
+| `openControlModal(door)` | Abre o modal de controle de porta |
+| `controlDoor(action)` | Controla uma porta (tranca/destranca) |
+| `closeModal(modalId)` | Fecha um modal pelo ID |
+| `showNotification(message, type)` | Mostra uma notificação na tela |
+| `formatDate(date)` | Formata uma data para exibição |
+
+### 7.9 Logs (logs.js)
+
+| Função | Descrição |
+|--------|-----------|
+| `initDateFilters()` | Configura os filtros de data e inicializa valores padrão |
+| `setupEventListeners()` | Configura os event listeners para a página |
+| `loadLogs()` | Carrega os logs do Firebase |
+| `applyFilters()` | Aplica os filtros selecionados aos logs |
+| `renderLogs()` | Renderiza os logs na interface |
+| `updateLogsCount()` | Atualiza os contadores de logs |
+| `updatePagination()` | Atualiza a paginação |
+| `getVisiblePageNumbers(currentPage, totalPages)` | Determina quais números de página mostrar na paginação |
+| `resetFilters()` | Reseta todos os filtros para seus valores padrão |
+| `exportLogs(format)` | Exporta os logs no formato especificado |
+| `exportCSV()` | Exporta os logs filtrados para um arquivo CSV |
+| `formatActionForExport(action)` | Formata a ação para exibição no arquivo exportado |
+| `formatDateForInput(date)` | Formata uma data para o formato de input date |
+| `showNotification(message, type)` | Exibe uma notificação na interface |
+
+### 7.10 Gerenciamento de Dispositivos (devices.js)
+
+| Função | Descrição |
+|--------|-----------|
+| `initModals()` | Inicializa os modais da página |
+| `setupEventListeners()` | Configura os event listeners da página |
+| `mockDevicesData()` | Simula a carga de dados de dispositivos para visualização |
+| `renderDevices()` | Renderiza os dispositivos na tabela |
+| `updatePagination()` | Atualiza as informações de paginação |
+| `updateDeviceStats()` | Atualiza as estatísticas de dispositivos |
+| `openDeviceModal(device)` | Abre o modal para adicionar ou editar um dispositivo |
+| `openConfigModal(device)` | Abre o modal de configuração de dispositivo |
+| `saveDevice()` | Salva um dispositivo (adição ou edição) |
+| `saveDeviceConfig()` | Salva as configurações de um dispositivo |
+| `applyFilters()` | Aplica filtros aos dispositivos |
+| `resetFilters()` | Reseta todos os filtros |
+| `confirmAction(title, message, onConfirm, confirmButtonText)` | Abre um modal de confirmação para uma ação |
+| `openModal(modalId)` | Abre um modal pelo ID |
+| `closeModal(modalId)` | Fecha um modal pelo ID |
+| `showNotification(message, type)` | Exibe uma notificação na tela |
+| `formatDate(date)` | Formata uma data para exibição |
+| `generateUUID()` | Gera um UUID simples |
+| `getDeviceTypeName(typeCode)` | Obtém o nome do tipo de dispositivo com base no código |
+| `findDeviceByName(name)` | Encontra um dispositivo pelo nome |
+| `setupTabStyles()` | Adiciona estilos CSS para tabs no modal de configuração |
+
+### 7.11 Assistente Gemini (gemini-assistant.js)
+
+| Classe/Método | Descrição |
+|---------------|-----------|
+| `GeminiAssistant` | Classe para gerenciar a interface do assistente Gemini |
+| `init()` | Inicializa o assistente e cria os elementos da interface |
+| `_setupEventListeners()` | Configura os event listeners para interação com o assistente |
+| `_initSystemContext()` | Inicializa o contexto do sistema coletando dados relevantes |
+| `_loadSystemData()` | Carrega dados adicionais do sistema para contexto |
+| `_handleSendMessage()` | Lida com o envio de mensagem do usuário |
+| `_isCommand(message)` | Verifica se uma mensagem parece ser um comando |
+| `_processCommand(command, systemContext)` | Processa um comando e executa as ações correspondentes |
+| `_executeCommand(processedCommand, messageElement)` | Executa um comando processado |
+| `_executeLogsAnalysisCommand(processedCommand, messageElement)` | Processa logs de acesso diretamente no chat |
+| `_executeQueryCommand(processedCommand, messageElement)` | Executa um comando de consulta |
+| `_executeActionCommand(processedCommand, messageElement)` | Executa um comando de ação |
+| `_executeConfigCommand(processedCommand, messageElement)` | Executa um comando de configuração |
+| `_addMessage(role, content)` | Adiciona uma mensagem à conversa |
+| `_updateMessage(messageElement, role, content)` | Atualiza o conteúdo de uma mensagem existente |
+| `_scrollToBottom()` | Rola a conversa para o final |
+| `_formatResponse(response)` | Formata a resposta para exibição |
+| `toggle(visible)` | Alterna a visibilidade do assistente |
+| `clearConversation()` | Limpa a conversa atual |
+| `generateInsights()` | Gera insights com base nos dados do sistema |
+
+### 7.12 Serviço Gemini (gemini-service.js)
+
+| Classe/Método | Descrição |
+|---------------|-----------|
+| `GeminiService` | Classe para gerenciar a comunicação com a API Gemini |
+| `_generateSystemContext()` | Gera o contexto do sistema para o assistente Gemini |
+| `sendMessage(message, context, options)` | Envia uma mensagem para a API Gemini e processa a resposta |
+| `_looksLikeJSON(text)` | Verifica se uma string parece conter JSON |
+| `_convertJSONToNaturalText(jsonText)` | Converte respostas JSON em texto natural |
+| `_removeThinkingProcess(response)` | Remove o processo de raciocínio interno da resposta do modelo |
+| `clearConversation()` | Limpa a conversa atual |
+| `generateInsights(systemData)` | Gera insights baseados em dados do sistema |
+| `_createFallbackInsights(response, errorMessage)` | Método auxiliar para criar insights de fallback |
+| `processCommand(command, systemState)` | Processa comandos de linguagem natural |
+| `processModelResponse(response, isConversation)` | Processa respostas do modelo Gemini |
+
+## 8. Fluxos de Funcionamento
+
+### 8.1 Fluxo de Controle Remoto
+
+1. Um administrador acessa a interface web ou app móvel
+2. Navega até a seção de gerenciamento de portas
+3. Seleciona uma porta específica e escolhe "Controlar"
+4. Clica em "Destrancar" ou "Trancar"
+5. O backend processa o comando e valida a autorização
+6. O comando é enviado ao Firebase
+7. O Firebase atualiza os dados do controlador da porta correspondente
+8. A porta muda de estado e a ação é registrada
+
+## 10. Implantação e DevOps
+
+### 10.1 Processo de Implantação
+
+1. Configurar projeto Firebase e obter credenciais
+2. Implantar a interface web via Firebase Hosting
+3. Implantar as funções de backend (Cloud Functions)
+4. Configurar as regras de segurança do banco de dados
+5. Configurar os dispositivos IoT com as credenciais apropriadas
+6. Testar o sistema completo
+
+## 11. Testes
+
+### 11.1 Estratégia de Testes
+
+- Testes unitários para componentes individuais
+- Testes de integração para interações entre componentes
+- Testes end-to-end para fluxos completos
+- Testes de segurança
+- Testes de desempenho
+- Testes de usabilidade
+
+### 11.2 Testes Específicos
+
+- Validação de leituras RFID
+- Verificação de tempo de resposta
+- Simulação de falhas de conectividade
+- Teste de backup de energia
+- Verificação de segurança de comunicação
+
+## 12. Manutenção e Suporte
+
+### 12.1 Procedimentos de Manutenção
+
+- Atualização regular de firmware dos dispositivos
+- Verificação periódica do estado das baterias
+- Backup regular do banco de dados
+- Monitoramento de logs para detecção de anomalias
+- Atualização de certificados de segurança
+
+### 12.2 Solução de Problemas Comuns
+
+- Dispositivo offline: Verificar conexão Wi-Fi e alimentação
+- Falha de leitura RFID: Limpar leitor ou substituir cartão
+- Porta não responde: Verificar controlador e conexões
+- Usuário não autorizado: Verificar cadastro e permissões
+
+## 13. Glossário
+
+- **RFID**: Radio-Frequency Identification - Tecnologia que usa campos eletromagnéticos para identificar e rastrear tags anexadas a objetos
+- **IoT**: Internet of Things - Rede de dispositivos físicos conectados à internet
+- **ESP32**: Microcontrolador com WiFi e Bluetooth integrados, frequentemente usado em projetos IoT
+- **JWT**: JSON Web Token - Método para representar reivindicações com segurança entre duas partes
+- **TLS**: Transport Layer Security - Protocolo criptográfico para comunicações seguras
+- **MQTT**: Message Queuing Telemetry Transport - Protocolo leve de mensagens para dispositivos IoT
+- **Firebase**: Plataforma de desenvolvimento de aplicativos da Google que fornece ferramentas como banco de dados em tempo real, autenticação e hospedagem
+
+## 14. Referências
+
+1. Documentação do Firebase: https://firebase.google.com/docs
+2. Especificações RFID ISO/IEC 14443
+3. Documentação do ESP32: https://docs.espressif.com/projects/esp-idf/en/latest/
+4. Especificação MQTT: https://mqtt.org/mqtt-specification/
+5. Guia de segurança para IoT: NIST SP 800-82
+
+---
+
+Documentação elaborada para o projeto SecureLab 2.0 - Sistema de Controle de Acesso com RFID e IoT
+Versão: 2.3.1
+Data: 20 de março de 2025

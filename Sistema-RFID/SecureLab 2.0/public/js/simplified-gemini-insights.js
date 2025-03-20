@@ -156,13 +156,12 @@ class SimplifiedInsights {
      * @returns {Promise<Object>} System data
      */
     async collectSystemData() {
-        try {
-            // Define time period (last 30 days)
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
+        console.log('Iniciando coleta de dados do sistema...');
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
 
-            // Fetch data from Firebase
+        try {
             const [usersSnapshot, doorsSnapshot, devicesSnapshot, logsSnapshot] = await Promise.all([
                 firebase.database().ref('users').once('value'),
                 firebase.database().ref('doors').once('value'),
@@ -171,160 +170,23 @@ class SimplifiedInsights {
                     .orderByChild('timestamp')
                     .startAt(thirtyDaysAgoISO)
                     .limitToLast(100)
-                    .once('value')
+                    .once('value') // Sem limite, coletamos todos os logs
             ]);
 
-            // Initialize data structure
             const systemData = {
-                timestamp: new Date().toISOString(),
-                stats: {},
-                dataRange: {
-                    start: thirtyDaysAgoISO,
-                    end: new Date().toISOString()
-                }
+                users: usersSnapshot.val(),
+                doors: doorsSnapshot.val(),
+                devices: devicesSnapshot.val(),
+                logs: logsSnapshot.val()
             };
 
-            // Process users data
-            if (usersSnapshot.exists()) {
-                const users = usersSnapshot.val();
-                systemData.stats.users = {
-                    total: Object.keys(users).length,
-                    active: Object.values(users).filter(u => u.status === 'active').length,
-                    inactive: Object.values(users).filter(u => u.status !== 'active').length
-                };
-            } else {
-                systemData.stats.users = { total: 0, active: 0, inactive: 0 };
-            }
-
-            // Process doors data
-            if (doorsSnapshot.exists()) {
-                const doors = doorsSnapshot.val();
-                systemData.stats.doors = {
-                    total: Object.keys(doors).length,
-                    locked: Object.values(doors).filter(d => d.status === 'locked').length,
-                    unlocked: Object.values(doors).filter(d => d.status === 'unlocked').length
-                };
-            } else {
-                systemData.stats.doors = { total: 0, locked: 0, unlocked: 0 };
-            }
-
-            // Process devices data
-            if (devicesSnapshot.exists()) {
-                const devices = devicesSnapshot.val();
-                systemData.stats.devices = {
-                    total: Object.keys(devices).length,
-                    online: Object.values(devices).filter(d => d.status === 'online').length,
-                    offline: Object.values(devices).filter(d => d.status === 'offline').length
-                };
-            } else {
-                systemData.stats.devices = { total: 0, online: 0, offline: 0 };
-            }
-
-            // Process access logs
-            if (logsSnapshot.exists()) {
-                const logs = logsSnapshot.val();
-                const logsArray = Object.values(logs);
-
-                // Group by action type
-                const accessGranted = logsArray.filter(log => log.action === 'access_granted').length;
-                const accessDenied = logsArray.filter(log => log.action === 'access_denied').length;
-                const doorLocked = logsArray.filter(log => log.action === 'door_locked').length;
-                const doorUnlocked = logsArray.filter(log => log.action === 'door_unlocked').length;
-
-                // Calculate denial rate
-                const totalAccessAttempts = accessGranted + accessDenied;
-                const denialRate = totalAccessAttempts > 0 ?
-                    (accessDenied / totalAccessAttempts) * 100 : 0;
-
-                // Group by day
-                const accessByDay = {};
-                logsArray.forEach(log => {
-                    if (log.timestamp) {
-                        const date = new Date(log.timestamp).toISOString().split('T')[0];
-                        accessByDay[date] = accessByDay[date] || {
-                            total: 0,
-                            granted: 0,
-                            denied: 0
-                        };
-
-                        accessByDay[date].total++;
-                        if (log.action === 'access_granted') {
-                            accessByDay[date].granted++;
-                        } else if (log.action === 'access_denied') {
-                            accessByDay[date].denied++;
-                        }
-                    }
-                });
-
-                // Find most active users
-                const userActivity = {};
-                logsArray.forEach(log => {
-                    if (log.user_id) {
-                        userActivity[log.user_id] = userActivity[log.user_id] || {
-                            name: log.user_name || log.user_id,
-                            total: 0,
-                            denied: 0
-                        };
-
-                        userActivity[log.user_id].total++;
-                        if (log.action === 'access_denied') {
-                            userActivity[log.user_id].denied++;
-                        }
-                    }
-                });
-
-                // Find most accessed doors
-                const doorActivity = {};
-                logsArray.forEach(log => {
-                    if (log.door_id) {
-                        doorActivity[log.door_id] = doorActivity[log.door_id] || {
-                            name: log.door_name || log.door_id,
-                            total: 0,
-                            denied: 0
-                        };
-
-                        doorActivity[log.door_id].total++;
-                        if (log.action === 'access_denied') {
-                            doorActivity[log.door_id].denied++;
-                        }
-                    }
-                });
-
-                systemData.stats.access = {
-                    total: logsArray.length,
-                    granted: accessGranted,
-                    denied: accessDenied,
-                    locked: doorLocked,
-                    unlocked: doorUnlocked,
-                    denialRate: denialRate.toFixed(1),
-                    byDay: accessByDay,
-                    byUser: userActivity,
-                    byDoor: doorActivity
-                };
-
-                // Most recent logs (last 10)
-                systemData.recentLogs = logsArray
-                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                    .slice(0, 10);
-            } else {
-                systemData.stats.access = {
-                    total: 0,
-                    granted: 0,
-                    denied: 0,
-                    locked: 0,
-                    unlocked: 0,
-                    denialRate: 0
-                };
-                systemData.recentLogs = [];
-            }
-
+            console.log('Dados coletados com sucesso:', systemData);
             return systemData;
         } catch (error) {
-            console.error('Error collecting system data:', error);
-            throw new Error('Failed to collect system data');
+            console.error('Erro ao coletar dados do sistema:', error);
+            throw error;
         }
     }
-
     /**
      * Generate insights using data analysis
      * @param {Object} systemData - Collected system data
@@ -351,54 +213,21 @@ class SimplifiedInsights {
      * @returns {Promise<Object>} Insights from Gemini
      */
     async generateInsightsWithGemini(systemData) {
-        // Create prompt for Gemini
         const prompt = `Analyze the following SecureLab access control system data and provide insights:
-    
 ${JSON.stringify(systemData, null, 2)}
+Respond ONLY with a valid JSON object containing your analysis.`;
 
-Respond ONLY with a valid JSON object using this exact structure:
-{
-  "summary": "A single sentence summary of the most important insight",
-  "insights": [
-    {
-      "type": "anomaly|pattern|recommendation",
-      "title": "Short title for the insight",
-      "description": "Detailed description of the insight",
-      "priority": "high|medium|low",
-      "relatedItems": ["item1", "item2"]
-    }
-  ]
-}`;
+        console.log('Prompt enviado para a API Gemini:', prompt);
 
         try {
-            // Send request to Gemini
-            const response = await window.geminiService.sendMessage(prompt, {}, {
-                isConversation: false,
-                timeout: 15000
-            });
-
-            // Try to parse response as JSON
-            try {
-                return JSON.parse(response);
-            } catch (parseError) {
-                // If we can't parse it directly, try to extract JSON from the response
-                const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/) ||
-                    response.match(/```\n([\s\S]*?)\n```/) ||
-                    response.match(/(\{[\s\S]*\})/);
-
-                if (jsonMatch && jsonMatch[1]) {
-                    return JSON.parse(jsonMatch[1]);
-                }
-
-                // If all else fails, return a fallback
-                throw new Error('Could not parse Gemini response');
-            }
+            const response = await window.geminiService.sendMessage(prompt);
+            console.log('Resposta recebida da API Gemini:', response);
+            return JSON.parse(response);
         } catch (error) {
-            console.error('Error generating insights with Gemini:', error);
+            console.error('Erro ao gerar insights com Gemini:', error);
             throw error;
         }
     }
-
     /**
      * Generate insights locally without API
      * @param {Object} systemData - Collected system data
@@ -658,7 +487,7 @@ Respond ONLY with a valid JSON object using this exact structure:
                     relatedItems: []
                 }]
             };
-        }
+        };
     }
 
     /**
