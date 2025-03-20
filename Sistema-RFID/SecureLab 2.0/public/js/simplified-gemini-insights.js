@@ -212,17 +212,60 @@ class SimplifiedInsights {
      * @param {Object} systemData - Collected system data
      * @returns {Promise<Object>} Insights from Gemini
      */
+    // Modifique esta função no arquivo simplified-gemini-insights.js
     async generateInsightsWithGemini(systemData) {
+        // Modificar o prompt para ser mais específico sobre o formato JSON
         const prompt = `Analyze the following SecureLab access control system data and provide insights:
 ${JSON.stringify(systemData, null, 2)}
-Respond ONLY with a valid JSON object containing your analysis.`;
 
-        console.log('Prompt enviado para a API Gemini:', prompt);
+IMPORTANT: You MUST respond with a valid JSON object in the following format and NOTHING ELSE:
+{
+  "summary": "Brief summary of the system status",
+  "insights": [
+    {
+      "type": "anomaly|pattern|recommendation",
+      "title": "Short title of the insight",
+      "description": "Detailed description",
+      "priority": "high|medium|low",
+      "relatedItems": ["doors", "users", "access", etc]
+    }
+  ]
+}`;
 
         try {
-            const response = await window.geminiService.sendMessage(prompt);
+            // Use o parâmetro isConversation: false para indicar que queremos JSON
+            const response = await window.geminiService.sendMessage(prompt, {}, {isConversation: false});
             console.log('Resposta recebida da API Gemini:', response);
-            return JSON.parse(response);
+
+            // Tentar extrair JSON da resposta
+            try {
+                // Primeiro, tentar analisar a resposta inteira como JSON
+                return JSON.parse(response);
+            } catch (parseError) {
+                // Se falhar, tentar extrair JSON de um bloco de código ou da resposta
+                const jsonMatch = response.match(/```(?:json)?\s*\n([\s\S]*?)\n```/) ||
+                    response.match(/```([\s\S]*?)```/) ||
+                    response.match(/(\{[\s\S]*\})/);
+
+                if (jsonMatch && jsonMatch[1]) {
+                    return JSON.parse(jsonMatch[1]);
+                } else if (jsonMatch) {
+                    return JSON.parse(jsonMatch[0]);
+                }
+
+                // Se ainda falhar, criar um objeto de insights básico
+                console.warn('Não foi possível extrair JSON válido da resposta:', response);
+                return {
+                    summary: "Análise baseada em resposta não estruturada",
+                    insights: [{
+                        type: "recommendation",
+                        title: "Limitações na análise de insights",
+                        description: "O sistema não conseguiu estruturar a análise em formato JSON. Recomenda-se revisar manualmente os logs de acesso.",
+                        priority: "medium",
+                        relatedItems: ["system"]
+                    }]
+                };
+            }
         } catch (error) {
             console.error('Erro ao gerar insights com Gemini:', error);
             throw error;
@@ -233,240 +276,109 @@ Respond ONLY with a valid JSON object containing your analysis.`;
      * @param {Object} systemData - Collected system data
      * @returns {Object} Generated insights
      */
+    // Modifique esta função no arquivo simplified-gemini-insights.js
     generateLocalInsights(systemData) {
         const insights = {
-            summary: "O sistema SecureLab apresenta alta atividade de usuários com foco no bloqueio de portas via web e concessão de acesso, com pico de atividade às 6h e uma taxa de negação de acesso baixa.",
+            summary: "Análise do Sistema SecureLab",
             insights: []
         };
 
         try {
-            // Check if we have data to analyze
-            if (!systemData || !systemData.stats) {
+            // Verificar se temos dados para analisar sem depender de systemData.stats
+            if (!systemData || !systemData.users || !systemData.doors || !systemData.logs) {
                 throw new Error('Insufficient data for analysis');
             }
 
-            // Analyze access methods (web vs RFID)
-            if (systemData.recentLogs && systemData.recentLogs.length > 0) {
-                // Count actions by method
-                const methodCounts = {};
-                systemData.recentLogs.forEach(log => {
-                    if (log.method) {
-                        methodCounts[log.method] = (methodCounts[log.method] || 0) + 1;
-                    }
-                });
+            // Computar estatísticas a partir dos dados brutos
+            const stats = this.computeSystemStats(systemData);
 
-                // Check if web is predominant
-                const webCount = methodCounts['web'] || 0;
-                const rfidCount = methodCounts['rfid'] || 0;
-                const totalCount = systemData.recentLogs.length;
+            // Atualizar o resumo com base nas estatísticas calculadas
+            insights.summary = `O sistema SecureLab tem ${Object.keys(systemData.users || {}).length} usuários e 
+                           ${Object.keys(systemData.doors || {}).length} portas registradas com 
+                           ${Object.keys(systemData.logs || {}).length} logs de acesso.`;
 
-                if (webCount > rfidCount && webCount > totalCount * 0.5) {
-                    insights.insights.push({
-                        type: "pattern",
-                        title: "Bloqueio de Portas Predominantemente via Web",
-                        description: "A maioria das ações recentes registradas são bloqueios de portas realizados via interface web. Isso pode indicar uma preferência dos usuários por esse método ou uma possível configuração padrão do sistema.",
-                        priority: "medium",
-                        relatedItems: ["recentLogs", "doors"]
-                    });
-                }
+            // Analisar portas destrancadas
+            const unlockedDoors = Object.values(systemData.doors || {}).filter(door =>
+                door.status === 'unlocked'
+            );
 
-                // Check for combined usage
-                if (webCount > 0 && rfidCount > 0) {
-                    // Analyze door-specific methods
-                    const doorMethods = {};
-                    systemData.recentLogs.forEach(log => {
-                        if (log.door_id && log.method) {
-                            if (!doorMethods[log.door_id]) {
-                                doorMethods[log.door_id] = { name: log.door_name || log.door_id, methods: {} };
-                            }
-
-                            doorMethods[log.door_id].methods[log.method] =
-                                (doorMethods[log.door_id].methods[log.method] || 0) + 1;
-                        }
-                    });
-
-                    // Find doors with distinct method preferences
-                    const rfidDoors = [];
-                    const webDoors = [];
-
-                    Object.values(doorMethods).forEach(door => {
-                        const webCount = door.methods['web'] || 0;
-                        const rfidCount = door.methods['rfid'] || 0;
-
-                        if (rfidCount > webCount * 2) {
-                            rfidDoors.push(door.name);
-                        } else if (webCount > rfidCount * 2) {
-                            webDoors.push(door.name);
-                        }
-                    });
-
-                    if (rfidDoors.length > 0 && webDoors.length > 0) {
-                        insights.insights.push({
-                            type: "pattern",
-                            title: "Uso Combinado de RFID e Web para Acesso",
-                            description: `Observa-se o uso de RFID para acesso à ${rfidDoors[0]} e interface web para acesso a outros locais, como o ${webDoors[0]}. Isso sugere uma estratégia de controle de acesso diferenciada por local.`,
-                            priority: "low",
-                            relatedItems: ["recentLogs", "doors"]
-                        });
-                    }
-                }
-
-                // Analyze activity by hour
-                const hourCounts = {};
-                systemData.recentLogs.forEach(log => {
-                    if (log.timestamp) {
-                        const hour = new Date(log.timestamp).getHours();
-                        hourCounts[hour] = (hourCounts[hour] || 0) + 1;
-                    }
-                });
-
-                // Find peak hour
-                let peakHour = 0;
-                let peakCount = 0;
-                Object.entries(hourCounts).forEach(([hour, count]) => {
-                    if (count > peakCount) {
-                        peakHour = parseInt(hour);
-                        peakCount = count;
-                    }
-                });
-
-                if (peakCount > 5) {
-                    insights.insights.push({
-                        type: "pattern",
-                        title: "Pico de Acesso Matinal",
-                        description: `O pico de acessos ocorre às ${peakHour}h, com ${peakCount} acessos registrados. Isso sugere um horário de maior atividade no laboratório, possivelmente relacionado ao início do expediente ou atividades específicas.`,
-                        priority: "medium",
-                        relatedItems: ["access", "users"]
-                    });
-                }
-            }
-
-            // Add offline devices insight if any devices are offline
-            if (systemData.stats.devices && systemData.stats.devices.offline > 0) {
-                insights.insights.push({
-                    type: "anomaly",
-                    title: "Dispositivo Offline",
-                    description: `Um dos dispositivos está offline. É crucial investigar a causa (falha de energia, problema de conectividade, etc.) e restaurar a conectividade para garantir a cobertura completa do sistema.`,
-                    priority: "high",
-                    relatedItems: ["devices"]
-                });
-            }
-
-            // Analyze access denial patterns
-            if (systemData.stats.access) {
-                const denialRate = parseFloat(systemData.stats.access.denialRate);
-
-                if (denialRate < 5) {
-                    insights.insights.push({
-                        type: "pattern",
-                        title: "Taxa de Negação de Acesso Baixa",
-                        description: `A taxa de negação de acesso atual é de ${denialRate}%, o que indica uma boa configuração de permissões e poucos tentativas de acesso não autorizado. Continue monitorando para garantir que se mantenha em níveis adequados.`,
-                        priority: "low",
-                        relatedItems: ["access", "security"]
-                    });
-                } else if (denialRate > 15) {
-                    insights.insights.push({
-                        type: "anomaly",
-                        title: "Alta Taxa de Negação de Acesso",
-                        description: `A taxa de negação de acesso está em ${denialRate}%, acima do ideal. Verifique se as permissões estão configuradas corretamente e investigue possíveis tentativas de acesso não autorizado.`,
-                        priority: "high",
-                        relatedItems: ["access", "security", "users"]
-                    });
-                }
-            }
-
-            // Analyze unlocked doors
-            if (systemData.stats.doors && systemData.stats.doors.unlocked > 0) {
-                // Get names of unlocked doors if available
-                let unlockedDoorNames = "algumas portas";
-                if (systemData.recentLogs) {
-                    const doorStatusMap = {};
-                    // Get most recent status for each door
-                    systemData.recentLogs.forEach(log => {
-                        if ((log.action === 'door_locked' || log.action === 'door_unlocked') && log.door_id) {
-                            doorStatusMap[log.door_id] = {
-                                name: log.door_name || log.door_id,
-                                status: log.action === 'door_locked' ? 'locked' : 'unlocked',
-                                timestamp: log.timestamp
-                            };
-                        }
-                    });
-
-                    // Find unlocked doors
-                    const unlockedDoors = Object.values(doorStatusMap)
-                        .filter(door => door.status === 'unlocked')
-                        .map(door => door.name);
-
-                    if (unlockedDoors.length > 0) {
-                        unlockedDoorNames = unlockedDoors.slice(0, 2).join(' e ');
-                        if (unlockedDoors.length > 2) {
-                            unlockedDoorNames += ' e outras';
-                        }
-                    }
-                }
-
+            if (unlockedDoors.length > 0) {
                 insights.insights.push({
                     type: "recommendation",
-                    title: `Portas Destrancadas Detectadas`,
-                    description: `Existem ${systemData.stats.doors.unlocked} portas atualmente destrancadas (${unlockedDoorNames}). Verifique se isso é intencional e considere trancá-las ao final do expediente para garantir a segurança do local.`,
-                    priority: systemData.stats.doors.unlocked > 3 ? "high" : "medium",
+                    title: `${unlockedDoors.length} Portas Destrancadas Detectadas`,
+                    description: `Existem ${unlockedDoors.length} portas atualmente destrancadas. Verifique se isso é intencional e considere trancá-las ao final do expediente.`,
+                    priority: unlockedDoors.length > 3 ? "high" : "medium",
                     relatedItems: ["doors", "security"]
                 });
             }
 
-            // If we have recent logs, check for unusual activity
-            if (systemData.recentLogs && systemData.recentLogs.length > 0) {
-                // Check for repeated access denials by the same user
-                const userDenials = {};
-                systemData.recentLogs.forEach(log => {
-                    if (log.action === 'access_denied' && log.user_id) {
-                        if (!userDenials[log.user_id]) {
-                            userDenials[log.user_id] = {
-                                count: 0,
-                                name: log.user_name || log.user_id
-                            };
-                        }
-                        userDenials[log.user_id].count++;
+            // Analisar logs de acesso
+            if (systemData.logs && Object.keys(systemData.logs).length > 0) {
+                const logsArray = Object.values(systemData.logs);
+
+                // Contar tipos de ações
+                const accessGranted = logsArray.filter(log => log.action === 'access_granted').length;
+                const accessDenied = logsArray.filter(log => log.action === 'access_denied').length;
+
+                if (accessGranted + accessDenied > 0) {
+                    const denialRate = Math.round((accessDenied / (accessGranted + accessDenied)) * 100);
+
+                    if (denialRate > 15) {
+                        insights.insights.push({
+                            type: "anomaly",
+                            title: "Taxa elevada de acessos negados",
+                            description: `A taxa de negação de acesso está em ${denialRate}%, acima do ideal. Verifique se as permissões estão configuradas corretamente.`,
+                            priority: "high",
+                            relatedItems: ["access", "security", "users"]
+                        });
+                    }
+                }
+
+                // Analisar atividade por usuário
+                const userActivity = {};
+                logsArray.forEach(log => {
+                    if (log.user_name) {
+                        userActivity[log.user_name] = (userActivity[log.user_name] || 0) + 1;
                     }
                 });
 
-                const suspiciousUsers = Object.values(userDenials)
-                    .filter(user => user.count >= 3);
+                // Encontrar usuários mais ativos
+                const topUsers = Object.entries(userActivity)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3);
 
-                if (suspiciousUsers.length > 0) {
-                    insights.insights.push({
-                        type: "anomaly",
-                        title: `Múltiplas Tentativas de Acesso Negadas`,
-                        description: `${suspiciousUsers.length} usuários tiveram múltiplas negações de acesso recentemente, incluindo ${suspiciousUsers[0].name}. Isso pode indicar tentativas de acesso não autorizado ou problemas com as credenciais dos usuários.`,
-                        priority: "high",
-                        relatedItems: ["security", "users", "access"]
-                    });
-                }
-
-                // Check for unusual after-hours access
-                const afterHoursLogs = systemData.recentLogs.filter(log => {
-                    if (!log.timestamp) return false;
-                    const hour = new Date(log.timestamp).getHours();
-                    return (hour >= 20 || hour <= 5) && log.action === 'access_granted';
-                });
-
-                if (afterHoursLogs.length > 0) {
+                if (topUsers.length > 0) {
                     insights.insights.push({
                         type: "pattern",
-                        title: "Acessos Fora do Horário Comercial",
-                        description: `Foram registrados ${afterHoursLogs.length} acessos fora do horário comercial (20h às 5h). Isso pode ser normal para atividades específicas, mas recomenda-se verificar se esses acessos são esperados.`,
-                        priority: "medium",
-                        relatedItems: ["access", "security"]
+                        title: "Usuários com maior atividade",
+                        description: `Os usuários mais ativos são: ${topUsers.map(u => `${u[0]} (${u[1]} ações)`).join(', ')}.`,
+                        priority: "low",
+                        relatedItems: ["users", "access"]
                     });
                 }
             }
 
-            // If no insights were generated, add a general recommendation
+            // Verificar dispositivos offline
+            const offlineDevices = Object.values(systemData.devices || {}).filter(device =>
+                device.status === 'offline'
+            );
+
+            if (offlineDevices.length > 0) {
+                insights.insights.push({
+                    type: "anomaly",
+                    title: `${offlineDevices.length} Dispositivos Offline`,
+                    description: `Existem ${offlineDevices.length} dispositivos offline. Verifique a conectividade e fonte de energia desses dispositivos.`,
+                    priority: "high",
+                    relatedItems: ["devices", "maintenance"]
+                });
+            }
+
+            // Se não houver insights, adicionar um insight padrão
             if (insights.insights.length === 0) {
                 insights.insights.push({
                     type: "recommendation",
                     title: "Sistema operando normalmente",
-                    description: "Nenhum problema significativo detectado. Continue monitorando o desempenho do sistema e a atividade dos usuários.",
+                    description: "Nenhum problema significativo detectado. Continue monitorando o sistema.",
                     priority: "low",
                     relatedItems: ["maintenance"]
                 });
@@ -475,19 +387,51 @@ Respond ONLY with a valid JSON object containing your analysis.`;
             return insights;
         } catch (error) {
             console.error('Error generating local insights:', error);
+            throw error;
+        }
+    }
 
-            // Return a fallback insight
-            return {
-                summary: "Monitoramento do sistema ativo",
-                insights: [{
-                    type: "recommendation",
-                    title: "Análise de sistema limitada",
-                    description: "Não foi possível gerar insights detalhados devido a limitações no processamento de dados. O monitoramento básico do sistema está ativo.",
-                    priority: "medium",
-                    relatedItems: []
-                }]
-            };
+// Adicione esta nova função auxiliar para calcular estatísticas
+    computeSystemStats(systemData) {
+        const stats = {
+            users: {
+                total: Object.keys(systemData.users || {}).length,
+                active: Object.values(systemData.users || {}).filter(u => u.status === 'active').length
+            },
+            doors: {
+                total: Object.keys(systemData.doors || {}).length,
+                locked: Object.values(systemData.doors || {}).filter(d => d.status === 'locked').length,
+                unlocked: Object.values(systemData.doors || {}).filter(d => d.status === 'unlocked').length
+            },
+            devices: {
+                total: Object.keys(systemData.devices || {}).length,
+                online: Object.values(systemData.devices || {}).filter(d => d.status === 'online').length,
+                offline: Object.values(systemData.devices || {}).filter(d => d.status === 'offline').length
+            },
+            logs: {
+                total: Object.keys(systemData.logs || {}).length
+            }
         };
+
+        // Calcular estatísticas adicionais
+        if (systemData.logs && Object.keys(systemData.logs).length > 0) {
+            const logsArray = Object.values(systemData.logs);
+            stats.access = {
+                granted: logsArray.filter(log => log.action === 'access_granted').length,
+                denied: logsArray.filter(log => log.action === 'access_denied').length,
+                doorLocked: logsArray.filter(log => log.action === 'door_locked').length,
+                doorUnlocked: logsArray.filter(log => log.action === 'door_unlocked').length
+            };
+
+            // Calcular taxa de negação
+            if (stats.access.granted + stats.access.denied > 0) {
+                stats.access.denialRate = (stats.access.denied / (stats.access.granted + stats.access.denied) * 100).toFixed(1);
+            } else {
+                stats.access.denialRate = "0.0";
+            }
+        }
+
+        return stats;
     }
 
     /**
