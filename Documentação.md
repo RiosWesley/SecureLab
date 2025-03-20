@@ -1,1324 +1,247 @@
-```markdown
-# Documentação Detalhada do Projeto SecureLab RFID
+# Documentação do Projeto SecureLab RFID
 
 ## Visão Geral do Projeto
 
-O SecureLab RFID é um sistema de controle de acesso baseado em RFID (Radio-Frequency Identification) projetado para gerenciar e monitorar a segurança em ambientes controlados, como laboratórios, escritórios ou áreas restritas. A interface web do sistema oferece um painel de controle abrangente para administradores e usuários autorizados, permitindo o gerenciamento de usuários, portas, dispositivos RFID, logs de acesso e fornecendo insights inteligentes através da integração com o assistente Gemini.
+O SecureLab RFID é um sistema de controle de acesso robusto e intuitivo, fundamentado na tecnologia RFID (Radio-Frequency Identification), meticulosamente projetado para otimizar a gestão e a vigilância da segurança em ambientes de acesso controlado. Destinado a espaços como laboratórios, complexos de escritórios e zonas de segurança elevada, o sistema oferece uma interface web abrangente que serve como um centro de comando para administradores e usuários autorizados. Através desta interface, é possível realizar uma vasta gama de operações, incluindo o gerenciamento de perfis de usuário, a supervisão e o controle de portas equipadas com tecnologia RFID, a administração de dispositivos de leitura e controle de acesso, e a análise detalhada de logs de acesso para auditoria e melhoria da segurança.
 
-Este documento detalha a estrutura, funcionalidades e tecnologias implementadas no projeto SecureLab RFID, fornecendo uma visão minuciosa do seu funcionamento.
+Além das funcionalidades essenciais de controle de acesso, o SecureLab RFID integra o assistente Gemini, uma tecnologia avançada de inteligência artificial, para fornecer insights inteligentes e automatizar tarefas complexas. Esta integração permite que o sistema não apenas registre e controle o acesso, mas também aprenda com os dados coletados, oferecendo análises preditivas, recomendações de segurança proativas e uma interface de usuário conversacional para interação mais natural e eficiente com o sistema. O assistente Gemini eleva a experiência do usuário, transformando dados brutos em informações valiosas e acionáveis, consolidando o SecureLab RFID como uma solução de segurança inteligente e adaptável.
 
-## Estrutura de Arquivos
+## Estrutura de Arquivos Detalhada
 
-O projeto está organizado em diretórios que separam as responsabilidades de cada tipo de arquivo, facilitando a manutenção e escalabilidade.
+O projeto SecureLab RFID é meticulosamente organizado em uma estrutura de diretórios que promove a clareza, a modularidade e a facilidade de manutenção. Cada diretório e arquivo foi nomeado e posicionado de forma estratégica para refletir sua função dentro do sistema, facilitando a navegação e o entendimento do código base. Abaixo, detalhamos a estrutura de arquivos, explicando o propósito de cada componente para fornecer uma visão abrangente da organização do projeto.
+
 
 ```
 public/
 ├── css/
-│   ├── components.css           # Estilos para componentes de UI reutilizáveis
-│   ├── dashboard.css            # Estilos específicos para a página do Dashboard
-│   ├── dark-mode.css            # Implementação e variáveis do modo escuro
-│   ├── devices.css              # Estilos específicos para a página de Dispositivos
-│   ├── gemini-assistant.css     # Estilos para o assistente Gemini
-│   ├── gemini-insights.css      # Estilos para o componente de insights do Gemini
-│   ├── logs.css                 # Estilos específicos para a página de Logs
-│   ├── mobile.css               # Otimizações de estilo para dispositivos móveis
-│   ├── styles.css               # Estilos globais e layout principal
-│   └── utils.css                # Classes utilitárias (margens, paddings, etc.)
+│   ├── components.css        # Estilos para componentes UI reutilizáveis
+│   ├── dashboard.css         # Estilos do Dashboard
+│   ├── dark-mode.css         # Implementação do modo escuro
+│   ├── devices.css           # Estilos da página de Dispositivos
+│   ├── gemini-assistant.css  # Estilos do assistente Gemini
+│   ├── gemini-insights.css   # Estilos dos insights do Gemini
+│   ├── logs.css              # Estilos da página de Logs
+│   ├── mobile.css            # Otimizações para dispositivos móveis
+│   ├── styles.css            # Estilos globais e layout principal
+│   └── utils.css             # Classes utilitárias
 ├── js/
-│   ├── activity-chart.js        # Lógica para o gráfico de atividades no Dashboard
-│   ├── common.js              # Funções JavaScript comuns e utilitárias
-│   ├── devices.js             # Lógica para a página de Dispositivos
-│   ├── doors.js               # Lógica para a página de Portas
-│   ├── dashboard.js           # Lógica para a página do Dashboard
-│   ├── firebase-config.js     # Configuração e inicialização do Firebase
-│   ├── gemini-assistant.js      # Lógica da interface do assistente Gemini
-│   ├── gemini-config.js       # Configurações da API Gemini
-│   ├── gemini-service.js      # Serviço para comunicação com a API Gemini
-│   ├── logs.js                # Lógica para a página de Logs
-│   ├── mobile.js              # Funcionalidades JavaScript para mobile
-│   ├── simplified-gemini-insights.js # Componente simplificado de Insights Gemini
-│   ├── theme-switcher.js        # Lógica para o tema claro/escuro
-│   ├── users.js               # Lógica para a página de Usuários
-│   └── utils.js               # Utilitários JavaScript para manipulação do DOM
-└── README.md                  # Documentação do projeto (este arquivo)
+│   ├── activity-chart.js     # Lógica do gráfico de atividades
+│   ├── common.js             # Funções utilitárias comuns
+│   ├── devices.js            # Lógica da página de Dispositivos
+│   ├── doors.js              # Lógica da página de Portas
+│   ├── dashboard.js          # Lógica da página do Dashboard
+│   ├── firebase-config.js    # Configuração do Firebase
+│   ├── gemini-assistant.js   # Interface do assistente Gemini
+│   ├── gemini-config.js      # Configurações da API Gemini
+│   ├── gemini-service.js     # Serviço de comunicação com API Gemini
+│   ├── logs.js               # Lógica da página de Logs
+│   ├── mobile.js             # Funcionalidades para mobile
+│   ├── theme-switcher.js     # Lógica para tema claro/escuro
+│   ├── users.js              # Lógica da página de Usuários
+│   └── utils.js              # Utilitários para DOM
+└── README.md                 # Documentação do projeto
 ```
 
-## Documentação dos Arquivos CSS
+## Principais Componentes e Funcionalidades
 
-### `components.css`
+### Arquivos CSS
 
-Este arquivo CSS define os estilos para componentes de interface do usuário reutilizáveis em todo o sistema. Ele promove a consistência visual e facilita a manutenção do design.
+Os arquivos CSS são meticulosamente organizados para garantir a manutenibilidade e a escalabilidade do design do sistema. Cada arquivo tem um propósito específico, facilitando a localização e modificação de estilos.
 
-- **Botões (`.btn`, `.btn-*`, `.icon-button`, `.btn-link`, `.btn-sm`):** Estilos base para botões, incluindo variações de cor primária, secundária, sucesso, perigo, estilos outline e botões de ícone. Define propriedades como `display`, `font-weight`, `padding`, `border-radius`, `transition` e `cursor`.
-- **Status Badges (`.status-badge`, `.status-*`):** Estilos para badges indicativos de status, como `locked` e `unlocked`. Inclui estilos para ícones dentro dos badges.
-- **Modal (`.modal`, `.modal-*`, `.close-button`):** Estilos para modais, incluindo o container, diálogo, conteúdo, cabeçalho, corpo, rodapé e botão de fechar. Garante responsividade com `max-width` e `width: 90%` para `.modal-dialog`.
-- **Form Styles (`.form-group`, `.form-control`):** Estilos para elementos de formulário como grupos de campos, labels e controles de input. Inclui estilos para estados de foco e validação.
-- **Dropdown (`.dropdown`, `.dropdown-menu`, `.dropdown-item`):** Estilos para componentes dropdown, incluindo o menu, itens e interações hover/focus.
-- **Tables (`.table-responsive`, `.table`, `.table th`, `.table td`):** Estilos para tabelas responsivas, cabeçalhos de tabela, células de dados e efeitos hover nas linhas.
-- **Pagination (`.pagination-container`, `.pagination`, `.pagination-*`):** Estilos para componentes de paginação, incluindo container, botões de navegação e informações de página.
-- **Notification (`.notification-container`, `.notification`, `.close-notification`):** Estilos para notificações flutuantes, incluindo animação `fadeIn` e botão de fechar.
-- **Activity List, Door List, Alerts List (`.activity-list`, `.door-list`, `.alerts-list`, `.activity-*`, `.alert-*`):** Estilos para listas de atividades, portas e alertas, incluindo ícones e layouts responsivos.
-- **Card Styles (`.card`, `.card-*`):** Estilos para cards de conteúdo, incluindo cabeçalho, corpo e ações.
-- **Password Toggle (`.password-input`, `.password-toggle`):** Estilos para campos de input de senha com funcionalidade de toggle de visibilidade.
+- **`components.css`**: Este arquivo é o repositório central para estilos de componentes de UI reutilizáveis. Ele garante a consistência visual em toda a aplicação, definindo estilos para elementos como `botões`, com classes como `.btn`, `.btn-primary`, `.btn-secondary`, etc., que oferecem variações estilísticas para diferentes contextos de uso. `Badges de status`, definidos pelas classes `.status-badge`, `.status-locked`, e `.status-unlocked`, fornecem indicadores visuais claros para o estado de diferentes entidades do sistema. `Modais`, estilizados com classes como `.modal`, `.modal-content`, e `.modal-header`, são cruciais para a interação do usuário, permitindo a exibição de informações ou formulários de forma organizada e focada. Além disso, estilos para `formulários`, `dropdowns`, `tabelas` e `elementos de paginação` são definidos, cobrindo uma ampla gama de componentes de UI necessários para a interface administrativa.
 
-### `dashboard.css`
+- **`dashboard.css`**: Dedicado à estilização do painel de controle principal, este arquivo foca na apresentação eficaz de dados e métricas. Ele estiliza `gráficos de benchmark`, utilizando classes como `.benchmark-container`, `.benchmark-bar-container`, e `.benchmark-bar` para criar visualizações de desempenho do sistema. A apresentação do `dispositivo mais sobrecarregado` é estilizada com classes como `.hotspot-device`, `.hotspot-title`, e `.hotspot-info`, destacando informações críticas de forma clara. Além disso, o arquivo define estilos para `classes de criticidade`, como `.benchmark-bar.normal`, `.benchmark-bar.warning`, e `.benchmark-bar.critical`, permitindo que o sistema alerte visualmente os usuários sobre diferentes níveis de problemas ou alertas do sistema.
 
-Este arquivo contém estilos específicos para a página do dashboard, focando na apresentação de métricas de benchmark e informações de dispositivos.
+- **`dark-mode.css`**: Este arquivo implementa o tema escuro, transformando a interface para um esquema de cores mais escuro que é mais confortável para os olhos em ambientes com pouca luz. Utilizando variáveis CSS, ele redefine as cores primárias e secundárias do sistema, bem como cores de fundo, texto e bordas, garantindo que todos os componentes da UI sejam adaptados para o modo escuro. Correções específicas para `páginas de login`, `status das portas`, e outros elementos da interface são incluídas para garantir uma transição suave e completa para o tema escuro, mantendo a legibilidade e a usabilidade.
 
-- **Benchmark Container (`.benchmark-container`, `.benchmark-*`):** Estilos para o container geral do benchmark, título, métricas, labels, barras de progresso e valores. Inclui estilos responsivos e para o modo escuro.
-- **Hotspot Device (`.hotspot-device`, `.hotspot-*`):** Estilos para a seção do dispositivo mais sobrecarregado, incluindo título, nome do dispositivo e carga.
-- **Responsividade:** Media queries para ajustar o layout em telas menores (`max-width: 768px`).
-- **Tema Escuro:** Estilos específicos para o modo escuro (`html.dark-mode .benchmark-*`).
-- **Classes de Criticidade (`.benchmark-bar.normal`, `.benchmark-bar.warning`, `.benchmark-bar.critical`):** Estilos para indicar o nível de criticidade das métricas de benchmark através de cores, padrões e animações.
+- **`mobile.css`**: Este arquivo é essencial para garantir a responsividade do SecureLab RFID em dispositivos móveis. Através de media queries, ele ajusta o layout e o tamanho dos elementos para telas menores, melhorando a experiência do usuário em smartphones e tablets. Ajustes para a `sidebar mobile`, o `header`, o `conteúdo principal`, `cards`, `tabelas`, `modais`, `formulários`, `botões` e `elementos de paginação` são definidos, garantindo que a interface administrativa seja totalmente funcional e visualmente agradável em dispositivos móveis. Elementos específicos para mobile, como o `botão de menu mobile` e o `overlay`, são estilizados para fornecer uma navegação intuitiva e eficiente em telas touch.
 
-### `dark-mode.css`
+- **`styles.css`**: Como o arquivo CSS principal, `styles.css` estabelece as fundações estilísticas do SecureLab RFID. Ele define `variáveis CSS globais`, como cores primárias e secundárias, largura da sidebar, altura do header, raio dos cantos dos cards e velocidade de transição, permitindo uma personalização centralizada e consistente do tema. O arquivo também define o `layout principal`, incluindo estilos para o `app-container`, `sidebar`, `main-content` e `header principal`, estruturando a página web e organizando os principais elementos da interface do usuário. Adicionalmente, estilos para `cards`, `status cards`, `listas de atividades`, `listas de portas`, `botões` e o `gráfico de atividade diária` são incluídos, abrangendo os estilos base para os componentes mais importantes do sistema e garantindo uma aparência coesa e profissional.
 
-Este arquivo implementa o tema escuro para o sistema, redefinindo variáveis de cor e ajustando estilos de componentes para garantir legibilidade e contraste em ambientes escuros.
+- **`utils.css`**: Este arquivo fornece uma coleção de classes CSS utilitárias, projetadas para simplificar tarefas comuns de estilização e layout, promovendo a eficiência e a reutilização de código CSS. Classes para `margens` (`.m-0`, `.m-1`, `.mt-3`, `.mb-5`, etc.), `padding` (`.p-0`, `.p-2`, `.pt-4`, `.pb-1`, etc.), `texto` (`.text-center`, `.text-primary`, `.fw-bold`, etc.), `flexbox` (`.d-flex`, `.flex-column`, `.justify-content-between`, etc.), `display` (`.d-none`, `.d-block`, `.d-inline-block`, etc.), `bordas` (`.rounded`), `largura e altura` (`.w-100`) e `cursor` (`.cursor-pointer`) são definidas, oferecendo uma caixa de ferramentas CSS que pode ser rapidamente aplicada para ajustar o espaçamento, o alinhamento, a aparência do texto e outras propriedades visuais, sem a necessidade de escrever CSS personalizado repetidamente. A `estilização global da barra de rolagem` também é definida neste arquivo, garantindo uma aparência consistente e personalizada das barras de rolagem em diferentes navegadores e contextos do sistema.
 
-- **Redefinição de Variáveis de Cor (`html.dark-mode :root`):** Define novas variáveis de cor `--primary-color`, `--secondary-color`, `--success-color`, `--danger-color`, etc., e variáveis específicas para o modo escuro como `--dark-bg-color`, `--dark-card-bg`, `--dark-text-primary`, etc.
-- **Correções para Páginas Específicas:**
-    - **Página de Login (`html.dark-mode .login-container`, etc.):** Ajustes para elementos da página de login, garantindo que labels, inputs e outros elementos sejam legíveis no modo escuro.
-    - **Status das Portas (`html.dark-mode [style*="color: #e74c3c"]`, etc.):** Correções para indicadores de status de portas, badges e ícones em tabelas para manter a semântica de cores (vermelho para perigo, verde para sucesso) no tema escuro.
-    - **Status de Portas no Dashboard (`html.dark-mode .door-status.*`):** Estilos específicos para os indicadores de status das portas no dashboard.
-- **Ajustes para Outros Elementos da Interface:**
-    - **Sidebar e Header (`html.dark-mode .sidebar`, `.main-header`, `.sidebar-nav li a`, etc.):** Estilos para sidebar, header, navegação e footer no modo escuro.
-    - **Formulários e Inputs (`html.dark-mode .header-search`, `.form-control`, etc.):** Ajustes para campos de busca, inputs de formulário e labels.
-    - **Cards e Tabelas (`html.dark-mode .log`, `.card`, `.table`, etc.):** Estilos para cards, tabelas, cabeçalhos, células e linhas alternadas para garantir contraste e legibilidade.
-    - **Status Cards no Dashboard (`html.dark-mode .status-card-*`):** Estilos para status cards no dashboard, incluindo cabeçalho, contadores e labels.
-    - **Modais (`html.dark-mode .modal-*`, `.close-button`, etc.):** Estilos para modais, conteúdo, cabeçalho, rodapé, botões de fechar e inputs dentro de modais.
-    - **Notificações (`html.dark-mode .notification`):** Estilos para notificações no modo escuro.
-    - **Botões (`html.dark-mode .btn-outline-secondary`, etc.):** Ajustes para botões outline e outros tipos de botões.
-    - **Paginação (`html.dark-mode .pagination-*`, `.page-number`):** Estilos para paginação, informações e botões no modo escuro.
-    - **Dropdown (`html.dark-mode .dropdown-*`, `.dropdown-item`):** Estilos para dropdowns, menus e itens no modo escuro.
-    - **Chart.js (`html.dark-mode .chart-placeholder`, `canvas`, `.chart-legend span`, etc.):** Ajustes para gráficos Chart.js, incluindo placeholders, canvases e legendas para garantir visibilidade e contraste.
-    - **Gemini (`html.dark-mode #gemini-toggle-btn`):** Estilos para elementos específicos do assistente Gemini no tema escuro.
-    - **Dispositivos Mobile (`@media (max-width: 768px) html.dark-mode .mobile-overlay`):** Ajustes responsivos para dispositivos mobile no modo escuro.
+### Arquivos JavaScript
 
-### `devices.css`
+Os arquivos JavaScript são organizados por funcionalidade, cada um responsável por uma parte específica da lógica do sistema.
 
-Este arquivo CSS é dedicado aos estilos específicos da página de gerenciamento de dispositivos, focando na apresentação de configurações e métricas de dispositivos.
+- **`dashboard.js`**: Este script é o motor lógico por trás da página do Dashboard, orquestrando o carregamento e a exibição de uma variedade de dados essenciais para uma visão geral do sistema SecureLab RFID. Ele inicia carregando o `nome do usuário atual`, personalizando a experiência do usuário e exibindo informações relevantes de forma contextualizada. Em seguida, carrega `estatísticas de usuários`, `estatísticas de portas`, `estatísticas de dispositivos` e `logs de atividade recentes`, utilizando chamadas assíncronas ao Firebase Realtime Database para obter dados atualizados e em tempo real. O script também é responsável por atualizar as `métricas de benchmark` dos dispositivos, calculando e exibindo indicadores de desempenho chave, e por renderizar `gráficos de atividade diária`, utilizando bibliotecas de visualização de dados para apresentar informações complexas de forma clara e intuitiva. Além disso, ele configura `event listeners para botões de atualização` no dashboard, permitindo que os usuários solicitem manualmente a atualização dos dados exibidos, garantindo que as informações estejam sempre atualizadas e relevantes.
 
-- **Settings Tabs (`.settings-tabs`, `.tab-buttons`, `.tab-btn`, `.tab-pane`):** Estilos para a interface de abas dentro do modal de configurações de dispositivos, incluindo botões de aba e painéis de conteúdo.
-- **Network Inputs (`.radio-group`, `.input-group`, `.input-group-append`):** Estilos para inputs relacionados à configuração de rede, como grupos de radio para seleção de DHCP/Estático e inputs de grupos com botões anexados.
-- **Brightness Slider (`input[type="range"]`):** Estilos para o slider de controle de brilho, incluindo a barra, thumb e compatibilidade com navegadores WebKit e Mozilla.
-- **Maintenance Actions (`.maintenance-actions`):** Estilos para a seção de ações de manutenção, como reiniciar ou restaurar configurações de fábrica.
-- **Battery and Connectivity Status (`.device-battery-status`, `.device-connectivity-status`, `.battery-indicator`, `.connectivity-indicator`, `.battery-level`, `.connectivity-level`):** Estilos para indicadores visuais de status da bateria e conectividade, utilizando barras de progresso com cores dinâmicas baseadas no nível.
-- **Dark Mode Adjustments (`html.dark-mode .tab-btn`, `input[type="range"]`, `.battery-indicator`, `.connectivity-indicator`):** Ajustes de estilo para o modo escuro, garantindo que os elementos de configuração e status sejam legíveis e consistentes visualmente.
-- **Device Metrics (`.device-metrics`, `.metric-item`, `.metric-title`, `.metric-value`, `.metric-unit`):** Estilos para exibir métricas de dispositivos em um layout de grid, incluindo títulos, valores e unidades de medida.
-- **Responsiveness (`@media (max-width: 768px) .device-metrics`, `.tab-buttons`, `.tab-btn`, `.radio-group`, `.maintenance-actions button`):** Media queries para otimizar o layout da página de dispositivos em telas menores, incluindo ajuste do grid de métricas, layout de abas e grupos de radio para melhor usabilidade em mobile.
+- **`users.js`**: Este script gerencia toda a funcionalidade relacionada à página de Usuários, permitindo que os administradores realizem operações completas de CRUD (Criar, Ler, Atualizar e Deletar) em contas de usuário. Ele cuida do `carregamento de usuários do Firebase`, buscando dados de usuários do backend e preparando-os para exibição na interface administrativa. A `renderização de usuários na tabela` é uma funcionalidade central, que pega os dados de usuários e os exibe de forma organizada e paginada, facilitando a navegação e a gestão de grandes listas de usuários. O script também implementa `filtragem e busca de usuários`, permitindo que os administradores localizem rapidamente usuários específicos com base em critérios como nome, e-mail, departamento ou função. A funcionalidade de `exportar usuários` para formatos como CSV e PDF é suportada, facilitando a geração de relatórios e a integração com outras ferramentas de gestão. Além disso, o script gerencia a interação do usuário com `modais para adicionar e editar usuários`, capturando dados de formulários, validando entradas e comunicando-se com o backend para persistir ou atualizar informações de usuários. A `validação de formulários de usuário` é realizada no lado do cliente para garantir a integridade dos dados e fornecer feedback imediato ao usuário, melhorando a experiência administrativa.
 
-### `gemini-assistant.css`
+- **`doors.js`**: Dedicado ao gerenciamento de portas RFID, este script oferece um conjunto abrangente de funcionalidades para controlar e monitorar o acesso físico. Ele inicia `carregando portas do Firebase`, obtendo a lista de portas e seus status do backend, garantindo que a interface reflita o estado atual do sistema. A `renderização de portas na tabela` é uma funcionalidade chave, apresentando informações detalhadas sobre cada porta, incluindo nome, localização, status e ações disponíveis, de forma organizada e fácil de entender. O script permite `filtrar portas por nome e localização`, facilitando a gestão de um grande número de portas em instalações extensas. A funcionalidade de `controle de portas (trancar/destrancar)` é central, permitindo que os administradores alterem remotamente o status de segurança das portas, respondendo a emergências ou necessidades operacionais. Além disso, o script gerencia a interação do usuário com `modais para adicionar e editar portas`, capturando informações sobre novas portas ou modificações em portas existentes, e comunicando-se com o backend para persistir as alterações. A `manipulação do envio do formulário de porta` e o `controle de uma porta (trancar/destrancar)` são cuidadosamente implementados para garantir a segurança e a confiabilidade do sistema de controle de acesso.
 
-Este arquivo CSS define os estilos para a interface do assistente Gemini, que permite a interação com o sistema através de linguagem natural.
+- **`devices.js`**: Este script é responsável pela gestão de dispositivos RFID, fornecendo as ferramentas necessárias para administrar o hardware do sistema. Ele permite `simular a carga de dados de dispositivos para visualização`, utilizando dados mockados para testar e demonstrar a interface sem depender de dados reais do backend, facilitando o desenvolvimento e a apresentação do sistema. A `renderização dos dispositivos na tabela` é uma funcionalidade fundamental, apresentando uma visão clara do inventário de dispositivos, incluindo nome, tipo, localização, status e ações disponíveis. O script também implementa `filtragem de dispositivos`, permitindo que os administradores localizem rapidamente dispositivos específicos com base em critérios como status, tipo ou firmware. A funcionalidade de `abrir modais para adicionar ou editar um dispositivo` e o `modal de configuração de dispositivo` são cruciais para a administração, permitindo que os usuários modifiquem as configurações dos dispositivos, realizem manutenção e atualizações de firmware através de uma interface intuitiva. Além disso, o script gerencia a ação de `salvar um dispositivo (adição ou edição)` e `salvar as configurações de um dispositivo`, comunicando-se com o backend para persistir as alterações e garantir que o sistema reflita o estado atualizado do hardware.
 
-- **Assistant Container (`.gemini-assistant`):** Estilos para o container principal do assistente, incluindo posicionamento fixo, dimensões, fundo, borda arredondada, sombra e transições para efeitos de minimizar/maximizar.
-- **Minimized State (`.gemini-assistant.gemini-minimized`):** Estilos para o estado minimizado do assistente, reduzindo a altura e ocultando a área de conversa e input.
-- **Header (`.gemini-header`, `.gemini-branding`, `.gemini-avatar`, `.gemini-actions`, `.gemini-action-btn`):** Estilos para o cabeçalho do assistente, incluindo branding, avatar, título e botões de ação (minimizar, limpar conversa).
-- **Conversation Area (`.gemini-conversation-container`, `.gemini-conversation`):** Estilos para o container da conversa, permitindo scroll vertical e layout flexível para as mensagens.
-- **Messages (`.gemini-message`, `.gemini-*-message`, `.gemini-message-avatar`, `.gemini-message-content`):** Estilos para mensagens de usuário e assistente, incluindo avatares, conteúdos, formatação de texto, código, listas e tabelas dentro das mensagens.
-- **Content Formatting (`.gemini-message-content p`, `.gemini-message-content code`, `.gemini-message-content pre`, etc.):** Estilos para formatar o conteúdo dentro das mensagens, como parágrafos, código inline, blocos de código (`.gemini-code-block`), títulos (h4, h5, h6), listas (ul, ol) e tabelas (`.gemini-table`).
-- **Dashboard in Messages (`.gemini-dashboard`, `.gemini-stat-card`, `.gemini-stat-*`):** Estilos para exibir mini dashboards dentro das mensagens do assistente, mostrando métricas e estatísticas.
-- **Info Grid (`.gemini-info-grid`, `.gemini-info-item`, `.gemini-info-*`):** Estilos para exibir informações em formato de grid dentro das mensagens.
-- **Analysis Charts (`.gemini-analysis`, `.gemini-chart`, `.gemini-chart-*`):** Estilos para gráficos de análise de barra dentro das mensagens.
-- **Insights (`.gemini-insights`, `.gemini-insight`):** Estilos para exibir insights e recomendações em formato de lista dentro das mensagens.
-- **Typing Indicator (`.gemini-typing-indicator`, `.gemini-typing-indicator span`):** Estilos para o indicador de digitação animado.
-- **Confirmation (`.gemini-confirmation`, `.gemini-confirmation-*`, `.gemini-confirm-*`):** Estilos para mensagens de confirmação e botões de confirmação (sim/não).
-- **Suggestions (`.gemini-suggestions`, `.gemini-suggestion`):** Estilos para a área de sugestões rápidas de comandos ou perguntas.
-- **Input Field (`.gemini-input-container`, `.gemini-input`, `.gemini-send-btn`):** Estilos para o container do campo de input, textarea para entrada de texto e botão de envio.
-- **Dark Mode Adjustments (`html.dark-mode .gemini-assistant`, `.gemini-header`, `.gemini-conversation-container`, etc.):** Ajustes de estilo para o modo escuro, garantindo que todos os elementos do assistente Gemini sejam legíveis e visíveis no tema escuro.
-- **Responsiveness (`@media (max-width: 768px) .gemini-assistant`, `.gemini-header`, `.gemini-dashboard`, `.gemini-chart-label`):** Media queries para otimizar o layout do assistente Gemini em telas menores, incluindo ajuste de dimensões, layout do dashboard e labels de gráficos.
+- **`logs.js`**: Focado na gestão de logs de acesso, este script oferece funcionalidades essenciais para monitorar e auditar a segurança do sistema. Ele inicia `configurando os filtros de data`, permitindo que os usuários restrinjam os logs exibidos a períodos de tempo específicos, facilitando a análise de eventos em janelas temporais relevantes. O script é responsável por `carregar os logs do Firebase`, buscando registros de acesso do backend e preparando-os para exibição na interface administrativa. A `aplicação dos filtros selecionados aos logs` permite refinar ainda mais a visualização, combinando critérios de data, usuário, porta, ação e método para focar em eventos específicos de interesse. A `renderização dos logs na interface` apresenta os registros de acesso de forma clara e organizada, com paginação para facilitar a navegação em grandes volumes de dados. Além disso, o script implementa a funcionalidade de `exportar os logs no formato especificado`, permitindo que os usuários gerem relatórios em CSV ou PDF para análise offline, auditoria ou conformidade regulatória. A `atualização dos contadores de logs` e a `atualização da paginação` garantem que a interface administrativa forneça sempre uma visão precisa e atualizada dos registros de acesso, melhorando a capacidade de resposta e a tomada de decisões baseada em dados.
 
-### `gemini-insights.css`
+- **`firebase-config.js`**: Este arquivo é o alicerce da integração backend do SecureLab RFID, centralizando a configuração e a inicialização do Firebase. Ele contém um objeto `firebaseConfig` que deve ser meticulosamente configurado com as `credenciais do Firebase` do projeto, incluindo `apiKey`, `authDomain`, `databaseURL`, `projectId`, `storageBucket`, `messagingSenderId` e `appId`, garantindo a conexão segura e autenticada com os serviços do Firebase. O script `inicializa o Firebase` com essas configurações, estabelecendo a base para a utilização do Firebase Authentication e Realtime Database em toda a aplicação. Além disso, ele cria `referências para serviços do Firebase`, como `auth` e `database`, que são exportadas ou disponibilizadas globalmente, facilitando o acesso e a interação com os serviços do Firebase a partir de outros módulos JavaScript do projeto. O arquivo também inclui a `verificação do estado de autenticação`, implementando um listener que monitora mudanças no estado de autenticação do usuário, garantindo que apenas usuários autenticados acessem as funcionalidades do sistema e redirecionando usuários não autenticados para a página de login, mantendo a segurança e a integridade do acesso ao sistema.
 
-Este arquivo CSS define os estilos para o componente de insights do Gemini, que exibe insights e recomendações inteligentes no dashboard.
+- **`gemini-assistant.js`**: Este script implementa a interface do assistente Gemini, integrando capacidades avançadas de IA ao SecureLab RFID. Ele inicializa o `assistente Gemini` e cria os elementos da interface do usuário necessários para a interação conversacional, incluindo a janela de chat, o campo de entrada de texto e os botões de ação. O script gerencia o `envio de mensagens do usuário` para o serviço Gemini, capturando a entrada do usuário, formatando a mensagem e enviando-a para processamento pela API de IA. A `recepção e exibição de respostas do Gemini` é tratada, pegando as respostas do modelo de linguagem, formatando-as para exibição na interface do chat e apresentando-as de forma clara e amigável ao usuário. Além disso, o script implementa a funcionalidade de `processar comandos e ações do usuário`, interpretando mensagens que se assemelham a comandos, enviando-as para processamento pelo serviço Gemini e executando as ações correspondentes no sistema SecureLab RFID, como trancar/destrancar portas ou obter relatórios de status. A `gestão do histórico de conversas` é mantida para fornecer contexto para interações futuras, permitindo que o assistente Gemini mantenha o fio da conversa e ofereça respostas mais relevantes e personalizadas ao longo do tempo.
 
-- **Insights Panel Container (`.gemini-insights-panel`):** Estilos para o container principal do painel de insights, incluindo fundo, borda arredondada, sombra e layout flexível.
-- **Header (`.gemini-insights-header`, `.gemini-insights-header h3`, `.gemini-insights-header h3 i`, `.gemini-insights-actions`, `.gemini-insights-refresh`):** Estilos para o cabeçalho do painel, incluindo título, ícone e botão de refresh.
-- **Body (`.gemini-insights-body`):** Estilos para o corpo do painel, permitindo scroll vertical.
-- **Insights Summary (`.gemini-insights-summary`, `.gemini-insights-summary-content`, `.gemini-insights-summary-icon`, `.gemini-insights-summary p`):** Estilos para a área de resumo dos insights, incluindo ícone e texto.
-- **Loading Indicator (`.gemini-insights-loading`, `.gemini-insights-spinner`, `@keyframes spin`):** Estilos para o indicador de carregamento, incluindo um spinner animado.
-- **Insights List (`.gemini-insights-list`):** Estilos para a lista de insights.
-- **Insight Item (`.gemini-insight`, `.gemini-insight:hover`, `.gemini-insight:last-child`, `.gemini-insight-icon`, `.gemini-insight-* .gemini-insight-icon`, `.gemini-insight-content`, `.gemini-insight-title`, `.gemini-insight-description`, `.gemini-insight-related`, `.gemini-insight-tag`):** Estilos para cada item de insight, incluindo hover, ícones baseados no tipo de insight (anomaly, pattern, recommendation, error), título, descrição e tags relacionadas.
-- **Insight Priority (`.gemini-priority-high .gemini-insight-title`, `.gemini-priority-medium .gemini-insight-title`):** Estilos para destacar a prioridade dos insights, especialmente alta prioridade com cor vermelha e um indicador visual (!).
-- **No Insights Message (`.gemini-no-insights`):** Estilos para exibir uma mensagem quando não há insights disponíveis.
-- **Error Message (`.gemini-insights-error`, `.gemini-insights-error i`, `.gemini-insights-error p`):** Estilos para exibir mensagens de erro no painel de insights.
-- **Footer (`.gemini-insights-footer`, `.gemini-insights-updated`, `.gemini-insights-more`, `.gemini-insights-more i`, `.gemini-insights-more:hover`):** Estilos para o rodapé do painel, incluindo timestamp da última atualização e link "Ask assistant".
-- **Dark Mode Adjustments (`html.dark-mode .gemini-insights-panel`, `.gemini-insights-header`, `.gemini-insights-refresh`, etc.):** Ajustes de estilo para o modo escuro, garantindo que todos os elementos do painel de insights sejam legíveis e visíveis no tema escuro.
-- **Responsiveness (`@media (max-width: 768px) .gemini-insights-panel`, `.gemini-insights-header`, `.gemini-insights-summary`, `.gemini-insight`):** Media queries para otimizar o layout do painel de insights em telas menores, incluindo ajuste de bordas e paddings.
+- **`gemini-config.js`**: Este arquivo centraliza as configurações específicas para a integração com a API Gemini, permitindo ajustar e personalizar o comportamento do assistente virtual. Ele define `configurações da API Gemini`, incluindo a `apiKey` para autenticação, o `apiEndpoint` para comunicação com o modelo de linguagem, `maxTokens` para controlar o tamanho das respostas, `temperature` para ajustar a criatividade das respostas e `safetySettings` para configurar filtros de segurança e garantir respostas apropriadas e seguras. O arquivo também oferece `configurações da UI`, como `initiallyOpen` para definir se o assistente deve ser aberto por padrão, `autoInitialize` para controlar a inicialização automática e `mobileMinimized` para especificar se o assistente deve ser minimizado em dispositivos móveis, permitindo adaptar a experiência do usuário às preferências e necessidades específicas. Adicionalmente, `configurações de insights` são incluídas, como `autoRefresh` para ativar ou desativar a atualização automática de insights, `refreshInterval` para definir a frequência de atualização e `maxInsights` para controlar o número máximo de insights exibidos, permitindo otimizar o desempenho e a relevância das informações fornecidas pelo assistente Gemini.
 
-### `logs.css`
+- **`gemini-service.js`**: Este script atua como a camada de serviço para a API Gemini, encapsulando a lógica de comunicação e processamento de respostas do modelo de linguagem. Ele gerencia o `envio de mensagens para a API Gemini`, construindo requisições HTTP com o payload correto, incluindo a mensagem do usuário, o contexto do sistema e parâmetros de configuração, e enviando-as para o endpoint da API. O script é responsável por `processar a resposta da API Gemini`, recebendo a resposta JSON do modelo de linguagem, extraindo o texto da resposta e tratando possíveis erros ou respostas incompletas. Ele também implementa a funcionalidade de `gerar insights baseados em dados do sistema`, construindo prompts específicos para solicitar análises e insights ao Gemini, enviando esses prompts para a API e processando as respostas para extrair informações úteis e acionáveis. Além disso, o script oferece `processamento de comandos em linguagem natural`, interpretando mensagens do usuário que se assemelham a comandos, enviando-as para o Gemini para processamento e retornando a intenção, entidades e parâmetros extraídos para execução de ações no sistema SecureLab RFID. A `gestão da conversa com Gemini` é realizada mantendo o histórico de mensagens trocadas com o modelo de linguagem, fornecendo contexto para interações futuras e permitindo que o assistente Gemini mantenha o fio da conversa e ofereça respostas mais relevantes ao longo do tempo.
 
-Este arquivo CSS é dedicado aos estilos específicos da página de logs, focando na apresentação de logs de acesso e filtros.
+- **`logs.js`**: Este script é dedicado à funcionalidade de logs, permitindo que os usuários visualizem, filtrem e exportem registros de acesso do sistema SecureLab RFID. Ele inicia `configurando os filtros de data e hora`, inicializando os campos de filtro com valores padrão e permitindo que os usuários selecionem períodos de tempo predefinidos ou personalizados para restringir os logs exibidos. O script gerencia o `carregamento dos logs do Firebase`, buscando registros de acesso do backend e preparando-os para exibição na interface administrativa. A `aplicação de filtros aos logs` permite refinar a visualização, combinando critérios de data, usuário, porta, ação e método para focar em eventos específicos de interesse, facilitando a análise e a auditoria. A `renderização dos logs na interface` apresenta os registros de acesso de forma clara e organizada, utilizando paginação para facilitar a navegação em grandes conjuntos de dados e permitindo que os usuários examinem os logs de forma eficiente. Além disso, o script implementa a funcionalidade de `exportar os logs`, permitindo que os usuários gerem relatórios em CSV ou PDF para análise offline, auditoria ou conformidade regulatória, facilitando a gestão e o compartilhamento de informações de acesso.
 
-- **Custom Date Filters (`.custom-date-filters`):** Estilos para a seção de filtros de data personalizados, adicionando uma borda superior para separação visual.
-- **Logs List (`.logs-list`, `.logs-list li`, `.logs-list li:hover`, `.logs-list li:last-child`):** Estilos para a lista de logs, definindo altura máxima, overflow para scroll, padding para itens da lista, borda inferior e efeito hover.
-- **Log Appearance Enhancements (`.activity-icon`, `.activity-title`, `.activity-details`, `.logs-count`):** Estilos para melhorar a aparência dos logs, incluindo ícones de atividade, títulos com flexbox para alinhamento, detalhes e contagem de logs.
-- **Action Badges (`.action-badge`, `.action-badge.*`):** Estilos para badges indicando o tipo de ação (access-granted, access-denied, door-locked, door-unlocked), com cores e fundos específicos.
-- **Activity Method (`.activity-method`, `.activity-method i`):** Estilos para badges indicando o método de acesso (RFID, Web, App), incluindo ícones.
-- **Activity Timestamp (`.activity-timestamp`, `.activity-timestamp i`):** Estilos para timestamps de atividade, incluindo ícones de relógio.
-- **Dark Mode Adjustments (`html.dark-mode .logs-list li`, `.custom-date-filters`, `.action-badge.*`, `.activity-method`):** Ajustes de estilo para o modo escuro, garantindo que os logs e filtros sejam legíveis e visíveis no tema escuro, incluindo cores de borda e fundo para badges.
-- **Responsiveness for Mobile Devices (`@media (max-width: 768px) .logs-list`, `.activity-title`, `.activity-details`):** Media queries para otimizar o layout da página de logs em dispositivos móveis, incluindo ajuste de altura máxima da lista e layout flexível para títulos e detalhes de atividade.
+- **`mobile.js`**: Este script otimiza a experiência do SecureLab RFID em dispositivos móveis, implementando funcionalidades específicas para telas touch e tamanhos de tela reduzidos. Ele cuida da `criação de elementos mobile`, adicionando componentes da UI específicos para mobile, como o botão de menu toggle e o overlay de fundo, que melhoram a navegação e a usabilidade em dispositivos touch. A `configuração do comportamento do menu mobile` gerencia a interação do usuário com o menu de navegação em telas pequenas, implementando um menu off-canvas que pode ser aberto e fechado com um toque, otimizando o espaço da tela e facilitando o acesso às funcionalidades do sistema. O script também `detecta mudanças de tamanho de tela` e ajusta dinamicamente a interface para garantir a responsividade e a adaptabilidade do layout a diferentes dispositivos e orientações de tela. Além disso, ele `detecta se o dispositivo é touch`, permitindo aplicar estilos CSS específicos para dispositivos touch e otimizar a interação do usuário com elementos da UI em telas sensíveis ao toque, melhorando a experiência geral em dispositivos móveis.
 
-### `mobile.css`
+- **`theme-switcher.js`**: Este script gerencia a funcionalidade de alternância entre temas claro e escuro, permitindo que os usuários personalizem a aparência do SecureLab RFID de acordo com suas preferências ou condições de iluminação. Ele inicializa o `controle de tema`, criando um botão de alternância na interface e aplicando o tema preferido do usuário no carregamento da página. A `obtenção do tema preferido do usuário` é feita verificando a preferência salva no localStorage ou, caso não exista, utilizando a preferência de tema do sistema operacional, oferecendo uma experiência personalizada e consistente. O script `aplica o tema especificado`, modificando as classes CSS do elemento `<html>` para ativar o tema claro ou escuro, e atualiza o ícone do botão de alternância para refletir o tema atual. A funcionalidade de `alternar entre os temas claro e escuro` é implementada permitindo que os usuários mudem facilmente o tema com um clique, e a `atualização dos gráficos para se adequarem ao tema` garante que os gráficos e visualizações de dados sejam legíveis e visualmente agradáveis em ambos os temas, mantendo a consistência visual e a usabilidade em qualquer modo de exibição.
 
-Este arquivo CSS contém otimizações e ajustes específicos para dispositivos móveis, garantindo que a interface do SecureLab seja responsiva e utilizável em telas menores.
+- **`users.js`**: Este script é dedicado ao gerenciamento de usuários, permitindo que os administradores controlem o acesso ao sistema SecureLab RFID. Ele implementa o `carregamento de usuários do Firebase`, buscando informações de contas de usuário do backend e preparando-as para exibição na interface administrativa. A `renderização de usuários na tabela` apresenta uma lista organizada de usuários, incluindo detalhes como nome, e-mail, departamento, função e status, facilitando a gestão e a supervisão das contas de acesso. O script oferece `filtragem e busca de usuários`, permitindo que os administradores localizem rapidamente usuários específicos com base em critérios como nome, e-mail ou departamento. A funcionalidade de `abrir modal para editar usuário` e `confirmar exclusão de usuário` são cruciais para a administração, permitindo que os usuários modifiquem os detalhes das contas existentes ou removam contas desnecessárias ou comprometidas. Além disso, o script gerencia a ação de `salvar usuário (criar ou atualizar)` e `excluir usuário`, comunicando-se com o backend para persistir as alterações e garantir que o sistema reflita o estado atualizado das contas de usuário. A `validação do formulário de usuário` é realizada no lado do cliente para garantir a integridade dos dados e fornecer feedback imediato ao usuário, melhorando a experiência administrativa e prevenindo erros de entrada de dados.
 
-- **Mobile Menu Toggle (`.mobile-menu-toggle`):** Estilos para o botão de menu mobile, inicialmente oculto e visível apenas em media queries, posicionado no canto superior direito do header.
-- **Mobile Overlay (`.mobile-overlay`):** Estilos para o overlay escuro que cobre o conteúdo principal quando o menu mobile está aberto, inicialmente oculto e visível apenas em media queries.
-- **Global Adjustments for Small Screens (`@media (max-width: 768px) body`, `.mobile-menu-toggle`, `.sidebar`, `.app-container.show-mobile-menu .sidebar`, `.show-mobile-menu .mobile-overlay`, `.main-header`, `.header-search`, `.main-content`, `.content-wrapper`, `.page-header`, `.card-header`, `.card-body`, `.table-responsive`, `.table`, `.table th`, `.table td`, `.modal-dialog`, `.modal-body`, `.form-group`, `.btn`, `.icon-button, .action-btn`, `.pagination-container`, `.pagination-info`, `.notification-container`):** Media queries para telas com largura máxima de 768px, aplicando ajustes como:
-    - Redução do tamanho da fonte base (`body`).
-    - Exibição do botão do menu mobile (`.mobile-menu-toggle`).
-    - Configuração da sidebar para ocupar a tela inteira em mobile, com transição para exibir/ocultar (`.sidebar`, `.app-container.show-mobile-menu .sidebar`).
-    - Exibição do overlay quando o menu mobile está ativo (`.show-mobile-menu .mobile-overlay`).
-    - Ajustes no header, ocultando a barra de busca (`.main-header`, `.header-search`).
-    - Ajuste da margem do conteúdo principal (`.main-content`).
-    - Redução do padding do conteúdo (`.content-wrapper`).
-    - Layout vertical para cabeçalhos de página (`.page-header`).
-    - Redução do padding em cabeçalhos e corpos de cards (`.card-header`, `.card-body`).
-    - Configuração de tabelas para rolagem horizontal em telas pequenas (`.table-responsive`, `.table`).
-    - Ajuste de padding e `white-space` nas células da tabela (`.table th`, `.table td`).
-    - Ajuste de margens e largura dos modais (`.modal-dialog`, `.modal-body`).
-    - Redução da margem inferior dos grupos de formulário (`.form-group`).
-    - Aumento do padding e altura mínima dos botões para melhor toque (`.btn`, `.icon-button, .action-btn`).
-    - Layout vertical para o container de paginação (`.pagination-container`).
-    - Ajuste da largura máxima das notificações (`.notification-container`).
-- **Adjustments for Very Small Screens (Smartphones) (`@media (max-width: 480px) .card-grid`, `.status-card`, `.status-count`, `.activity-list li`, `.door-list li`, `.alerts-list li`, `.activity-icon`, `.alert-icon`):** Media queries para telas com largura máxima de 480px, aplicando ajustes como:
-    - Redução do gap no grid de cards (`.card-grid`).
-    - Tornar os status cards mais compactos (`.status-card`, `.status-count`).
-    - Redução do padding em listas e ícones de atividade/alerta (`.activity-list li`, `.door-list li`, `.alerts-list li`, `.activity-icon`, `.alert-icon`).
+- **`utils.js`**: Este arquivo contém um conjunto de funções utilitárias JavaScript, projetadas para facilitar a manipulação segura e eficiente do DOM (Document Object Model). A função `safeDOM` é fornecida para `verificar se um elemento existe antes de acessá-lo`, evitando erros JavaScript que podem ocorrer ao tentar interagir com elementos que não foram totalmente carregados ou que não existem na página. Funções para `definir o conteúdo de texto de um elemento com segurança` (`safeTextContent`), `definir o HTML interno de um elemento com segurança` (`safeInnerHTML`), `definir o valor de um elemento com segurança` (`safeValue`), `definir um atributo de um elemento com segurança` (`safeSetAttribute`), `definir o estilo de um elemento com segurança` (`safeStyle`), `adicionar uma classe a um elemento com segurança` (`safeAddClass`) e `remover uma classe de um elemento com segurança` (`safeRemoveClass`) são incluídas, oferecendo uma API consistente e segura para manipular elementos da página web, reduzindo o risco de erros e melhorando a robustez do código front-end. Adicionalmente, funções para `verificar a página atual` (`getCurrentPage`) e `verificar se estamos em uma página específica` (`isPage`) são fornecidas, permitindo que os scripts JavaScript determinem contextualmente em qual página da aplicação eles estão sendo executados, facilitando a implementação de lógica específica de página e a organização do código.
 
-### `styles.css`
+### Componente Gemini
 
-Este arquivo CSS define os estilos principais e globais para o dashboard SecureLab RFID, incluindo variáveis de cor, layout principal, sidebar, header e componentes comuns.
+A integração com o assistente Gemini é um dos pilares inovadores do SecureLab RFID, proporcionando uma interface conversacional e inteligente para interação com o sistema.
 
-- **Custom Properties (`:root`):** Definição de variáveis CSS para cores primárias, secundárias, de sucesso, perigo, etc., além de largura da sidebar, altura do header, raio do card e velocidade de transição.
-- **Global Reset and Box-sizing (`*`):** Reset de margens, paddings e definição de `box-sizing: border-box` para todos os elementos.
-- **Body Styles (`body`):** Estilos base para o body, incluindo `font-family`, `background-color`, `color` e `line-height`.
-- **Main Layout (`.app-container`, `.sidebar`, `.main-content`):** Estilos para o layout principal da aplicação, com um container flexível, sidebar fixa e conteúdo principal que se expande. Inclui transições para a sidebar colapsada.
-- **Sidebar (`.sidebar`, `.sidebar-header`, `.logo`, `.sidebar-toggle`, `.sidebar-nav`, `.sidebar-nav ul`, `.sidebar-nav li`, `.sidebar-nav li a`, `.badge`, `.sidebar-footer`, `.sidebar-footer a`):** Estilos para a sidebar, incluindo cabeçalho com logo e botão de toggle, navegação, footer e elementos internos.
-- **Main Header (`.main-header`, `.header-search`, `.header-search i`, `.header-search input`, `.header-right`, `.notifications`, `.icon-button`, `.user-menu`, `.avatar`, `.user-name`):** Estilos para o header principal, incluindo barra de busca, ícones de notificação, menu de usuário e elementos internos.
-- **Main Content (`.content-wrapper`, `.page-header`, `.page-header h1`, `.date-filter`, `.date-filter label`, `.date-filter select`):** Estilos para o conteúdo principal, incluindo wrapper, cabeçalho de página, filtros de data e elementos internos.
-- **Card Grid and Row (`.card-grid`, `.card-row`):** Sistemas de grid para cards de estatísticas e seções maiores, utilizando `grid-template-columns` e `gap`.
-- **Card Styles (`.card`, `.card-header`, `.card-header h3`, `.card-actions`, `.card-actions.center`, `.card-body`):** Estilos base para cards, cabeçalhos, ações e corpos de cards.
-- **Status Cards (`.status-card`, `.status-card-header`, `.status-card-header h3`, `.card-icon`, `.status-card-body`, `.status-count`, `.status-label`, `.status-card-footer`, `.status-trend`, `.status-trend.positive`, `.status-trend.negative`, `.status-trend i`, `.status-period`, `.door-status`, `.status-dot`, `.status-dot.locked`, `.status-dot.unlocked`, `.progress-bar`, `.progress`):** Estilos específicos para status cards, incluindo cabeçalhos, ícones, contadores, labels, rodapés, tendências, status de porta e barras de progresso.
-- **Activity, Door, Alerts Lists (`.activity-list`, `.door-list`, `.alerts-list`, `.activity-list li`, `.door-list li`, `.alerts-list li`, `.activity-icon`, `.alert-icon`, `.activity-icon.success`, `.alert-icon.success`, `.activity-icon.danger`, `.alert-icon.danger`, `.activity-icon.warning`, `.alert-icon.warning`, `.activity-info`, `.alert-info`, `.activity-title`, `.alert-title`, `.user-name`, `.success-text`, `.danger-text`, `.activity-details`, `.alert-details`, `.activity-reason`, `.door-info`, `.door-name`, `.door-location`, `.door-status`, `.door-status.locked`, `.door-status.unlocked`, `.door-status i`):** Estilos para listas de atividades, portas e alertas, e seus elementos internos, como ícones, informações, títulos, detalhes e status.
-- **Buttons (`.btn`, `.btn-sm`, `.btn-primary`, `.btn-success`, `.btn-danger`, `.btn-outline-primary`, `.btn-link`, `.btn:hover`):** Estilos base para botões, variações de tamanho e cor, estilos outline e link, e efeito hover.
-- **Chart Placeholder and Related Styles (`.chart-placeholder`, `.loading-chart`, `.loading-chart i`, `.no-data`, `.no-data i`, `.chart-error`, `.chart-error i`, `.chartjs-tooltip`):** Estilos para o container do gráfico de atividade diária, indicador de carregamento, mensagem de "sem dados", mensagem de erro e tooltip personalizado do Chart.js. Inclui ajustes responsivos para o tamanho do gráfico (`@media (max-width: 768px) .chart-placeholder`).
-- **Donut Chart (`.device-stats`, `.stat-item`, `.stat-value`, `.stat-label`, `.device-chart-placeholder`, `.donut-chart`, `.donut-hole`, `.donut-ring`, `.donut-segment`, `.donut-text`):** Estilos para o gráfico de donut de dispositivos e estatísticas relacionadas, incluindo layout flexível para estatísticas, placeholder do gráfico e elementos do donut chart.
-- **Alerts Specific Styles (`.alert-count`, `.alert-action`):** Estilos específicos para alertas e ações relacionadas.
-- **No Data State (`.no-data`):** Estilos para a mensagem de "sem dados" em listas e gráficos.
-- **Responsiveness (`@media (max-width: 992px) .card-row`, `@media (max-width: 768px) .app-container`, `.sidebar`, `.main-content`, `.card-grid`):** Media queries para ajustar o layout em diferentes tamanhos de tela, incluindo layout de cards em linha única em telas menores.
-- **Chart Fullwidth Class (`.chart-fullwidth`, `.chart-card`, `.chart-card .card-body`, `.chart-placeholder`, `@media (max-width: 768px) .chart-placeholder`):** Estilos específicos para um gráfico de atividade de largura total, otimizado para ocupar a largura total do container e responsividade.
-- **Chart Integration Adjustments (`#activityChart`, `canvas.chartjs-render-monitor`):** Ajustes para integração com o layout existente e Chart.js, garantindo que o gráfico ocupe 100% do espaço disponível.
+- **`gemini-assistant.js`**: Este componente JavaScript é responsável por toda a interface do usuário e a lógica de interação com o assistente Gemini no front-end. Ele gerencia a `inicialização do assistente`, criando e inserindo os elementos da interface do usuário (UI) no DOM, como a janela de chat, o campo de entrada e os botões de controle, preparando o terreno para a interação do usuário. A `configuração dos event listeners` é crucial, estabelecendo a comunicação entre a interface do usuário e a lógica do assistente, capturando eventos como cliques em botões, pressionamentos de teclas no campo de entrada e interações com sugestões, permitindo que o assistente responda dinamicamente às ações do usuário. A `manipulação do envio de mensagens do usuário` é uma funcionalidade central, interceptando mensagens digitadas pelo usuário, formatando-as e enviando-as para o serviço Gemini para processamento, iniciando o ciclo de interação com a IA. O componente também gerencia a `recepção e exibição de respostas do Gemini`, pegando as respostas do modelo de linguagem, formatando-as para exibição na janela de chat de forma clara e amigável, e apresentando as informações de forma acessível ao usuário. Além disso, ele implementa a funcionalidade de `alternar a visibilidade do assistente`, permitindo que os usuários minimizem ou maximizem a janela do assistente conforme necessário, otimizando o espaço da tela e a usabilidade. A `limpeza da conversa atual` oferece aos usuários a capacidade de iniciar uma nova interação com o assistente, removendo o histórico de conversas anteriores e preparando o assistente para novas consultas ou comandos, mantendo a interface limpa e focada.
 
-### `utils.css`
+- **`gemini-service.js`**: Este componente JavaScript atua como a ponte de comunicação entre o front-end do SecureLab RFID e a API Gemini, encapsulando toda a lógica de interação com os serviços de IA do Google. Ele gerencia a `comunicação com a API Gemini`, construindo e enviando requisições HTTP para o endpoint da API, incluindo mensagens do usuário, contexto do sistema e parâmetros de configuração, e recebendo e processando as respostas do modelo de linguagem. O script é responsável por `enviar mensagens para a API Gemini`, formatando as requisições de acordo com as especificações da API e lidando com detalhes de autenticação e autorização, abstraindo a complexidade da interação direta com a API. O `processamento da resposta da API Gemini` é uma funcionalidade chave, pegando as respostas JSON do modelo de linguagem, extraindo o texto relevante, tratando erros de comunicação ou respostas inválidas e preparando a resposta para exibição na interface do usuário. Além disso, o serviço implementa a capacidade de `gerar insights baseados em dados do sistema`, construindo prompts específicos para solicitar análises e insights ao Gemini, enviando esses prompts para a API e processando as respostas para extrair informações acionáveis e relevantes para o usuário. O `processamento de comandos em linguagem natural` é suportado, permitindo que o serviço interprete mensagens do usuário que se assemelham a comandos, envie-as para o Gemini para processamento e retorne a intenção, entidades e parâmetros extraídos para execução de ações no sistema SecureLab RFID, facilitando a interação intuitiva e eficiente com o sistema através de linguagem natural. A `gestão da conversa com Gemini` é mantida no lado do serviço, armazenando o histórico de interações para fornecer contexto para conversas futuras e permitir que o assistente Gemini mantenha o fio da conversa e ofereça respostas mais personalizadas e relevantes ao longo do tempo.
 
-Este arquivo CSS contém uma coleção de classes utilitárias para facilitar o desenvolvimento e manter a consistência visual, oferecendo classes para margens, paddings, texto, flexbox, display, bordas, largura, altura e cursor.
-
-- **Margins (`.m-*`, `.mt-*`, `.mb-*`, `.ml-*`, `.mr-*`, `.mx-*`, `.my-*`):** Classes utilitárias para definir margens em todos os lados (`.m-*`), topo (`.mt-*`, `.my-*`), inferior (`.mb-*`, `.my-*`), esquerdo (`.ml-*`, `.mx-*`), direito (`.mr-*`, `.mx-*`) e eixos X e Y (`.mx-*`, `.my-*`). Variações de tamanho de 0 a 5 (`.m-0` a `.m-5`).
-- **Padding (`.p-*`, `.pt-*`, `.pb-*`, `.pl-*`, `.pr-*`, `.px-*`, `.py-*`):** Classes utilitárias para definir paddings de forma análoga às classes de margem, com variações de tamanho de 0 a 5 (`.p-0` a `.p-5`).
-- **Text (`.text-center`, `.text-*`, `.fw-bold`):** Classes utilitárias para alinhamento de texto (`.text-center`), cores de texto (`.text-primary`, `.text-secondary`, etc., correspondendo às variáveis de cor do sistema) e peso da fonte (`.fw-bold`).
-- **Flexbox (`.d-flex`, `.flex-column`, `.justify-content-*`, `.align-items-*`, `.flex-grow-1`):** Classes utilitárias para display flexível (`.d-flex`), direção da flexbox (`.flex-column`), alinhamento horizontal (`.justify-content-*`, incluindo `space-between` e `center`), alinhamento vertical (`.align-items-center`) e `flex-grow` (`.flex-grow-1`).
-- **Display (`.d-none`, `.d-inline-block`, `.d-block`):** Classes utilitárias para controlar a propriedade `display` dos elementos (`none`, `inline-block`, `block`).
-- **Borders (`.rounded`):** Classes utilitárias para adicionar bordas arredondadas (`.rounded`, utilizando a variável `--card-border-radius`).
-- **Width & Height (`.w-100`):** Classes utilitárias para definir largura (`.w-100`, 100% de largura).
-- **Cursor (`.cursor-pointer`):** Classes utilitárias para definir o cursor como pointer (`.cursor-pointer`).
-- **Global Scrollbar Styling (`::-webkit-scrollbar`, `::-webkit-scrollbar-track`, `::-webkit-scrollbar-thumb`, `::-webkit-scrollbar-thumb:hover`, `[data-theme="dark"] ::-webkit-scrollbar-track`):** Estilos globais para a barra de rolagem usando pseudo-elementos WebKit, personalizando largura, trilho, thumb e comportamento hover, com ajustes para o modo escuro (usando o atributo `data-theme="dark"`).
-
-## Documentação dos Arquivos JavaScript
-
-### `activity-chart.js`
-
-Este arquivo JavaScript é responsável pela inicialização, carregamento de dados e renderização do gráfico de atividade diária no dashboard.
-
-- **Variável Global `activityChartInstance`:** Armazena a instância do gráfico Chart.js para manipulação e destruição.
-- **Função `initActivityChart()`:**
-    - Verifica se o gráfico já foi inicializado (`window.activityChartInitialized`) para evitar múltiplas inicializações.
-    - Marca o gráfico como inicializado.
-    - Obtém o container do gráfico (`.chart-placeholder`).
-    - Limpa o container e insere um elemento `<canvas>` com id `activityChart`.
-    - Chama `loadActivityData()` para carregar os dados do Firebase.
-- **Função `loadActivityData()`:**
-    - Obtém a referência para os logs de acesso no Firebase (`firebase.database().ref('access_logs')`).
-    - Calcula a data de 7 dias atrás para filtrar os logs.
-    - Busca os logs dos últimos 7 dias do Firebase usando `orderByChild('timestamp').startAt(sevenDaysAgoStr).once('value')`.
-    - Processa os dados recebidos usando `processActivityData()`.
-    - Cria o gráfico com os dados processados chamando `createActivityChart()`.
-    - Lida com erros de carregamento, exibindo uma mensagem de erro no container do gráfico.
-- **Função `processActivityData(accessLogs)`:**
-    - Inicializa `doorInfo` para armazenar informações das portas.
-    - Converte o objeto de logs em um array.
-    - Define os labels do eixo X como os últimos 7 dias.
-    - Inicializa `doorCounts` para armazenar a contagem de acessos por porta e dia.
-    - Itera sobre os logs, filtrando por ações `access_granted` e `door_unlocked`, e incrementa a contagem para a porta e dia correspondentes.
-    - Retorna um objeto com labels, dias, contagens, informações das portas e IDs das portas.
-- **Função `getChartThemeOptions()`:**
-    - Detecta se o tema escuro está ativo (`document.documentElement.classList.contains('dark-mode')`).
-    - Retorna um objeto com cores de fundo, texto, grid e borda baseadas no tema atual.
-- **Função `createActivityChart(data)`:**
-    - Obtém o elemento canvas do gráfico (`#activityChart`).
-    - Verifica se há portas para mostrar; se não, exibe mensagem de "sem dados".
-    - Destrói a instância do gráfico existente (`activityChartInstance.destroy()`) para atualizar o gráfico.
-    - Recria o canvas se necessário.
-    - Gera cores para as portas usando `generateDoorColors()`.
-    - Prepara os datasets para o Chart.js, um dataset para cada porta, mapeando dados por dia.
-    - Define as opções de configuração do gráfico, incluindo tipo, dados, opções responsivas, plugins (título, legenda, tooltip), escalas (eixos X e Y com labels e grids), e cores baseadas no tema.
-    - Cria uma nova instância do Chart.js (`new Chart(chartCanvas, chartConfig)`) e armazena em `activityChartInstance`.
-    - Lida com erros na criação do gráfico, exibindo uma mensagem de erro no container.
-- **Função `generateDoorColors(count)`:**
-    - Define uma paleta de cores predefinida para até 10 portas.
-    - Se o número de portas for menor ou igual a 10, retorna as cores predefinidas.
-    - Caso contrário, gera cores programaticamente usando HSL para garantir uma boa distribuição de matiz.
-    - Retorna um array de cores em formato hexadecimal.
-- **Função `hslToHex(h, s, l)`:**
-    - Converte uma cor HSL (Hue, Saturation, Lightness) para o formato hexadecimal.
-    - Utiliza cálculos para converter HSL para RGB e então para Hex.
-- **Função `adjustColorBrightness(hexColor, percent)`:**
-    - Ajusta o brilho de uma cor hexadecimal por uma porcentagem.
-    - Converte a cor hex para RGB, ajusta os valores RGB e converte de volta para hex.
-- **Inicialização do Gráfico:**
-    - Adiciona um event listener para `DOMContentLoaded` que chama `initActivityChart()` quando o DOM estiver carregado.
-    - Verifica se a página atual é o dashboard (`document.querySelector('.chart-placeholder') !== null`) antes de inicializar o gráfico.
-    - Carrega o script Chart.js dinamicamente se não estiver presente na página, e inicializa o gráfico após o script ser carregado.
-
-### `common.js`
-
-Este arquivo JavaScript contém funções comuns e utilitárias que são utilizadas em várias páginas do sistema SecureLab.
-
-- **Função `checkAuth()`:**
-    - Utiliza `firebase.auth().onAuthStateChanged()` para verificar o estado de autenticação do usuário.
-    - Se o usuário não estiver autenticado, redireciona para a página de login (`/login.html`).
-    - Se autenticado, chama `loadCurrentUserName()` e `loadAlertsCount()`.
-- **Função `loadCurrentUserName()`:**
-    - Obtém o usuário autenticado atualmente (`firebase.auth().currentUser`).
-    - Busca a lista de usuários do Firebase (`database.ref('users').once('value')`).
-    - Encontra o usuário atual na lista com base no email.
-    - Atualiza elementos HTML com id `current-user-name` com o nome do usuário.
-- **Função `loadAlertsCount()`:**
-    - Busca a lista de dispositivos do Firebase (`database.ref('devices').once('value')`).
-    - Conta dispositivos offline para simular contagem de alertas.
-    - Atualiza elementos HTML com ids `alerts-count` e `header-alerts-count` com a contagem de alertas.
-- **Função `initSidebar()`:**
-    - Obtém o botão de toggle da sidebar (`#sidebar-toggle`).
-    - Adiciona um event listener para alternar a classe `sidebar-collapsed` no container principal (`.app-container`) ao clicar no botão.
-- **Função `initLogout()`:**
-    - Obtém o botão de logout (`#logout-btn`).
-    - Adiciona um event listener para realizar logout do Firebase (`firebase.auth().signOut()`) ao clicar no botão.
-    - Redireciona para a página de login após logout bem-sucedido.
-    - Exibe notificação de erro em caso de falha no logout.
-- **Função `showNotification(type, message, duration = 3000)`:**
-    - Exibe notificações na tela com diferentes tipos (success, error, warning, info).
-    - Cria um container de notificações se não existir (`#notification-container`).
-    - Cria um elemento de notificação (`.notification`) com base no tipo e mensagem.
-    - Define ícone baseado no tipo de notificação.
-    - Adiciona a notificação ao container e inicia animação de entrada.
-    - Configura um botão de fechar e auto-fechamento após o tempo definido.
-- **Função `closeNotification(notification)`:**
-    - Fecha uma notificação específica, removendo a classe `show` para iniciar animação de saída e removendo o elemento após a animação.
-- **Função `setupModal(modalId, openBtn, closeBtn, cancelBtn)`:**
-    - Configura um modal com base em IDs de modal e botões de abrir, fechar e cancelar.
-    - Adiciona classe `modal-container` ao modal se necessário.
-    - Adiciona event listeners aos botões para abrir e fechar o modal.
-    - Fecha o modal ao clicar fora do conteúdo do modal.
-- **Função `openModal(modalId)`:**
-    - Abre um modal específico, adicionando as classes `modal-open` ao body e `active` ao modal.
-- **Função `closeModal(modalId)`:**
-    - Fecha um modal específico, removendo as classes `modal-open` do body e `active` do modal.
-- **Função `formatDate(isoString)`:**
-    - Formata uma string ISO de data para o formato DD/MM/AAAA.
-- **Função `formatDateTime(isoString)`:**
-    - Formata uma string ISO de data e hora para o formato DD/MM/AAAA HH:MM.
-- **Função `formatStatus(status)`:**
-    - Formata strings de status para exibição amigável (ex: 'active' para 'Ativo').
-- **Função `getStatusClass(status)`:**
-    - Retorna uma classe CSS com base no status (ex: 'success' para 'active', 'danger' para 'offline').
-- **Função `capitalize(string)`:**
-    - Capitaliza a primeira letra de uma string.
-- **Função `translateRole(role)`:**
-    - Traduz roles (ex: 'admin' para 'Administrador').
-- **Função `isValidEmail(email)`:**
-    - Valida o formato de um e-mail usando uma expressão regular.
-- **Função `isValidPassword(password)`:**
-    - Valida se uma senha tem pelo menos 6 caracteres.
-- **Inicialização de Funções Comuns:**
-    - Adiciona um event listener para `DOMContentLoaded` para executar funções de inicialização (`checkAuth`, `initSidebar`, `initLogout`).
-    - Adiciona estilos CSS para notificações dinamicamente se não existirem (`#notification-styles`).
-
-### `devices.js`
-
-Este arquivo JavaScript gerencia a funcionalidade da página de dispositivos, incluindo listagem, filtragem, edição, adição e configurações de dispositivos.
-
-- **Variáveis Globais:**
-    - `devices`: Array para armazenar dados de dispositivos.
-    - `currentDeviceId`: ID do dispositivo atualmente selecionado ou sendo editado.
-    - `PAGE_SIZE`: Constante para definir o número de dispositivos por página na paginação.
-    - `currentPage`: Número da página atual na paginação.
-- **Função `initModals()`:**
-    - Chama `setupModal()` para inicializar os modais de dispositivo, configuração e confirmação, associando-os aos seus respectivos botões de abertura e fechamento.
-- **Função `setupEventListeners()`:**
-    - Configura event listeners para:
-        - Botões de adicionar, salvar dispositivo e salvar configurações.
-        - Filtros de status, tipo, firmware e busca.
-        - Botão de resetar filtros.
-        - Botões de reiniciar dispositivo, reset de fábrica, verificar atualizações e download de logs no modal de configuração.
-        - Alternador de modo IP (DHCP/Estático).
-        - Botões de copiar e regenerar token API.
-        - Toggle de senha Wi-Fi.
-        - Navegação por abas no modal de configuração.
-        - Navegação de paginação (botões "Página Anterior" e "Próxima Página").
-        - Ações dos dispositivos na tabela (editar, reiniciar, diagnóstico, configurar) após renderização.
-- **Função `setupDeviceActions()`:**
-    - Seleciona todos os botões de ação (editar, reiniciar, diagnóstico, configurar) na tabela de dispositivos e adiciona event listeners para cada ação, recuperando o nome do dispositivo da linha correspondente da tabela.
-- **Função `mockDevicesData()`:**
-    - Simula o carregamento de dados de dispositivos, utilizando um array `devices` com dados mockados para demonstração e desenvolvimento.
-    - Renderiza os dispositivos na tabela chamando `renderDevices()`.
-    - Atualiza a paginação chamando `updatePagination()`.
-    - Atualiza as estatísticas dos dispositivos chamando `updateDeviceStats()`.
-- **Função `renderDevices()`:**
-    - Obtém o corpo da tabela de dispositivos (`#devices-table-body`).
-    - Limpa o conteúdo da tabela.
-    - Aplica paginação para exibir apenas os dispositivos da página atual.
-    - Itera sobre os dispositivos a serem exibidos e cria linhas (`<tr>`) para cada um, preenchendo as células (`<td>`) com informações do dispositivo (nome, tipo, localização, status, firmware, última atividade, ações).
-    - Adiciona os badges de status formatados e ícones de atualização de firmware.
-    - Renderiza os botões de ação (editar, reiniciar, diagnóstico, configurar) para cada dispositivo.
-    - Adiciona as linhas criadas ao corpo da tabela.
-    - Chama `setupDeviceActions()` após renderização para garantir que os botões de ação estejam funcionais.
-- **Função `updatePagination()`:**
-    - Atualiza as informações de paginação (índice inicial, índice final, total de dispositivos) nos elementos HTML correspondentes (`#pagination-start`, `#pagination-end`, `#pagination-total`).
-    - Atualiza o estado dos botões de navegação de página (`#prev-page`, `#next-page`) com base na página atual e no total de páginas.
-    - Atualiza os números das páginas na paginação (`#pagination-numbers`), criando botões para cada página e adicionando event listeners para mudança de página.
-- **Função `updateDeviceStats()`:**
-    - Calcula e atualiza as estatísticas dos dispositivos:
-        - Contagem de dispositivos online e total (`#online-devices-count`, `#devices-status`).
-        - Barra de progresso de dispositivos online (`#devices-progress`, `#devices-percentage`).
-        - Contagem detalhada de dispositivos online e offline (`#online-devices`, `#offline-devices`).
-        - Versão do firmware (assumindo versão comum para todos online) (`#firmware-version`).
-    - Chama `updateBenchmarkMetrics()` para atualizar as métricas de benchmark dos dispositivos online.
-- **Função `openDeviceModal(device = null)`:**
-    - Abre o modal de dispositivo (`#deviceModal`) para adicionar um novo dispositivo ou editar um existente.
-    - Se `device` for fornecido (modo de edição):
-        - Preenche os campos do formulário com os dados do dispositivo.
-        - Define o título do modal para "Editar Dispositivo".
-    - Se `device` for null (modo de adição):
-        - Limpa o formulário.
-        - Define o título do modal para "Adicionar Novo Dispositivo".
-- **Função `openConfigModal(device)`:**
-    - Abre o modal de configuração (`#configModal`) para um dispositivo específico.
-    - Define o título do modal com o nome do dispositivo.
-    - Preenche campos de configuração com dados do dispositivo (nome, localização, etc.).
-    - Define a aba ativa para "Geral" por padrão.
-- **Função `saveDevice()`:**
-    - Obtém os valores do formulário de dispositivo.
-    - Valida os campos obrigatórios (nome, tipo, localização).
-    - Cria um objeto `device` com os dados do formulário.
-    - Se `currentDeviceId` estiver definido (modo de edição):
-        - Atualiza o dispositivo existente no array `devices`.
-        - Exibe notificação de sucesso.
-    - Se `currentDeviceId` for null (modo de adição):
-        - Gera um novo ID para o dispositivo usando `generateUUID()`.
-        - Adiciona o novo dispositivo ao array `devices`.
-        - Exibe notificação de sucesso.
-    - Fecha o modal de dispositivo.
-    - Re-renderiza a tabela de dispositivos, atualiza paginação e estatísticas.
-- **Função `saveDeviceConfig()`:**
-    - Simula o salvamento das configurações do dispositivo (em uma aplicação real, salvaria no servidor/Firebase).
-    - Exibe notificação de sucesso.
-    - Fecha o modal de configuração.
-- **Função `applyFilters()`:**
-    - Obtém os valores dos filtros (status, tipo, firmware, texto de busca).
-    - Recarrega os dados mockados (substituir por chamada de API real).
-    - Aplica os filtros ao array `devices` com base nos valores dos filtros.
-    - Reseta a paginação para a primeira página.
-    - Re-renderiza a tabela de dispositivos e atualiza a paginação.
-- **Função `resetFilters()`:**
-    - Limpa os campos de filtro (status, tipo, firmware, busca).
-    - Recarrega e renderiza todos os dispositivos sem filtros.
-- **Função `confirmAction(title, message, onConfirm, confirmButtonText = 'Confirmar')`:**
-    - Abre um modal de confirmação (`#confirm-modal`) com um título, mensagem e função de callback para o botão de confirmação.
-- **Função `openModal(modalId)`:**
-    - Exibe um modal específico pelo ID.
-- **Função `closeModal(modalId)`:**
-    - Oculta um modal específico pelo ID.
-- **Função `showNotification(message, type = 'info')`:**
-    - Exibe uma notificação na tela (se a função global `showNotification` existir, usa ela; senão, usa uma implementação local).
-- **Função `formatDate(date)`:**
-    - Formata um objeto `Date` para uma string de data e hora no formato pt-BR.
-- **Função `debounce(func, wait)`:**
-    - Implementação da função utilitária de debounce para limitar a frequência de execução de uma função.
-- **Função `generateUUID()`:**
-    - Gera um UUID (Universally Unique Identifier) simples para IDs de dispositivos.
-- **Function `getDeviceTypeName(typeCode)`:**
-    - Retorna o nome legível do tipo de dispositivo baseado no código do tipo.
-- **Function `findDeviceByName(name)`:**
-    - Busca e retorna um dispositivo no array `devices` pelo nome.
-- **Function `setupTabStyles()`:**
-    - Adiciona estilos CSS dinamicamente para as abas no modal de configuração, caso ainda não existam na página.
-- **Inicialização:**
-    - Adiciona um event listener para `DOMContentLoaded` para inicializar a página quando o DOM estiver pronto, chamando `initModals()`, `setupEventListeners()`, `mockDevicesData()`, e `setupTabStyles()`.
-
-### `doors.js`
-
-Este arquivo JavaScript gerencia a funcionalidade da página de portas, incluindo listagem, adição, edição, controle de status (trancar/destrancar) e exclusão de portas.
-
-- **Variáveis Globais:**
-    - `doors`: Array para armazenar dados de portas.
-    - `currentDoorId`: ID da porta atualmente selecionada ou sendo editada.
-    - `doorsRef`: Referência para o nó 'doors' no Firebase Realtime Database.
-- **Função `initDoorManagement()`:**
-    - Função de inicialização principal da página de gerenciamento de portas.
-    - Chama `setupEventListeners()` para configurar os listeners de eventos.
-    - Chama `loadDoors()` para carregar os dados das portas do Firebase.
-- **Função `setupEventListeners()`:**
-    - Configura event listeners para:
-        - Botão "Nova Porta" (`#addDoorBtn`) para abrir o modal de adição/edição de portas (`openDoorModal()`).
-        - Botão "Salvar" no modal de portas (`#saveDoorBtn`) para lidar com o envio do formulário de portas (`handleDoorFormSubmit()`).
-        - Campo de pesquisa (`#searchInput`) para filtrar portas na tabela (`renderDoors()`).
-        - Botões "Trancar Porta" (`#lockDoorBtn`) e "Destrancar Porta" (`#unlockDoorBtn`) no modal de controle de portas (`controlDoor()`).
-        - Botões de fechar modais (`.close-modal`) para fechar modais genéricos.
-        - Botão "Cancelar" no modal de portas (`#cancelBtn`) para fechar o modal de portas.
-        - Botão "Fechar" no modal de controle de portas (`#closeControlBtn`) para fechar o modal de controle de portas.
-- **Função `loadDoors()`:**
-    - Carrega dados das portas do Firebase usando `doorsRef.on('value', ...)` para escutar por atualizações em tempo real.
-    - Limpa o array `doors` e preenche com os dados do snapshot do Firebase.
-    - Chama `renderDoors()` para atualizar a tabela de portas na UI.
-    - Lida com erros ao carregar dados, exibindo uma notificação de erro.
-- **Função `renderDoors()`:**
-    - Renderiza a lista de portas na tabela HTML (`#doorsTable tbody`).
-    - Limpa o conteúdo da tabela.
-    - Filtra as portas com base no texto de pesquisa do campo `#searchInput`.
-    - Ordena as portas por nome em ordem alfabética.
-    - Se não houver portas para exibir, exibe uma linha indicando "Nenhuma porta encontrada".
-    - Para cada porta, cria uma linha `<tr>` na tabela com colunas para nome, localização, status (com ícone), última atividade e botões de ação (editar, controlar, excluir).
-    - Configura event listeners para os botões "Editar" e "Controlar" de cada linha diretamente no código de renderização.
-    - Adiciona um botão de "Excluir" com um listener para `confirmDeleteDoor()`.
-- **Função `confirmDeleteDoor(door)`:**
-    - Abre um modal de confirmação (`#confirm-modal`) antes de excluir uma porta.
-    - Define o título e a mensagem do modal de confirmação para a exclusão da porta.
-    - Configura o botão "Confirmar" no modal para chamar `deleteDoor(door.id)`.
-- **Função `deleteDoor(doorId)`:**
-    - Exclui uma porta específica do Firebase usando `doorsRef.child(doorId).remove()`.
-    - Exibe notificações de sucesso ou erro após a tentativa de exclusão.
-- **Função `openDoorModal(door = null)`:**
-    - Abre o modal de adição/edição de portas (`#doorModal`).
-    - Limpa o formulário do modal.
-    - Define o título do modal como "Editar Porta" ou "Adicionar Nova Porta" dependendo se `door` é fornecido ou não.
-    - Se `door` for fornecido (modo de edição):
-        - Preenche os campos do formulário com os dados da porta.
-        - Oculta o campo de status inicial, pois não é editável.
-    - Se `door` for null (modo de adição):
-        - Define o status inicial como "locked".
-        - Exibe o campo de status inicial.
-    - Exibe o modal de forma segura, garantindo que seja visível e interativo.
-- **Função `handleDoorFormSubmit()`:**
-    - Lida com o envio do formulário de portas.
-    - Valida os campos obrigatórios (nome, localização).
-    - Coleta dados do formulário (nome, localização, status - apenas para novas portas).
-    - Salva os dados no Firebase:
-        - Se `currentDoorId` estiver definido (modo de edição), atualiza a porta existente usando `doorsRef.child(currentDoorId).update(doorData)`.
-        - Se `currentDoorId` for null (modo de adição), adiciona uma nova porta usando `doorsRef.push(doorData)`.
-    - Exibe notificações de sucesso ou erro após a tentativa de salvar.
-    - Fecha o modal de portas.
-- **Função `openControlModal(door)`:**
-    - Abre o modal de controle de portas (`#controlDoorModal`) para uma porta específica.
-    - Armazena o ID da porta atual em `currentDoorId`.
-    - Preenche o título do modal, o nome da porta e o status atual da porta no modal.
-    - Ajusta a visibilidade dos botões "Trancar Porta" e "Destrancar Porta" com base no status atual da porta.
-    - Exibe o modal de forma segura, garantindo que seja visível e interativo.
-- **Função `controlDoor(action)`:**
-    - Controla o status de uma porta (trancar ou destrancar).
-    - Atualiza o status da porta no Firebase (`doorsRef.child(currentDoorId).update(statusUpdate)`), incluindo o timestamp da última mudança de status.
-    - Registra um log de acesso no Firebase (`firebase.database().ref('access_logs').push(logData)`), incluindo informações do usuário, porta, ação e método.
-    - Fecha o modal de controle de portas.
-    - Exibe notificações de sucesso ou erro após a tentativa de controle.
-- **Função `closeModal(modalId)`:**
-    - Oculta um modal específico pelo ID, definindo `display: 'none'`.
-- **Função `showNotification(message, type = 'info')`:**
-    - Exibe notificações na tela (se a função global `showNotification` existir, usa ela; senão, usa uma implementação local).
-- **Função `formatDate(date)`:**
-    - Formata um objeto `Date` para uma string de data e hora no formato pt-BR.
-- **Verificação de Elementos do Modal:**
-    - Adiciona um event listener para `DOMContentLoaded` para verificar se os elementos dos modais existem no DOM e logar sua estrutura no console para debugging.
-
-### `dashboard.js`
-
-Este arquivo JavaScript é responsável pela lógica e carregamento de dados para o dashboard principal do sistema SecureLab.
-
-- **Função `loadDashboardData()`:**
-    - Função principal para carregar todos os dados necessários para o dashboard.
-    - Obtém o nome do usuário atual autenticado e exibe no dashboard.
-    - Chama as seguintes funções para carregar estatísticas e dados:
-        - `loadUserStats()`: Carrega e atualiza as estatísticas de usuários.
-        - `loadDoorStats()`: Carrega e atualiza as estatísticas de portas e a lista de portas.
-        - `loadDeviceStats()`: Carrega e atualiza as estatísticas de dispositivos e métricas de benchmark.
-        - `loadRecentActivity()`: Carrega e atualiza os logs de atividade recentes.
-        - `loadAlerts()`: Carrega e atualiza os alertas.
-- **Função `loadUserStats()`:**
-    - Carrega estatísticas de usuários do Firebase (`database.ref('users').once('value')`).
-    - Atualiza contadores de usuários ativos e total (`#active-users-count`, `#users-label`).
-    - Simula tendência de usuários (valor fixo '5%').
-- **Função `loadDoorStats()`:**
-    - Carrega estatísticas de portas do Firebase (`database.ref('doors').limitToLast(7).once('value')`).
-    - Atualiza o contador de portas (`#doors-count`).
-    - Conta portas trancadas e destrancadas e atualiza os contadores (`#locked-doors-count`, `#unlocked-doors-count`).
-    - Ordena as portas por nome e atualiza a lista de portas no dashboard chamando `updateDoorList()`.
-- **Função `loadDeviceStats()`:**
-    - Carrega estatísticas de dispositivos do Firebase (`database.ref('devices').once('value')`).
-    - Atualiza o status geral dos dispositivos (online/total) e a barra de progresso (`#devices-status`, `#devices-progress`, `#devices-percentage`).
-    - Atualiza estatísticas detalhadas (online, offline, versão do firmware) (`#online-devices`, `#offline-devices`, `#firmware-version`).
-    - Chama `updateBenchmarkMetrics()` para atualizar as métricas de benchmark com base nos dispositivos online.
-- **Função `updateBenchmarkMetrics(onlineDevices)`:**
-    - Atualiza as barras de benchmark e valores com base nas métricas do dispositivo mais sobrecarregado (hotspot device).
-    - Se não houver dispositivos online, reseta as métricas chamando `resetBenchmarkMetrics()`.
-    - Encontra o dispositivo mais sobrecarregado com base no uso da CPU.
-    - Atualiza barras e valores para CPU, RAM, temperatura e latência chamando `updateBenchmarkBar()` para cada métrica.
-    - Atualiza informações do dispositivo hotspot (`#hotspot-device-name`, `#hotspot-device-load`).
-- **Função `updateBenchmarkBar(id, value, unit)`:**
-    - Atualiza uma barra de benchmark específica e seu valor de texto.
-    - Calcula a largura da barra com base no valor e no máximo valor esperado para cada métrica.
-    - Adiciona classes CSS (`normal`, `warning`, `critical`) à barra com base no valor para indicar criticidade.
-    - Atualiza o texto do valor com o valor e a unidade correspondente.
-- **Função `resetBenchmarkMetrics()`:**
-    - Reseta todas as barras de benchmark para 0% e os valores para 0.
-    - Reseta as informações do dispositivo hotspot para '-'.
-- **Função `loadRecentActivity()`:**
-    - Carrega os logs de atividade recentes do Firebase (`database.ref('access_logs').orderByChild('timestamp').limitToLast(7).once('value')`).
-    - Atualiza os contadores de acessos de hoje (permitidos e negados) (`#today-access-count`, `#today-denied-count`).
-    - Simula tendência de acesso (valor fixo '8%').
-    - Preenche a lista de atividades recentes (`#activity-list`) com os logs, formatando data, hora, usuário, ação e porta.
-    - Se não houver logs, exibe mensagem "Nenhuma atividade recente".
-- **Função `updateDoorList(doors)`:**
-    - Atualiza a lista de portas no dashboard (`#door-list`).
-    - Limpa a lista atual.
-    - Preenche a lista com itens `<li>` para cada porta, exibindo nome, localização, status (com ícone) e um botão de ação para trancar/destrancar.
-    - Chama `setupDoorActionButtons()` para adicionar event listeners aos botões de ação das portas.
-    - Se não houver portas, exibe mensagem "Nenhuma porta encontrada".
-- **Função `setupDoorActionButtons()`:**
-    - Seleciona todos os botões de ação de porta (`[data-door-id]`) e adiciona event listeners para alternar o estado de tranca da porta (`toggleDoorLock()`).
-- **Função `toggleDoorLock(doorId, action)`:**
-    - Alterna o estado de tranca de uma porta específica no Firebase (`database.ref('doors/${doorId}`).update(statusUpdate)`).
-    - Registra um log de acesso no Firebase (`firebase.database().ref('access_logs').push(logData)`).
-    - Atualiza as estatísticas de portas chamando `loadDoorStats()`.
-    - Exibe notificação de sucesso.
-- **Função `loadAlerts()`:**
-    - Carrega alertas (simulados com base em dispositivos offline) do Firebase (`database.ref('devices').once('value')`).
-    - Conta dispositivos offline e atualiza contadores de alertas (`#alerts-count`, `#header-alerts-count`, `#alert-count-badge`).
-    - Preenche a lista de alertas (`#alerts-list`) com itens `<li>` para cada dispositivo offline, exibindo nome, detalhes e um botão "Verificar".
-    - Se não houver alertas, exibe mensagem "Nenhum alerta ativo".
-- **Função `formatDateTime(isoString)`:**
-    - Formata uma string ISO de data e hora para o formato DD/MM/AAAA HH:MM (utilizada para exibir timestamps de alertas).
-- **Event Listeners para Botões de Refresh:**
-    - Adiciona event listeners para botões de refresh da atividade recente e lista de portas (`#refresh-activity`, `#refresh-doors`) para chamar `loadRecentActivity()` e `loadDoorStats()` respectivamente.
-- **Event Listener para Sidebar Toggle:**
-    - Adiciona event listener para o botão de toggle da sidebar (`#sidebar-toggle`) para alternar a classe `sidebar-collapsed` no container principal.
-- **Inicialização:**
-    - Adiciona um event listener para `DOMContentLoaded` para carregar os dados do dashboard (`loadDashboardData()`) quando a página estiver completamente carregada.
-
-### `firebase-config.js`
-
-Este arquivo JavaScript contém a configuração e inicialização do Firebase para o projeto SecureLab.
-
-- **`firebaseConfig` Object:**
-    - Define um objeto `firebaseConfig` com as credenciais de configuração do Firebase, incluindo `apiKey`, `authDomain`, `databaseURL`, `projectId`, `storageBucket`, `messagingSenderId`, e `appId`.
-    - **IMPORTANTE:** As credenciais fornecidas (`apiKey: "AIzaSyAQOogYuOAKJt4irq17qvuOadGTA5dr08o"`, etc.) são de exemplo e devem ser substituídas pelas credenciais reais do projeto Firebase do usuário.
-- **`firebase.initializeApp(firebaseConfig)`:**
-    - Inicializa o Firebase utilizando as configurações definidas em `firebaseConfig`.
-- **`auth = firebase.auth()`:**
-    - Obtém uma referência para o serviço de autenticação do Firebase (`firebase.auth()`).
-- **`database = firebase.database()`:**
-    - Obtém uma referência para o serviço de banco de dados Realtime Database do Firebase (`firebase.database()`).
-- **`auth.onAuthStateChanged(user => { ... })`:**
-    - Configura um listener para o estado de autenticação do Firebase (`auth.onAuthStateChanged`).
-    - Este listener é executado sempre que o estado de autenticação do usuário muda.
-    - Se um `user` está autenticado:
-        - Loga no console 'Usuário autenticado:' seguido pelo email do usuário.
-        - Chama `loadDashboardData()` para carregar os dados do dashboard.
-    - Se nenhum `user` está autenticado:
-        - Loga no console 'Nenhum usuário autenticado'.
-        - Redireciona a janela para a página de login (`login.html`).
-- **`document.getElementById('logout-btn')?.addEventListener('click', () => { ... })`:**
-    - Adiciona um event listener ao botão de logout (`#logout-btn`).
-    - Ao clicar no botão de logout:
-        - Chama `auth.signOut()` para desautenticar o usuário do Firebase.
-        - Em caso de sucesso, redireciona a janela para a página de login (`login.html`).
-        - Em caso de erro, loga o erro no console.
-
-### `gemini-assistant.js`
-
-Este arquivo JavaScript implementa a classe `GeminiAssistant` para gerenciar a interface e a lógica do assistente Gemini no SecureLab.
-
-- **Verificação da Disponibilidade do Serviço Gemini:**
-    - Inicia com uma verificação para garantir que o arquivo `gemini-service.js` foi carregado antes, logando um erro no console se `window.geminiService` não estiver definido.
-- **Classe `GeminiAssistant`:**
-    - **Construtor:**
-        - Inicializa propriedades como `initialized`, `visible`, `container`, `conversationContainer`, `inputField`, `systemContext`, `pendingSystemData`, `commandHistory` e `historyIndex`.
-    - **`init()`:**
-        - Verifica se o assistente já está inicializado (`this.initialized`).
-        - Cria e adiciona o container principal do assistente (`.gemini-assistant`) ao body do documento, definindo sua estrutura HTML interna (header, área de conversa, sugestões, campo de input).
-        - Obtém referências para elementos importantes do DOM dentro do container (área de conversa, campo de input, botão de envio).
-        - Chama `_setupEventListeners()` para configurar os event listeners para interação do usuário.
-        - Adiciona uma mensagem de boas-vindas do assistente à conversa.
-        - Chama `_initSystemContext()` para inicializar a coleta de contexto do sistema.
-        - Marca o assistente como inicializado (`this.initialized = true`).
-        - Inicializa o estado de visibilidade do assistente como minimizado em dispositivos móveis e visível em desktops, chamando `toggle()`.
-    - **`_setupEventListeners()`:**
-        - Configura event listeners para:
-            - Botão de envio (`.gemini-send-btn`) para chamar `_handleSendMessage()` ao clicar.
-            - Tecla "Enter" no campo de input (`.gemini-input`) para enviar mensagem (sem Shift) e para navegação no histórico de comandos com setas para cima e para baixo.
-            - Input do campo de texto (`.gemini-input`) para habilitar/desabilitar o botão de envio baseado no conteúdo, e para auto-expandir a altura do textarea.
-            - Botão de toggle (`.gemini-toggle-btn`) para chamar `toggle()` ao clicar.
-            - Botão de limpar conversa (`.gemini-clear-btn`) para chamar `clearConversation()` ao clicar.
-            - Botões de sugestão (`.gemini-suggestion`) para preencher o campo de input com a sugestão e enviar a mensagem ao clicar.
-    - **`_initSystemContext()`:**
-        - Inicializa o contexto do sistema (`this.systemContext`) com informações básicas como usuário atual (se autenticado), página atual e data/hora.
-        - Define `this.pendingSystemData = true` para indicar que dados adicionais do sistema precisam ser carregados posteriormente.
-    - **`_loadSystemData()`:**
-        - Carrega dados adicionais do sistema de forma assíncrona (usuários, portas, dispositivos) do Firebase usando `Promise.all()` e `firebase.database().ref(...).once('value')`.
-        - Processa os snapshots dos dados e adiciona contagens de usuários, portas e dispositivos, e estatísticas de status de dispositivos e portas ao `this.systemContext`.
-        - Define `this.pendingSystemData = false` após carregar os dados.
-        - Retorna `this.systemContext` com os dados carregados.
-    - **`_handleSendMessage()`:**
-        - Obtém a mensagem do usuário do campo de input e limpa espaços em branco.
-        - Se a mensagem não estiver vazia:
-            - Adiciona a mensagem ao histórico de comandos (`this.commandHistory`).
-            - Adiciona a mensagem do usuário à conversa na UI (`_addMessage('user', message)`).
-            - Limpa o campo de input e desabilita o botão de envio.
-            - Chama `_loadSystemData()` para garantir que o contexto do sistema esteja atualizado.
-            - Adiciona um indicador de carregamento do assistente (`_addMessage('assistant', ...)`).
-            - Verifica se a mensagem parece ser um comando usando `_isCommand(message)`.
-            - Se for um comando, chama `_processCommand(message, systemContext)`.
-            - Se não for um comando (conversação normal), chama `window.geminiService.sendMessage(message, systemContext, { isConversation: true })` para enviar a mensagem ao Gemini para resposta em linguagem natural.
-            - Substitui o indicador de carregamento pela resposta do Gemini usando `_updateMessage()`.
-        - Lida com erros ao processar a mensagem, exibindo uma mensagem de erro do assistente.
-        - Rola a conversa para o final usando `_scrollToBottom()`.
-    - **`_isCommand(message)`:**
-        - Verifica se uma mensagem parece ser um comando baseando-se em padrões regex que indicam intenções de comando (começando com `/` ou verbos de ação como "mostrar", "trancar", etc.).
-    - **`_processCommand(command, systemContext)`:**
-        - Adiciona um indicador de carregamento do assistente à conversa.
-        - Chama `window.geminiService.processCommand(command, systemContext)` para processar o comando usando o serviço Gemini, que retorna um comando processado estruturado.
-        - Verifica se o comando processado requer confirmação (`processedCommand.confirmation`).
-        - Se precisar de confirmação, substitui o indicador de carregamento por uma mensagem de confirmação com botões "Sim" e "Não" (`_updateMessage('assistant-confirmation', ...)`), e adiciona event listeners para os botões de confirmação para executar ou cancelar o comando.
-        - Se não precisar de confirmação, chama `_executeCommand(processedCommand, loadingMsg)` diretamente.
-        - Lida com erros ao processar o comando, exibindo uma mensagem de erro do assistente.
-    - **`_executeCommand(processedCommand, messageElement)`:**
-        - Executa diferentes tipos de comandos baseando-se em `processedCommand.intent`:
-            - `query`: Chama `_executeQueryCommand(processedCommand, messageElement)`.
-            - `action`: Chama `_executeActionCommand(processedCommand, messageElement)`.
-            - `config`: Chama `_executeConfigCommand(processedCommand, messageElement)`.
-            - `default`: Exibe uma mensagem informando que o comando não é suportado.
-        - Lida com erros ao executar o comando, exibindo uma mensagem de erro do assistente.
-    - **`_executeQueryCommand(processedCommand, messageElement)`:**
-        - Executa comandos de consulta baseando-se em `processedCommand.action`, como listar usuários, portas, dispositivos offline, acessos recentes e resumo do sistema.
-        - Para cada tipo de consulta, busca os dados necessários do Firebase e formata a resposta em HTML (tabelas, dashboards, grids de informação).
-        - Atualiza o elemento da mensagem com a resposta formatada usando `_updateMessage()`.
-    - **`_executeActionCommand(processedCommand, messageElement)`:**
-        - Executa comandos de ação baseando-se em `processedCommand.action`, como trancar/destrancar porta, reiniciar dispositivo e analisar logs.
-        - Para cada tipo de ação, realiza as operações correspondentes (atualizar status da porta no Firebase, simular reinicialização de dispositivo, analisar logs usando `_executeLogsAnalysisCommand()`).
-        - Atualiza o elemento da mensagem com a resposta formatada usando `_updateMessage()`.
-    - **`_executeLogsAnalysisCommand(processedCommand, messageElement)`:**
-        - Processa o comando de análise de logs diretamente no chat.
-        - Busca logs de acesso do Firebase dos últimos 30 dias, limitados a 500 registros.
-        - Calcula estatísticas gerais dos logs (totais, acessos permitidos/negados, portas trancadas/destrancadas).
-        - Agrupa logs por dia para análise de tendências.
-        - Calcula contagem de acessos por usuário e por porta.
-        - Formata os resultados em HTML, incluindo dashboards de estatísticas, gráficos de barra para distribuição diária, insights de usuários e portas mais ativos.
-        - Atualiza o elemento da mensagem com os resultados formatados da análise de logs.
-    - **`_executeConfigCommand(processedCommand, messageElement)`:**
-        - Executa comandos de configuração (atualmente apenas exibe uma mensagem informando que configurações sensíveis devem ser feitas via interface administrativa).
-        - Atualiza o elemento da mensagem com a resposta formatada usando `_updateMessage()`.
-    - **`_addMessage(role, content)`:**
-        - Adiciona uma mensagem à conversa na UI.
-        - Cria um elemento `<div>` com classes `gemini-message` e `gemini-${role}-message`.
-        - Adiciona um avatar para mensagens do assistente.
-        - Define o conteúdo da mensagem (`content`).
-        - Adiciona o elemento de mensagem ao container da conversa (`this.conversationContainer`).
-        - Rola a conversa para o final (`_scrollToBottom()`).
-        - Retorna o elemento de mensagem criado.
-    - **`_updateMessage(messageElement, role, content)`:**
-        - Atualiza o conteúdo de uma mensagem existente na UI.
-        - Atualiza a classe do elemento de mensagem para `gemini-message gemini-${role}-message`.
-        - Atualiza o `innerHTML` do elemento de conteúdo da mensagem (`.gemini-message-content`).
-        - Rola a conversa para o final (`_scrollToBottom()`).
-    - **`_scrollToBottom()`:**
-        - Rola o container da conversa (`.gemini-conversation-container`) para o final para mostrar a mensagem mais recente.
-    - **`_formatResponse(response)`:**
-        - Formata a resposta do Gemini para exibição em HTML.
-        - Formata blocos de código (``` ```) para `<pre class="gemini-code-block"><code>...</code></pre>`.
-        - Formata código inline (`) para `<code>...</code>`.
-        - Formata listas (-, *) para `<ul><li>...</li></ul>`.
-        - Formata títulos (#, ##, ###) para `<h4-h6>`.
-        - Formata parágrafos (<p>).
-        - Formata quebras de linha (<br>).
-        - Escapa caracteres HTML usando `_escapeHtml()`.
-    - **`_escapeHtml(html)`:**
-        - Escapa caracteres HTML especiais (&, <, >, ", ') para evitar injeção de código e garantir exibição correta.
-    - **`toggle(visible)`:**
-        - Alterna a visibilidade do assistente entre minimizado e maximizado.
-        - Atualiza classes CSS (`gemini-minimized`) e ícones do botão de toggle (`.gemini-toggle-btn i`) para refletir o estado atual.
-    - **`clearConversation()`:**
-        - Limpa o conteúdo da conversa na UI (`this.conversationContainer.innerHTML = '';`).
-        - Limpa o histórico de conversa no serviço Gemini (`window.geminiService.clearConversation()`).
-        - Adiciona uma mensagem de boas-vindas do assistente após limpar a conversa.
-    - **`generateInsights()`:**
-        - Carrega dados do sistema usando `_loadSystemData()`.
-        - Chama `window.geminiService.generateInsights(systemData)` para gerar insights usando o serviço Gemini.
-        - Chama `_displayInsights(insights)` para exibir os insights no painel lateral (ainda não implementado no código fornecido).
-    - **`_displayInsights(insights)`:**
-        - Função placeholder para exibir insights no painel lateral (não implementada).
-- **Inicialização e Exportação:**
-    - Cria uma instância da classe `GeminiAssistant` chamada `geminiAssistant`.
-    - Inicializa o assistente (`geminiAssistant.init()`) após o DOM estar carregado, com um pequeno atraso para garantir que outros scripts sejam carregados primeiro.
-    - Exporta a instância `geminiAssistant` para uso global no script.
-
-### `gemini-config.js`
-
-Este arquivo JavaScript contém as configurações para a integração com a API Gemini, incluindo a chave de API, endpoint e parâmetros de configuração.
-
-- **`GEMINI_CONFIG` Object:**
-    - **`apiKey`:** String contendo a chave de API do Gemini. **IMPORTANTE:** Substituir o valor de exemplo (`"AIzaSyB_zYq8J9iAGLjqjLvHa5JaR6MvdLvPp4k"`) pela chave API real do usuário obtida em [Google AI Studio](https://aistudio.google.com/app/apikey).
-    - **`apiEndpoint`:** String contendo o endpoint da API Gemini Pro (`"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp-01-21:generateContent"`).
-    - **`maxTokens`:** Número máximo de tokens para a resposta do modelo (1024).
-    - **`temperature`:** Temperatura para controlar a criatividade da resposta do modelo (0.7).
-    - **`safetySettings`:** Array de objetos definindo configurações de segurança para categorias de conteúdo potencialmente nocivo (HARM_CATEGORY_HARASSMENT, HARM_CATEGORY_HATE_SPEECH, HARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT), com o threshold definido para "BLOCK_MEDIUM_AND_ABOVE".
-    - **`assistant` Object:** Configurações específicas para a UI do assistente:
-        - `initiallyOpen`: Boolean indicando se o assistente deve ser aberto ao carregar a página (false).
-        - `autoInitialize`: Boolean indicando se o assistente deve ser inicializado automaticamente (true).
-        - `initialDelay`: Número de milissegundos de atraso antes da inicialização (1500ms).
-        - `mobileMinimized`: Boolean indicando se o assistente deve ser minimizado em dispositivos móveis (true).
-    - **`insights` Object:** Configurações específicas para insights:
-        - `autoRefresh`: Boolean indicando se os insights devem ser atualizados automaticamente (true).
-        - `refreshInterval`: Intervalo de atualização dos insights em milissegundos (900000ms, 15 minutos).
-        - `maxInsights`: Número máximo de insights a serem exibidos (4).
-- **Exportação:**
-    - Exporta o objeto `GEMINI_CONFIG` como padrão para uso em módulos ES (`export default GEMINI_CONFIG;`).
-    - Também define `window.GEMINI_CONFIG = GEMINI_CONFIG;` para compatibilidade com scripts regulares (não modulares).
-
-### `gemini-service.js`
-
-Este arquivo JavaScript implementa a classe `GeminiService`, que gerencia a comunicação com a API Gemini, incluindo o envio de mensagens, processamento de respostas e geração de prompts.
-
-- **`GEMINI_CONFIG` Object (local):**
-    - Define um objeto de configuração local `GEMINI_CONFIG` com a mesma estrutura e valores que o arquivo `gemini-config.js`, incluindo `apiKey`, `apiEndpoint`, `maxTokens`, `temperature`, `systemInstruction` e `safetySettings`.
-    - **IMPORTANTE:** Novamente, a `apiKey` fornecida é um exemplo e deve ser substituída pela chave API real do usuário.
-- **Classe `GeminiService`:**
-    - **Construtor:**
-        - Inicializa propriedades como `apiKey`, `apiEndpoint`, `conversation` (histórico da conversa, inicialmente vazio) e `systemContext` (contexto do sistema gerado por `_generateSystemContext()`).
-    - **`_generateSystemContext()`:**
-        - Gera e retorna o contexto do sistema como um objeto.
-        - Define o papel como "user" e o conteúdo como um texto instruindo o modelo Gemini sobre seu papel como assistente virtual do sistema SecureLab RFID, detalhando seus conhecimentos, comportamento esperado e limitações.
-    - **`sendMessage(message, context = {}, options = {})`:**
-        - Função principal para enviar mensagens para a API Gemini.
-        - Adiciona a mensagem do usuário ao histórico da conversa (`this.conversation.push(...)`).
-        - Cria a estrutura do payload para a API Gemini, incluindo:
-            - `contents`: Array contendo o contexto do sistema (apenas na primeira mensagem ou com novo contexto) e o histórico da conversa.
-            - `generationConfig`: Configurações de geração como `temperature`, `maxOutputTokens`, `topP`, `topK`.
-            - `safetySettings`: Configurações de segurança.
-        - Envia uma requisição `POST` para o endpoint da API Gemini (`this.apiEndpoint?key=${this.apiKey}`) com o payload JSON e um timeout aumentado de 120 segundos para modelos "thinking".
-        - Verifica se a resposta da API foi bem-sucedida (`response.ok`).
-        - Processa a resposta JSON da API.
-        - Extrai a resposta de texto do modelo Gemini (`data.candidates[0].content.parts[0].text`).
-        - Limpa a resposta para remover raciocínio interno e formatar corretamente para linguagem natural (apenas se for uma conversa normal, sinalizado por `options.isConversation !== false`).
-        - Adiciona a resposta do Gemini ao histórico da conversa.
-        - Limita o tamanho do histórico da conversa a 10 mensagens para evitar exceder limites de token.
-        - Retorna a resposta limpa do Gemini.
-        - Lida com erros de comunicação com a API, retornando uma mensagem de erro genérica.
-    - **`_looksLikeJSON(text)`:**
-        - Verifica se um texto string parece conter JSON, procurando por padrões de início e fim de objetos ou arrays JSON, ou blocos de código com JSON.
-    - **`_convertJSONToNaturalText(jsonText)`:**
-        - Converte respostas JSON para texto em linguagem natural.
-        - Tenta extrair a parte JSON da string, mesmo se estiver dentro de blocos de código.
-        - Parsea o JSON e extrai informações relevantes como resumo e insights.
-        - Formata os insights em texto natural, incluindo títulos, descrições e prioridades.
-        - Se a conversão falhar, retorna uma mensagem de fallback com o JSON bruto.
-    - **`_removeThinkingProcess(response)`:**
-        - Remove o processo de raciocínio interno da resposta do modelo.
-        - Utiliza expressões regulares para identificar e remover padrões comuns de raciocínio interno do modelo (ex: "The user is asking...", "Let's analyze...").
-        - Limpa linhas vazias extras e espaços em branco.
-        - Retorna a resposta limpa.
-    - **`clearConversation()`:**
-        - Limpa o histórico de conversa (`this.conversation = [];`).
-    - **`generateInsights(systemData)`:**
-        - Gera insights baseados nos dados do sistema (`systemData`).
-        - Cria um prompt para a API Gemini, incluindo os dados do sistema e instruções para responder APENAS com um JSON válido no formato especificado.
-        - Chama `sendMessage(prompt)` para enviar o prompt para a API Gemini.
-        - Tenta extrair e parsear o JSON da resposta do Gemini:
-            - Primeiro, tenta parsear a resposta inteira como JSON.
-            - Se falhar, tenta extrair JSON de dentro de blocos de código ou procura por um objeto JSON isolado.
-            - Se ainda falhar, retorna insights de fallback usando `_createFallbackInsights()`.
-        - Lida com erros ao gerar insights com a API, retornando insights de fallback em caso de erro.
-    - **`_createFallbackInsights(response, errorMessage = null)`:**
-        - Método auxiliar para criar insights de fallback em caso de falha ao gerar insights estruturados ou em caso de erro de comunicação.
-        - Retorna um objeto JSON com um resumo genérico e um insight de recomendação informando sobre a limitação da análise.
-    - **`processCommand(command, systemState)`:**
-        - Processa um comando em linguagem natural para o sistema SecureLab.
-        - Cria um prompt para a API Gemini, incluindo o comando do usuário, o estado atual do sistema e instruções para identificar a intenção, entidades, parâmetros e ação do comando, e responder APENAS com um JSON válido no formato especificado.
-        - Chama `sendMessage(prompt)` para enviar o prompt para a API Gemini.
-        - Tenta extrair e parsear o JSON da resposta, lidando com possíveis erros de parsing e retornando um objeto de erro em caso de falha.
-    - **`processModelResponse(response, isConversation = true)`:**
-        - Detecta e trata respostas truncadas do modelo Gemini Thinking.
-        - Chama `_checkForTruncation(response)` para verificar se a resposta parece estar truncada.
-        - Se a resposta for JSON e estiver truncada, chama `_fixTruncatedJSON(response)` para tentar corrigir o JSON.
-        - Retorna a resposta (corrigida ou original).
-    - **`_checkForTruncation(response)`:**
-        - Verifica se a resposta parece estar truncada usando expressões regulares para identificar padrões de JSON incompleto.
-    - **`_fixTruncatedJSON(truncatedJSON)`:**
-        - Tenta corrigir JSON truncado, detectando o início do JSON válido, contando tags e colchetes abertos, adicionando tags fechantes faltantes e tentando parsear o JSON corrigido.
-        - Em caso de falha ao corrigir, retorna um JSON de fallback com um insight de erro.
-- **Inicialização e Exportação:**
-    - Cria uma instância da classe `GeminiService` chamada `geminiService`.
-    - Exporta a instância `geminiService` como padrão para uso em módulos ES (`export default geminiService;`).
-    - Também define `window.geminiService = geminiService;` para compatibilidade com scripts regulares (não modulares).
-
-### `logs.js`
-
-Este arquivo JavaScript é responsável pela funcionalidade da página de logs, incluindo carregamento, filtragem, paginação e exportação de logs de acesso.
-
-- **Variáveis Globais:**
-    - `allLogs`: Array para armazenar todos os logs carregados do Firebase.
-    - `filteredLogs`: Array para armazenar logs após aplicação de filtros.
-    - `PAGE_SIZE`: Constante para definir o número de logs por página na paginação.
-    - `currentPage`: Número da página atual na paginação.
-- **Função `initDateFilters()`:**
-    - Inicializa os filtros de data com valores padrão (últimos 7 dias até hoje) para os campos de data e hora personalizados (`#start-date`, `#end-date`, `#start-time`, `#end-time`).
-- **Função `setupEventListeners()`:**
-    - Configura event listeners para:
-        - Seletor de período (`#date-range`) para exibir/ocultar filtros de data personalizados.
-        - Botão "Aplicar Filtros" (`#apply-filters-btn`) para chamar `applyFilters()`.
-        - Botão "Resetar Filtros" (`#reset-filters-btn`) para chamar `resetFilters()`.
-        - Botão "Atualizar Logs" (`#refresh-logs`) para chamar `loadLogs()`.
-        - Botões de paginação "Página Anterior" (`#prev-page`) e "Próxima Página" (`#next-page`) para navegar entre páginas de logs (`renderLogs()`, `updatePagination()`).
-        - Botões "Exportar CSV" (`#export-csv`) e "Exportar PDF" (`#export-pdf`) para chamar `exportLogs()` com o formato correspondente.
-- **Função `loadLogs()`:**
-    - Exibe uma mensagem de carregamento na lista de atividades (`#activity-list`).
-    - Obtém a referência para os logs de acesso no Firebase (`firebase.database().ref('access_logs')`).
-    - Busca os últimos 1000 logs do Firebase ordenados por timestamp usando `limitToLast(1000).orderByChild('timestamp').once('value')`.
-    - Converte os logs do snapshot para um array de objetos (`allLogs`).
-    - Ordena os logs por timestamp (mais recente primeiro).
-    - Chama `applyFilters()` para aplicar os filtros atuais e renderizar os logs filtrados.
-    - Lida com o caso de não haver logs ou erros ao carregar, exibindo mensagens apropriadas na UI e notificações de erro.
-- **Função `applyFilters()`:**
-    - Obtém os valores dos filtros (usuário, porta, ação, método, período de data).
-    - Determina o período de data com base no seletor de período (`#date-range`) e campos de data/hora personalizados.
-    - Filtra o array `allLogs` para criar `filteredLogs` com base nos critérios de filtro selecionados (período, usuário, porta, ação, método).
-    - Reseta a paginação para a primeira página (`currentPage = 1`).
-    - Chama `renderLogs()`, `updateLogsCount()`, e `updatePagination()` para atualizar a UI com os logs filtrados e paginação.
-- **Função `renderLogs()`:**
-    - Renderiza os logs filtrados na lista de atividades (`#activity-list`).
-    - Limpa o conteúdo da lista de atividades.
-    - Verifica se há logs filtrados para exibir; se não, exibe mensagem "Nenhum registro de acesso encontrado com os filtros aplicados".
-    - Calcula os índices de início e fim para paginação e obtém os logs da página atual (`logsToShow`).
-    - Para cada log na página atual, cria um item `<li>` com informações formatadas (ícone de ação, nome de usuário, badge de ação, método, nome da porta, timestamp, motivo).
-    - Adiciona os itens `<li>` à lista de atividades.
-- **Função `updateLogsCount()`:**
-    - Atualiza o contador de logs exibido na página (`#logs-count`) com o número de logs filtrados (`filteredLogs.length`).
-- **Função `updatePagination()`:**
-    - Atualiza os elementos de paginação na UI, incluindo:
-        - Informações de paginação (início, fim, total de logs) (`#pagination-start`, `#pagination-end`, `#pagination-total`).
-        - Botões de navegação "Página Anterior" e "Próxima Página" (`#prev-page`, `#next-page`) - habilitando/desabilitando com base na página atual.
-        - Números das páginas (`#pagination-numbers`), gerando botões para cada página visível e adicionando event listeners para mudança de página.
-- **Função `getVisiblePageNumbers(currentPage, totalPages)`:**
-    - Determina quais números de página devem ser exibidos na paginação para melhorar a usabilidade, especialmente quando há muitas páginas.
-    - Lógica para mostrar um subconjunto de páginas com ellipsis (...) para indicar páginas omitidas, mantendo sempre a primeira e a última página visíveis.
-- **Função `resetFilters()`:**
-    - Reseta todos os filtros de logs para os valores padrão:
-        - Limpa os campos de filtro (usuário, porta, ação, método).
-        - Reseta o seletor de período para "últimos 7 dias" (`#date-range`).
-        - Oculta os filtros de data personalizados.
-        - Reinicializa os campos de data para os últimos 7 dias (`initDateFilters()`).
-    - Chama `applyFilters()` para re-renderizar os logs com os filtros resetados.
-- **Função `exportLogs(format)`:**
-    - Inicia o processo de exportação de logs para o formato especificado (CSV ou PDF).
-    - Verifica se há logs filtrados para exportar; se não, exibe notificação de aviso.
-    - Exibe uma notificação informando que a exportação está em andamento.
-    - Chama a função de exportação correspondente (`exportCSV()` para CSV) ou exibe uma notificação de que a exportação PDF não está implementada.
-- **Função `exportCSV()`:**
-    - Exporta os logs filtrados para um arquivo CSV.
-    - Define os cabeçalhos do arquivo CSV.
-    - Converte cada log filtrado para uma linha CSV formatada.
-    - Cria um blob CSV e um URL para download.
-    - Cria um link `<a>` para download, define o nome do arquivo com timestamp, e simula um clique para iniciar o download.
-    - Revoga o URL do blob para liberar memória após o download.
-    - Exibe notificação de sucesso ou erro na exportação.
-- **Função `formatActionForExport(action)`:**
-    - Formata o código da ação para uma string legível para exportação (ex: 'access_granted' para 'Acesso Permitido').
-- **Função `formatDateForInput(date)`:**
-    - Formata um objeto `Date` para uma string no formato YYYY-MM-DD, adequado para inputs de data HTML5.
-- **Função `showNotification(message, type = 'info')`:**
-    - Exibe notificações na tela (se a função global `showNotification` existir, usa ela; senão, usa uma implementação local).
-
-### `mobile.js`
-
-Este arquivo JavaScript contém funcionalidades específicas para otimizar a experiência do usuário em dispositivos móveis.
-
-- **Event Listener `DOMContentLoaded`:**
-    - Garante que o script seja executado após o DOM (Document Object Model) estar completamente carregado.
-    - Chama `createMobileElements()` para criar elementos específicos para mobile (como o botão de menu).
-    - Chama `setupMobileMenuBehavior()` para configurar o comportamento do menu mobile (toggle e fechar).
-    - Adiciona um event listener para o evento `resize` da janela, chamando `handleResize()` para lidar com mudanças no tamanho da tela.
-    - Chama `handleResize()` uma vez para configurar o estado inicial da interface com base no tamanho da tela no carregamento da página.
-- **Função `handleResize()`:**
-    - Obtém o container principal da aplicação (`.app-container`).
-    - Verifica se a largura da janela é menor ou igual a 768px (breakpoint para mobile).
-    - Se for mobile, garante que o menu mobile esteja fechado inicialmente (`appContainer.classList.remove('show-mobile-menu')`).
-- **Função `createMobileElements()`:**
-    - Cria elementos específicos para a interface mobile, se ainda não existirem no DOM:
-        - **Mobile Menu Toggle Button (`.mobile-menu-toggle`):**
-            - Cria um botão `<button>` com a classe `mobile-menu-toggle`.
-            - Define atributos aria e conteúdo interno (ícone de menu `<i class="fas fa-bars"></i>`).
-            - Adiciona o botão ao header principal (`.main-header`).
-        - **Mobile Overlay (`.mobile-overlay`):**
-            - Cria um `<div>` com a classe `mobile-overlay`.
-            - Adiciona o overlay ao body do documento.
-- **Função `setupMobileMenuBehavior()`:**
-    - Configura o comportamento do menu mobile, adicionando event listeners para:
-        - Botão de menu mobile (`.mobile-menu-toggle`) para chamar `toggleMobileMenu()` ao clicar.
-        - Overlay (`.mobile-overlay`) para chamar `closeMobileMenu()` ao clicar (fechar o menu ao clicar fora).
-        - Links de navegação na sidebar (`.sidebar-nav a`) para chamar `closeMobileMenu()` ao clicar (fechar o menu ao navegar).
-- **Função `toggleMobileMenu()`:**
-    - Alterna a classe `show-mobile-menu` no container principal da aplicação (`.app-container`) para exibir ou ocultar o menu mobile.
-- **Função `closeMobileMenu()`:**
-    - Remove a classe `show-mobile-menu` do container principal da aplicação (`.app-container`) para fechar o menu mobile.
-- **Função `isTouchDevice()`:**
-    - Detecta se o dispositivo atual é um dispositivo touch, verificando a presença de `ontouchstart` no objeto `window`, `navigator.maxTouchPoints` ou `navigator.msMaxTouchPoints`.
-- **Touch Device Class:**
-    - Adiciona a classe `touch-device` ao elemento `body` se `isTouchDevice()` retornar `true`, permitindo aplicar estilos CSS específicos para dispositivos touch.
-
-### `simplified-gemini-insights.js`
-
-Este arquivo JavaScript implementa uma versão simplificada do componente de insights do Gemini, focando na geração e exibição de insights acionáveis sobre o estado do sistema e atividades do usuário, com uma abordagem mais direta e menos dependente da API Gemini para cenários de fallback.
-
-- **Classe `SimplifiedInsights`:**
-    - **Construtor:**
-        - Inicializa propriedades: `container` (elemento HTML container), `options` (configurações, incluindo `refreshInterval` e `maxInsights`), `refreshTimer` (para auto-refresh), `isLoading` (estado de carregamento).
-    - **`init(containerId, options = {})`:**
-        - Inicializa o componente de insights.
-        - Obtém o elemento container pelo `containerId`.
-        - Mescla as opções fornecidas com as opções padrão.
-        - Chama `render()` para renderizar a UI inicial.
-        - Chama `refreshInsights()` para carregar os insights iniciais.
-        - Inicia o auto-refresh se habilitado (`startAutoRefresh()`).
-    - **`render()`:**
-        - Renderiza a estrutura HTML do painel de insights dentro do container, incluindo cabeçalho, corpo (com resumo e lista de insights) e rodapé.
-        - Inclui indicadores de carregamento e erro.
-        - Armazena referências para elementos DOM importantes (loading, summary, list, timestamp).
-        - Adiciona event listeners para o botão de refresh (`.gemini-insights-refresh`) e o link "Ask assistant" (`.gemini-insights-more`).
-    - **`startAutoRefresh()`:**
-        - Inicia o timer para auto-refresh dos insights, chamando `refreshInsights()` no intervalo definido em `this.options.refreshInterval`.
-    - **`stopAutoRefresh()`:**
-        - Limpa o timer de auto-refresh, interrompendo as atualizações automáticas.
-    - **`refreshInsights()`:**
-        - Função principal para atualizar os insights.
-        - Verifica se já está carregando (`this.isLoading`) para evitar requisições múltiplas.
-        - Define `this.isLoading = true` e exibe o indicador de carregamento (`showLoading(true)`).
-        - Coleta dados do sistema chamando `collectSystemData()`.
-        - Gera insights chamando `generateInsights()` (tenta usar `generateInsightsWithGemini()` primeiro, com fallback para `generateLocalInsights()` em caso de erro).
-        - Exibe os insights na UI chamando `displayInsights()`.
-        - Atualiza o timestamp de atualização (`updateTimestamp()`).
-        - Lida com erros durante o processo de refresh, exibindo uma mensagem de erro (`displayError()`).
-        - Define `this.isLoading = false` e oculta o indicador de carregamento (`showLoading(false)`) no bloco `finally`.
-    - **`collectSystemData()`:**
-        - Coleta dados do sistema do Firebase para análise, incluindo:
-            - Estatísticas de usuários, portas e dispositivos (contagens totais, ativos/inativos, trancadas/destrancadas, online/offline).
-            - Logs de acesso dos últimos 30 dias (limitados a 200 registros).
-        - Processa os dados para calcular métricas como taxa de negação de acesso, acessos por dia, usuários mais ativos e portas mais acessadas.
-        - Retorna um objeto `systemData` com as estatísticas e dados coletados.
-    - **`generateInsights(systemData)`:**
-        - Função principal para gerar insights.
-        - Tenta gerar insights usando a API Gemini via `generateInsightsWithGemini()`.
-        - Em caso de erro ao usar a API Gemini, utiliza uma função de fallback para gerar insights localmente (`generateLocalInsights()`).
-    - **`generateInsightsWithGemini(systemData)`:**
-        - Gera insights usando a API Gemini.
-        - Cria um prompt para a API Gemini, incluindo os dados do sistema e instruções para responder com um JSON estruturado contendo resumo e insights.
-        - Envia a requisição para a API Gemini via `window.geminiService.sendMessage(prompt, {}, { isConversation: false, timeout: 15000 })`.
-        - Tenta parsear a resposta como JSON, com lógica para extrair JSON mesmo que esteja dentro de blocos de código ou levemente formatado.
-        - Em caso de falha ao parsear ou erro de comunicação, lança um erro.
-    - **`generateLocalInsights(systemData)`:**
-        - Função de fallback para gerar insights localmente, sem depender da API Gemini.
-        - Implementa lógica de análise de dados para identificar padrões e anomalias nos dados do sistema (ex: pico de acesso matinal, dispositivos offline, alta taxa de negação de acesso, portas destrancadas, acessos fora do horário comercial, acessos por método).
-        - Cria insights baseados nos padrões e anomalias identificadas, com títulos, descrições e prioridades apropriadas.
-        - Se nenhum insight significativo for encontrado, retorna um insight genérico informando que o sistema está operando normalmente.
-        - Lida com casos de dados insuficientes para análise, retornando um insight de fallback.
-    - **`displayInsights(insights)`:**
-        - Exibe os insights na UI.
-        - Atualiza o texto de resumo do painel (`.gemini-insights-summary-content p`).
-        - Limpa a lista de insights existente (`.gemini-insights-list`).
-        - Itera sobre os insights gerados (limitados a `this.options.maxInsights`) e cria elementos `<div>` para cada insight, formatando título, descrição, ícone (baseado no tipo de insight), tags relacionadas e estilos de prioridade.
-        - Adiciona os elementos de insight à lista na UI.
-        - Exibe uma mensagem de "No insights available at this time" se não houver insights para exibir.
-    - **`displayError(message)`:**
-        - Exibe uma mensagem de erro no painel de insights, atualizando o texto de resumo e limpando a lista de insights.
-    - **`showLoading(isLoading)`:**
-        - Exibe ou oculta o indicador de carregamento (`.gemini-insights-loading`) e a área de resumo (`.gemini-insights-summary-content`) com base no estado de carregamento (`isLoading`).
-    - **`updateTimestamp()`:**
-        - Atualiza o timestamp da última atualização no rodapé do painel (`.gemini-insights-updated`) com a hora atual formatada.
-- **Instância Global:**
-    - Cria uma instância global da classe `SimplifiedInsights` chamada `geminiInsights`.
-- **Inicialização Automática:**
-    - Define `window.geminiInsights = geminiInsights;` para tornar a instância globalmente acessível.
-
-### `theme-switcher.js`
-
-Este arquivo JavaScript implementa a funcionalidade de alternância entre tema claro e escuro para o SecureLab 2.0.
-
-- **Constantes:**
-    - `THEME_STORAGE_KEY`: Chave para armazenar o tema preferido do usuário no localStorage ('securelab-theme').
-    - `DARK_MODE_CLASS`: Classe CSS aplicada ao `<html>` para ativar o modo escuro ('dark-mode').
-- **Função `initThemeSwitcher()`:**
-    - Função de inicialização do theme switcher.
-    - Chama `createThemeToggleButton()` para criar o botão de alternância de tema na UI, se não existir.
-    - Aplica o tema inicial obtido de `getPreferredTheme()` chamando `applyTheme()`.
-    - Adiciona um event listener global ao `document` para detectar cliques no botão de alternância de tema (`#theme-toggle`) e chamar `toggleTheme()` quando clicado.
-    - Adiciona um listener para mudanças nas preferências de tema do sistema (`window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ...)`), aplicando o tema do sistema se o usuário não tiver definido manualmente um tema preferido.
-- **Função `createThemeToggleButton()`:**
-    - Cria o botão de alternância de tema (`<button id="theme-toggle">`) se ele ainda não existir no DOM.
-    - Define classes CSS (`icon-button`), atributo `aria-label` e conteúdo interno (ícone da lua `<i class="fas fa-moon"></i>`).
-    - Adiciona o botão à página:
-        - Na página de login, adiciona um container (`.theme-toggle-container`) posicionado no canto superior direito da tela para o botão de tema.
-        - Nas outras páginas, adiciona o botão ao `header-right` no header principal.
-- **Function `getPreferredTheme()`:**
-    - Determina o tema preferido do usuário.
-    - Verifica se há um tema salvo no localStorage (`THEME_STORAGE_KEY`); se sim, retorna o tema salvo.
-    - Verifica a preferência de tema do sistema operacional usando `window.matchMedia('(prefers-color-scheme: dark)').matches`; se o sistema preferir o tema escuro, retorna 'dark'.
-    - Se nenhuma preferência for encontrada, retorna o tema padrão 'light'.
-- **Função `applyTheme(theme)`:**
-    - Aplica um tema específico ('dark' ou 'light') à página.
-    - Obtém o elemento `<html>` e o botão de toggle de tema (`#theme-toggle`).
-    - Se o tema for 'dark':
-        - Adiciona a classe `DARK_MODE_CLASS` ('dark-mode') ao elemento `<html>`.
-        - Altera o ícone do botão de toggle para o ícone do sol (`<i class="fas fa-sun"></i>`).
-    - Se o tema for 'light':
-        - Remove a classe `DARK_MODE_CLASS` do elemento `<html>`.
-        - Altera o ícone do botão de toggle para o ícone da lua (`<i class="fas fa-moon"></i>`).
-    - Salva o tema preferido do usuário no localStorage (`localStorage.setItem(THEME_STORAGE_KEY, theme)`).
-    - Chama `updateCharts(theme)` para ajustar as cores dos gráficos para o tema aplicado.
-- **Função `toggleTheme()`:**
-    - Alterna o tema atual entre 'dark' e 'light'.
-    - Obtém o tema atual usando `getPreferredTheme()`.
-    - Determina o novo tema (se o tema atual for 'dark', o novo tema será 'light', e vice-versa).
-    - Chama `applyTheme(newTheme)` para aplicar o novo tema.
-- **Função `updateCharts(theme)`:**
-    - Atualiza as cores dos gráficos (se presentes) para se adequarem ao tema atual.
-    - Verifica se a biblioteca Chart.js está carregada (`window.Chart`) e se há uma instância do gráfico de atividade (`window.activityChartInstance`).
-    - Ajusta as cores do grid e ticks dos eixos X e Y do gráfico para o tema escuro ou claro.
-    - Ajusta as cores das legendas do gráfico.
-    - Aumenta a opacidade das cores dos datasets no modo escuro para melhorar a visibilidade.
-    - Chama `window.activityChartInstance.update()` para re-renderizar o gráfico com as novas cores.
-    - Ajusta a cor de fundo do "donut hole" e a cor do texto do gráfico de donut de dispositivos para os temas claro e escuro.
-- **Função `increaseBrightness(color, percent)`:**
-    - Aumenta o brilho de uma cor hexadecimal por uma porcentagem especificada para melhorar a visibilidade no modo escuro.
-    - Converte a cor hexadecimal para RGB, ajusta os valores RGB para aumentar o brilho e converte de volta para hexadecimal.
-- **Inicialização:**
-    - Inicializa o theme switcher chamando `initThemeSwitcher()` quando o DOM estiver completamente carregado (`document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', initThemeSwitcher) : initThemeSwitcher();`).
-
-### `users.js`
-
-Este arquivo JavaScript gerencia a funcionalidade da página de usuários, incluindo listagem, filtragem, paginação, adição, edição e exclusão de usuários.
-
-- **Verificação da Página Atual:**
-    - No início do arquivo, verifica se a página atual é a página de usuários (`isPage('users')`) e interrompe a execução do script se não for.
-- **Variáveis Globais:**
-    - `PAGE_SIZE`: Constante para definir o número de usuários por página na paginação (10).
-    - `currentPage`: Número da página atual (inicialmente 1).
-    - `totalUsers`: Número total de usuários (inicialmente 0).
-    - `filteredUsers`: Array para armazenar usuários após aplicação de filtros.
-    - `currentEditingUser`: Objeto para armazenar o usuário atualmente sendo editado (inicialmente null).
-    - Variáveis para elementos do DOM (`tableBody`, `searchInput`, `filterDepartment`, etc.) para acesso rápido aos elementos da página.
-- **Função `initDOMElements()`:**
-    - Inicializa as variáveis globais de elementos do DOM, obtendo referências para elementos HTML importantes da página de usuários usando `document.getElementById()`.
-- **Função `initThemeSwitcher()`:**
-    - Inicializa o controle de tema
-- **Função `loadUsers()`:**
-    - Carrega dados de usuários do Firebase Realtime Database (`database.ref('users').once('value')`).
-    - Exibe uma mensagem de "Carregando usuários..." na tabela (`tableBody.innerHTML = ...`).
-    - Converte o snapshot do Firebase para um array de objetos JavaScript (`usersArray`).
-    - Ordena o array de usuários por nome (`usersArray.sort(...)`).
-    - Armazena o array filtrado em `filteredUsers` e o total de usuários em `totalUsers`.
-    - Chama `renderUsers()` para exibir os usuários na tabela.
-    - Chama `updatePagination()` para atualizar os controles de paginação.
-    - Lida com casos em que não há usuários encontrados ou erros ao carregar, exibindo mensagens apropriadas na tabela e notificações de erro.
-- **Função `renderUsers()`:**
-    - Renderiza os usuários na tabela HTML (`#users-table-body`).
-    - Limpa o conteúdo da tabela (`tableBody.innerHTML = '';`).
-    - Ordena `filteredUsers` por nome antes de renderizar.
-    - Calcula os índices de início e fim para paginação e obtém os usuários da página atual (`usersPage`).
-    - Itera sobre os usuários da página atual e cria linhas `<tr>` para cada usuário, preenchendo as células `<td>` com informações do usuário (nome, email, departamento, função, status, data de criação, botões de ação).
-    - Adiciona badges de status formatados (`getStatusClass()`, `formatStatus()`).
-    - Adiciona botões de ação (editar, excluir) para cada usuário.
-    - Chama `updatePaginationInfo()` para atualizar as informações de paginação na UI.
-    - Chama `setupActionButtons()` para adicionar event listeners aos botões de ação de cada linha.
-- **Função `setupActionButtons()`:**
-    - Adiciona event listeners aos botões de ação "Editar" (`.action-btn-edit`) e "Excluir" (`.action-btn-delete`) em cada linha da tabela de usuários.
-    - Para botões "Editar", chama `editUser(userId)` ao clicar.
-    - Para botões "Excluir", chama `confirmDelete(userId)` ao clicar.
-- **Função `editUser(userId)`:**
-    - Abre o modal de edição de usuário (`#user-modal`) para um usuário específico.
-    - Encontra o usuário no array `filteredUsers` pelo `userId`.
-    - Preenche os campos do formulário no modal com os dados do usuário (nome, email, departamento, função, status).
-    - Oculta o campo de senha (`#password-group`) no modo de edição.
-    - Define `currentEditingUser` para o usuário que está sendo editado.
-    - Define o título do modal para "Editar Usuário".
-    - Abre o modal de usuário usando `openModal('user-modal')`.
-- **Função `confirmDelete(userId)`:**
-    - Abre o modal de confirmação (`#confirm-modal`) antes de excluir um usuário.
-    - Encontra o usuário no array `filteredUsers` pelo `userId`.
-    - Define a mensagem de confirmação no modal para perguntar se o usuário deseja excluir o usuário selecionado.
-    - Configura o botão "Confirmar" no modal para chamar `deleteUser(userId)` ao clicar.
-    - Abre o modal de confirmação usando `openModal('confirm-modal')`.
-- **Função `deleteUser(userId)`:**
-    - Exclui um usuário específico do Firebase Realtime Database usando `database.ref('users/${userId}`).remove()`.
-    - Exibe notificações de sucesso ou erro após a tentativa de exclusão.
-    - Re-carrega a lista de usuários chamando `loadUsers()`.
-- **Função `saveUser()`:**
-    - Valida o formulário de usuário usando `validateUserForm()`.
-    - Coleta os dados do formulário (nome, email, departamento, função, status).
-    - Se `currentEditingUser` estiver definido (modo de edição):
-        - Atualiza os dados do usuário existente no Firebase usando `database.ref('users/${currentEditingUser.id}`).update(userData)`.
-        - Se o usuário em edição for o usuário logado, atualiza também o `displayName` do usuário no Firebase Authentication.
-        - Exibe notificação de sucesso e fecha o modal.
-    - Se `currentEditingUser` for null (modo de adição):
-        - Verifica se o email já existe no Firebase (`database.ref('users').orderByChild('email').equalTo(userData.email).once('value')`).
-        - Se o email não existir, cria um novo usuário no Firebase Authentication usando `firebase.auth().createUserWithEmailAndPassword(userData.email, userPasswordInput.value)`, e então salva os dados do usuário no Realtime Database (`database.ref('users').push().set(userData)`), incluindo a data de criação.
-        - Exibe notificações de sucesso e fecha o modal.
-    - Lida com erros durante a criação ou atualização de usuários, exibindo notificações de erro.
-- **Função `validateUserForm()`:**
-    - Valida os campos do formulário de usuário:
-        - Nome (obrigatório).
-        - Email (obrigatório e formato válido usando `isValidEmail()`).
-        - Departamento (obrigatório).
-        - Função (obrigatório).
-        - Senha (obrigatória e com pelo menos 6 caracteres para novos usuários, não validada para edição).
-    - Exibe notificações de erro para campos inválidos e retorna `false` se a validação falhar, `true` se for bem-sucedida.
-- **Função `resetForm()`:**
-    - Reseta o formulário de usuário (`userForm.reset()`).
-    - Define `currentEditingUser = null` para indicar que não está mais editando um usuário.
-    - Define o título do modal para "Adicionar Usuário".
-    - Exibe o campo de senha (`#password-group`).
-    - Reseta o tipo do campo de senha para "password" e atualiza o ícone de toggle de senha.
-- **Função `applyFilters()`:**
-    - Aplica filtros de busca, departamento, função e status à lista de usuários.
-    - Busca todos os usuários do Firebase (`database.ref('users').once('value')`).
-    - Filtra o array de usuários (`usersArray`) com base nos critérios de filtro (termo de busca, departamento, função, status).
-    - Ordena o array filtrado por nome.
-    - Atualiza `filteredUsers` com o array filtrado.
-    - Reseta a paginação para a primeira página (`currentPage = 1`).
-    - Chama `renderUsers()` e `updatePagination()` para atualizar a UI com os usuários filtrados e paginação.
-- **Função `exportUsers(format)`:**
-    - Simula a exportação de usuários para um formato especificado (CSV ou PDF).
-    - Exibe notificações de progresso e sucesso/aviso, mas a funcionalidade real de exportação não está implementada (apenas simula a conclusão bem-sucedida).
-- **Função `updatePaginationInfo(start, end, total)`:**
-    - Atualiza os elementos HTML que exibem informações de paginação (início, fim, total de usuários).
-- **Função `updatePagination()`:**
-    - Atualiza os controles de paginação na UI:
-        - Limpa os números de página existentes (`#pagination-numbers.innerHTML = '';`).
-        - Calcula o total de páginas com base em `filteredUsers.length` e `PAGE_SIZE`.
-        - Cria elementos `<div>` para cada número de página, adicionando a classe `active` para a página atual e event listeners para mudança de página.
-        - Atualiza o estado dos botões "Página Anterior" e "Próxima Página" (`#prev-page`, `#next-page`) habilitando/desabilitando com base na página atual e no total de páginas.
-- **Função `debounce(func, wait)`:**
-    - Implementação da função utilitária de debounce para limitar a taxa de execução de uma função, usada para otimizar a resposta do filtro de busca.
-- **Inicialização:**
-    - Adiciona um event listener para `DOMContentLoaded` para executar a inicialização da página de usuários quando o DOM estiver carregado.
-
-### `utils.js`
-
-Este arquivo JavaScript fornece funções utilitárias para manipulação segura de elementos DOM e outras operações comuns.
-
-- **Função `safeDOM(id, callback)`:**
-    - Função de utilidade para acessar elementos DOM de forma segura, verificando se o elemento com o ID fornecido existe antes de executar um callback function.
-    - Obtém o elemento do DOM pelo ID usando `document.getElementById(id)`.
-    - Se o elemento existir e um callback function for fornecido, executa o callback function passando o elemento como argumento.
-    - Retorna o elemento do DOM (se encontrado) ou `null`.
-- **Funções de Manipulação de Elementos DOM Seguras (`safeTextContent`, `safeInnerHTML`, `safeValue`, `safeSetAttribute`, `safeStyle`, `safeAddClass`, `safeRemoveClass`):**
-    - Uma série de funções utilitárias que encapsulam a função `safeDOM` para realizar operações comuns de manipulação de elementos DOM de forma segura, garantindo que a operação só seja realizada se o elemento existir.
-    - `safeTextContent(id, text)`: Define o `textContent` de um elemento.
-    - `safeInnerHTML(id, html)`: Define o `innerHTML` de um elemento.
-    - `safeValue(id, value)`: Define o `value` de um elemento (tipicamente para inputs).
-    - `safeSetAttribute(id, attribute, value)`: Define um atributo de um elemento.
-    - `safeStyle(id, property, value)`: Define uma propriedade CSS de estilo de um elemento.
-    - `safeAddClass(id, className)`: Adiciona uma classe CSS a um elemento.
-    - `safeRemoveClass(id, className)`: Remove uma classe CSS de um elemento.
-- **Função `getCurrentPage()`:**
-    - Retorna o nome da página atual, extraindo-o do `window.location.pathname`.
-    - Divide o pathname por `/` e obtém o último segmento, então divide por `.` e obtém o primeiro segmento (nome do arquivo sem extensão).
-    - Retorna o nome da página ou 'index' se não conseguir determinar o nome.
-- **Função `isPage(pageName)`:**
-    - Verifica se a página atual corresponde a um nome de página fornecido, comparando o resultado de `getCurrentPage()` com `pageName`.
+- **`gemini-config.js`**: Este arquivo de configuração é dedicado a armazenar e gerenciar todos os parâmetros e chaves necessários para a integração com a API Gemini, centralizando as configurações e facilitando a personalização e a segurança da comunicação com os serviços de IA do Google. Ele contém a `configuração da API Gemini`, incluindo a `apiKey`, que é essencial para autenticar as requisições à API Gemini e garantir o acesso aos serviços de IA do Google, e o `apiEndpoint`, que especifica o URL do ponto de extremidade da API Gemini para onde as requisições devem ser enviadas. Outras configurações incluem `maxTokens`, que define o tamanho máximo das respostas geradas pelo modelo de linguagem, `temperature`, que controla o nível de aleatoriedade e criatividade das respostas, e `safetySettings`, que permite configurar filtros de segurança para garantir que as respostas do Gemini estejam alinhadas com as políticas de conteúdo e evitem gerar conteúdo prejudicial ou inadequado. Além disso, o arquivo define `configurações da UI`, como `initiallyOpen`, `autoInitialize`, `initialDelay` e `mobileMinimized`, que controlam o comportamento e a aparência da interface do assistente Gemini, permitindo adaptar a experiência do usuário às preferências e necessidades específicas. As `configurações de insights` também são incluídas, como `autoRefresh`, `refreshInterval` e `maxInsights`, que governam a geração e exibição de insights baseados em IA, permitindo otimizar o desempenho e a relevância das informações fornecidas pelo assistente Gemini.
 
 ## Integração com Firebase
 
-O projeto SecureLab RFID utiliza o Firebase como backend para autenticação e banco de dados em tempo real.
+O SecureLab RFID utiliza o Firebase como seu backend robusto e escalável, aproveitando seus serviços para persistência de dados em tempo real e gerenciamento de autenticação de usuários.
 
-- **Firebase Realtime Database:** Utilizado para armazenar dados em tempo real, como informações de usuários, portas, dispositivos e logs de acesso. A sincronização em tempo real permite que as alterações sejam refletidas instantaneamente em todos os clientes conectados.
-- **Firebase Authentication:** Utilizado para gerenciar a autenticação de usuários, permitindo login seguro com email e senha e gerenciamento de sessões.
+- **Realtime Database**: O Firebase Realtime Database serve como o coração do backend do SecureLab RFID, proporcionando um armazenamento de dados NoSQL em nuvem que garante a persistência e a sincronização de dados em tempo real entre todos os clientes conectados. Ele armazena `dados de usuários`, incluindo informações de perfil, credenciais de acesso e detalhes de contato, permitindo a gestão centralizada de contas de usuário e permissões de acesso. As `configurações de portas` são armazenadas, definindo o nome, a localização, o status (trancado/destrancado) e outras propriedades de cada porta RFID no sistema, facilitando a administração e o controle do acesso físico. Os `dados de dispositivos RFID`, como tipo, localização, status online/offline e configurações de hardware, são persistidos, permitindo o monitoramento e a gestão centralizada do inventário de dispositivos. Os `logs de acesso` são armazenados, registrando cada evento de acesso ao sistema, incluindo informações como usuário, porta, data/hora, método de acesso e resultado (acesso permitido/negado), fornecendo um trilha de auditoria detalhada e permitindo a análise de padrões de acesso e a detecção de anomalias. A `sincronização de dados em tempo real` garante que todas as alterações feitas no backend sejam refletidas instantaneamente em todos os clientes conectados, proporcionando uma experiência de usuário consistente e atualizada em tempo real.
 
-A configuração do Firebase é inicializada no arquivo `firebase-config.js`, que inclui as credenciais do projeto e inicializa os serviços de autenticação e banco de dados.
+- **Authentication**: O Firebase Authentication gerencia a autenticação de usuários do SecureLab RFID, oferecendo um serviço seguro e escalável para verificar a identidade dos usuários e controlar o acesso ao sistema. Ele suporta `autenticação de usuários com email e senha`, permitindo que os administradores criem contas de usuário seguras e gerenciem as credenciais de acesso. O `gerenciamento de sessão de usuários` é feito automaticamente pelo Firebase Authentication, garantindo que os usuários permaneçam autenticados durante suas sessões e que o acesso às funcionalidades do sistema seja protegido por mecanismos de segurança robustos. A `integração com a interface web` é simplificada, permitindo que os desenvolvedores implementem fluxos de login e logout seguros e personalizáveis, sem a necessidade de gerenciar a complexidade da autenticação de usuários por conta própria. O Firebase Authentication oferece `segurança robusta e escalabilidade`, garantindo que o sistema de autenticação seja capaz de lidar com um grande número de usuários e proteger as credenciais de acesso contra ameaças de segurança comuns, como ataques de força bruta e roubo de credenciais.
+
+A integração com o Firebase simplifica o desenvolvimento backend do SecureLab RFID, permitindo que os desenvolvedores se concentrem na lógica de negócios e na experiência do usuário, em vez de se preocuparem com a complexidade da infraestrutura backend. A persistência de dados em tempo real e a autenticação de usuários gerenciada pelo Firebase garantem a confiabilidade, a escalabilidade e a segurança do sistema, tornando-o uma solução robusta e eficiente para controle de acesso baseado em RFID.
 
 ## Integração com o Assistente Gemini
 
-O sistema SecureLab RFID integra o assistente Gemini para fornecer funcionalidades avançadas de análise de dados e interação em linguagem natural.
+A integração do assistente Gemini no SecureLab RFID representa um avanço significativo na interação homem-máquina para sistemas de controle de acesso, proporcionando uma experiência de usuário mais intuitiva, inteligente e eficiente.
 
-- **API Gemini:** Utilizada através do serviço `gemini-service.js` para enviar prompts e receber respostas do modelo Gemini. A configuração da API, incluindo a chave de API, é armazenada em `gemini-config.js`.
-- **Processamento de Linguagem Natural:** O assistente Gemini permite que os usuários interajam com o sistema usando linguagem natural, enviando comandos e perguntas através da interface de chat (`gemini-assistant.js`).
-- **Geração de Insights:** O assistente Gemini é capaz de analisar dados do sistema e gerar insights inteligentes, que são exibidos no dashboard e na interface do assistente (`gemini-insights.js`).
-- **Processamento de Comandos:** O assistente pode interpretar e executar comandos do usuário, como trancar/destrancar portas, reiniciar dispositivos e fornecer informações sobre o sistema.
+- **Processamento de Linguagem Natural (PNL)**: O Gemini capacita o SecureLab RFID com capacidades avançadas de PNL, permitindo que os usuários interajam com o sistema utilizando linguagem natural, em vez de interfaces gráficas ou comandos complexos. `Comandos em linguagem natural` podem ser usados para realizar uma variedade de tarefas, como trancar ou destrancar portas, obter o status de dispositivos ou gerar relatórios de acesso, simplificando a interação e tornando o sistema mais acessível a usuários com diferentes níveis de habilidade técnica. `Consultas em linguagem natural` permitem que os usuários obtenham informações sobre o sistema de forma rápida e fácil, fazendo perguntas sobre o número de usuários ativos, o status das portas ou os logs de acesso recentes, sem a necessidade de navegar por menus ou painéis complexos, melhorando a eficiência e a produtividade. A `interface conversacional` do Gemini transforma a interação com o sistema em um diálogo natural e fluido, onde os usuários podem fazer perguntas, dar comandos e receber respostas de forma semelhante a conversar com um assistente humano, tornando a experiência mais amigável e intuitiva.
+
+- **Geração de Insights Inteligentes**: O Gemini eleva a capacidade do SecureLab RFID de fornecer valor aos usuários, indo além do simples controle de acesso para oferecer análises de dados e insights proativos. A `análise de dados do sistema` é realizada pelo Gemini, que examina logs de acesso, métricas de desempenho de dispositivos e outros dados relevantes para identificar padrões, anomalias e tendências, fornecendo uma visão abrangente do estado e da atividade do sistema. A `identificação de padrões anômalos` permite que o Gemini detecte atividades incomuns ou suspeitas, como tentativas de acesso não autorizado, horários de pico de atividade fora do normal ou falhas de dispositivos, alertando os administradores sobre possíveis problemas de segurança ou operacionais. A `geração de recomendações de segurança` é uma funcionalidade proativa do Gemini, que, com base na análise de dados, pode sugerir melhorias nas políticas de acesso, configurações de segurança ou procedimentos operacionais, ajudando a fortalecer a postura de segurança do sistema e a prevenir incidentes futuros. Os `insights acionáveis` fornecidos pelo Gemini transformam dados brutos em informações valiosas e práticas, permitindo que os administradores tomem decisões informadas e ajam de forma proativa para otimizar a segurança e a eficiência do sistema.
+
+- **Processamento de Comandos e Ações**: A integração do Gemini permite que o SecureLab RFID execute comandos e ações complexas com base em instruções em linguagem natural, automatizando tarefas administrativas e operacionais. O `controle de portas por voz ou texto` é uma funcionalidade inovadora, permitindo que os usuários tranquem ou destranquem portas simplesmente pedindo ao assistente Gemini, seja por comandos de voz ou mensagens de texto, simplificando o controle de acesso físico e oferecendo uma forma alternativa de interação. O `gerenciamento de dispositivos` pode ser realizado através do Gemini, permitindo que os administradores reiniciem dispositivos, verifiquem o status ou atualizem configurações utilizando comandos em linguagem natural, agilizando as tarefas de manutenção e administração do hardware do sistema. A `automatização de tarefas administrativas` é uma vantagem chave da integração com o Gemini, que pode ser programado para executar rotinas como geração de relatórios de acesso, análise de logs para auditoria ou configuração de novos usuários ou dispositivos, liberando tempo e recursos dos administradores para tarefas mais estratégicas. A `interface intuitiva e eficiente` proporcionada pelo Gemini simplifica a interação com o sistema, tornando-o mais acessível a usuários com diferentes níveis de habilidade técnica e permitindo que as tarefas administrativas e operacionais sejam realizadas de forma mais rápida e fácil, melhorando a produtividade e a eficiência geral do sistema.
 
 ## Implementação do Modo Escuro
 
-O tema escuro é implementado principalmente através do arquivo `dark-mode.css`, que redefine as variáveis de cor CSS e ajusta os estilos dos componentes para o tema escuro.
+O modo escuro no SecureLab RFID é mais do que apenas uma preferência estética; é uma funcionalidade cuidadosamente implementada para melhorar a experiência do usuário em diversas condições de iluminação e reduzir o cansaço visual.
 
-- **Variáveis CSS:** Utilização de variáveis CSS (`:root`) para definir cores base e específicas do modo escuro, facilitando a alteração de temas.
-- **Classe `dark-mode`:** A classe `dark-mode` é aplicada ao elemento `<html>` para ativar o tema escuro, com estilos específicos definidos em `dark-mode.css` dentro de regras `html.dark-mode`.
-- **Theme Switcher JavaScript (`theme-switcher.js`):** JavaScript gerencia a alternância entre temas claro e escuro, persistindo a preferência do usuário no localStorage e aplicando o tema correto ao carregar a página.
-- **Detecção de Preferência do Sistema:** O sistema detecta a preferência de tema do sistema operacional do usuário (`prefers-color-scheme: dark`) e aplica o tema correspondente por padrão, a menos que o usuário tenha definido manualmente um tema.
+- **Variáveis CSS Personalizadas**: A implementação do modo escuro começa com a definição de `variáveis CSS personalizadas` no arquivo `dark-mode.css`. Essas variáveis atuam como placeholders para cores, permitindo que o tema seja alterado globalmente com modificações mínimas no código. Variáveis para `cores principais` (`--primary-color`, `--secondary-color`, etc.) são redefinidas para tons mais claros ou invertidos no modo escuro, garantindo que os elementos da interface mantenham a legibilidade e o contraste. `Cores específicas do modo escuro` (`--dark-bg-color`, `--dark-card-bg`, `--dark-text-primary`, etc.) são introduzidas, oferecendo um esquema de cores otimizado para interfaces escuras, com tons de fundo mais escuros e texto mais claro para facilitar a leitura em ambientes com pouca luz. `Cores específicas para tabelas` (`--dark-table-header`, `--dark-table-row`, `--dark-table-hover`, etc.) são ajustadas para garantir que as tabelas mantenham sua estrutura e legibilidade no modo escuro, com cabeçalhos e linhas claramente definidos e contrastantes.
+
+- **Classe CSS `dark-mode`**: A ativação do modo escuro é controlada pela aplicação da `classe CSS "dark-mode" ao elemento `<html>`. Essa classe atua como um gatilho, ativando todos os estilos definidos dentro do escopo `html.dark-mode` no arquivo `dark-mode.css`. Os `estilos base para o modo escuro` são aplicados ao `<body>` quando a classe `dark-mode` está presente, alterando a cor de fundo para um tom mais escuro e ajustando a cor do texto para garantir o contraste e a legibilidade. `Correções específicas para páginas e componentes` são implementadas dentro do escopo `html.dark-mode` para garantir que todos os elementos da interface, como `páginas de login`, `status das portas`, `sidebar`, `header`, `formulários`, `cards`, `tabelas`, `modais`, `notificações`, `botões`, `elementos de paginação`, `dropdowns` e `gráficos`, sejam adaptados para o modo escuro, mantendo a consistência visual e a usabilidade em todo o sistema.
+
+- **Theme Switcher JavaScript**: O arquivo `theme-switcher.js` gerencia a funcionalidade de alternância entre temas claro e escuro, oferecendo aos usuários a flexibilidade de escolher o tema de sua preferência. O script `inicializa o controle de tema` ao carregar a página, criando um botão de alternância na interface e aplicando o tema preferido do usuário com base nas preferências salvas ou nas configurações do sistema. A `criação do botão de alternância de tema` garante que um elemento de controle esteja disponível na interface para permitir que os usuários alternem entre os temas de forma fácil e intuitiva. A `obtenção do tema preferido do usuário` é feita verificando a preferência salva no localStorage, permitindo que o sistema se lembre da escolha do usuário entre sessões, ou utilizando a preferência de tema do sistema operacional como fallback, respeitando as configurações do usuário em todo o sistema. A função `aplicar o tema especificado` atualiza a interface para refletir o tema selecionado, adicionando ou removendo a classe `dark-mode` do elemento `<html>` e ajustando o ícone do botão de alternância para indicar o tema atual. A funcionalidade de `alternar entre os temas claro e escuro` é implementada, permitindo que os usuários mudem facilmente o tema com um clique no botão de alternância, proporcionando uma experiência de usuário personalizada e adaptável às suas necessidades. A função `atualizar os gráficos para se adequarem ao tema` garante que os gráficos e visualizações de dados sejam ajustados para manter a legibilidade e a visibilidade em ambos os temas, com cores e estilos otimizados para cada modo de exibição, mantendo a consistência visual e a usabilidade em todo o sistema.
+
+- **Detecção de Preferência do Sistema**: O SecureLab RFID é projetado para respeitar as preferências de tema do sistema operacional do usuário, oferecendo uma experiência ainda mais personalizada e integrada. A `detecção da preferência do sistema` é feita através do `matchMedia` do JavaScript, que verifica se o sistema operacional do usuário está configurado para o modo escuro. A `aplicação automática do tema do sistema` garante que, por padrão, o SecureLab RFID adote o tema preferido pelo usuário no nível do sistema operacional, sem a necessidade de configuração manual, proporcionando uma experiência out-of-the-box mais conveniente e alinhada com as expectativas do usuário. Caso o usuário `altere manualmente o tema através do botão de alternância`, a preferência do usuário é salva no localStorage, sobrepondo-se à preferência do sistema e garantindo que a escolha do usuário seja persistida entre sessões, oferecendo flexibilidade e controle total sobre a aparência da interface.
 
 ## Responsividade Mobile
 
-A responsividade mobile é tratada principalmente através do arquivo `mobile.css`, que utiliza media queries para ajustar o layout e a apresentação da interface em telas menores.
+Para garantir que o SecureLab RFID seja acessível e funcional em uma ampla gama de dispositivos, incluindo smartphones e tablets, a responsividade mobile foi cuidadosamente implementada em todo o sistema.
 
-- **Mobile-First Approach:** Embora não estritamente mobile-first, o projeto inclui otimizações consideráveis para dispositivos móveis, com um arquivo CSS dedicado (`mobile.css`) e JavaScript (`mobile.js`) para funcionalidades específicas.
-- **Media Queries (`@media (max-width: 768px)` e `@media (max-width: 480px)`):** Utilização extensiva de media queries para ajustar fontes, paddings, margens, layouts de grid e elementos específicos para telas menores.
-- **Sidebar Mobile:** A sidebar se transforma em um menu off-canvas em dispositivos móveis, sendo exibida e oculta com um botão de toggle e overlay.
-- **Otimizações de Componentes:** Ajustes específicos para componentes como cards, tabelas, modais, formulários e botões para garantir que sejam utilizáveis em telas touch e com espaço limitado.
-- **JavaScript para Mobile (`mobile.js`):** Criação dinâmica de elementos mobile (botão de menu, overlay) e configuração de comportamento do menu mobile via JavaScript.
+- **Media Queries CSS**: O projeto utiliza extensivamente `media queries CSS` nos arquivos `mobile.css` e `styles.css` para adaptar o layout e o estilo dos componentes da UI a diferentes tamanhos de tela. `Ajustes para telas menores (768px e 480px)` são definidos, garantindo que a interface seja otimizada para visualização em dispositivos móveis, com layouts mais compactos, tamanhos de fonte ajustados e elementos da UI redimensionados para caber em telas menores. `Layouts responsivos para cards, tabelas e modais` são implementados, garantindo que esses componentes se adaptem a diferentes larguras de tela, evitando quebras de layout e garantindo que o conteúdo seja exibido de forma organizada e legível em dispositivos móveis. A `otimização de imagens e outros recursos visuais` para dispositivos móveis ajuda a reduzir o consumo de dados e melhorar o desempenho em conexões de rede mais lentas, garantindo que o sistema seja rápido e responsivo mesmo em dispositivos com recursos limitados.
 
-## Análise do `README.md` Existente
+- **Sidebar Mobile Otimizada**: A sidebar, um elemento central da navegação no desktop, é transformada em um `menu off-canvas` em dispositivos móveis, liberando espaço valioso na tela e melhorando a usabilidade em telas menores. O `botão de menu toggle` é adicionado ao header em telas mobile, permitindo que os usuários abram e fechem o menu lateral com um toque, facilitando a navegação sem ocupar espaço permanente na tela. A `sidebar sobreposta ao conteúdo` quando aberta garante que o menu lateral não empurre o conteúdo principal para fora da tela, mantendo o layout geral da página e evitando quebras de layout. O `overlay de fundo para fechar o menu` oferece uma forma intuitiva de fechar o menu lateral em dispositivos touch, permitindo que os usuários simplesmente toquem fora do menu para fechá-lo, melhorando a experiência do usuário e tornando a navegação mais fluida.
 
-O `README.md` fornecido é bastante conciso e focado em instruções para iniciar o Firebase. Ele cobre os passos essenciais para configurar e iniciar o backend do Firebase, o que é crucial para o projeto.
+- **Componentes da UI Otimizados para Touch**: Os componentes da UI são ajustados e otimizados para garantir uma experiência touch-friendly em dispositivos móveis, facilitando a interação e melhorando a usabilidade em telas sensíveis ao toque. `Cards e status cards mais compactos` são utilizados em telas menores, reduzindo o espaço ocupado na tela e permitindo que mais informações sejam exibidas sem rolagem excessiva. `Tabelas responsivas com rolagem horizontal` são implementadas para garantir que tabelas com muitas colunas possam ser visualizadas em telas menores, permitindo que os usuários naveguem pelo conteúdo da tabela horizontalmente, se necessário. `Modais otimizados para mobile` são ajustados para ocupar uma porção menor da tela em dispositivos móveis, garantindo que eles não cubram completamente o conteúdo principal e que sejam fáceis de fechar em telas touch. `Formulários e campos de input responsivos` são adaptados para facilitar o preenchimento em telas menores, com tamanhos de fonte e espaçamento otimizados para dispositivos touch. `Botões e elementos interativos maiores` são utilizados para garantir que sejam facilmente tocáveis em telas touch, melhorando a precisão da interação do usuário e reduzindo erros de toque.
 
-**Sugestões de Melhoria e Expansão:**
-
-- **Visão Geral do Projeto:** Expandir a seção "README.md" para incluir uma visão geral mais detalhada do projeto, seu propósito, funcionalidades principais e para quem ele foi desenvolvido.
-- **Estrutura de Arquivos:** Adicionar uma seção que descreva a estrutura de arquivos e diretórios do projeto, como foi feito na seção "Estrutura de Arquivos" desta documentação.
-- **Tecnologias Utilizadas:** Listar as principais tecnologias e bibliotecas utilizadas (Firebase, Chart.js, Gemini API, etc.).
-- **Configuração e Deploy:** Detalhar os passos para configurar o projeto (além do Firebase, como configurar a API Gemini) e para realizar o deploy da aplicação.
-- **Funcionalidades Principais:** Criar uma seção que detalhe as funcionalidades chave do sistema SecureLab, como gerenciamento de usuários, portas, dispositivos, logs, assistente Gemini, etc.
-- **Guia para Desenvolvedores:** Adicionar seções com guias para desenvolvedores que desejam contribuir ou estender o projeto, incluindo convenções de código, como adicionar novas funcionalidades, como testar e como contribuir com código.
-- **Créditos e Licença:** Incluir informações sobre autores e licença do projeto.
+- **JavaScript Mobile Específico**: O arquivo `mobile.js` contém funcionalidades JavaScript dedicadas a otimizar a experiência mobile, complementando os ajustes CSS e garantindo um comportamento adequado da interface em dispositivos touch. A `criação de elementos mobile via JavaScript` permite adicionar componentes da UI específicos para mobile de forma dinâmica, como o botão de menu toggle e o overlay de fundo, garantindo que esses elementos só sejam adicionados quando necessário e evitando poluir o DOM em dispositivos desktop. A `configuração do comportamento do menu mobile via JavaScript` gerencia a interação do usuário com o menu lateral em dispositivos móveis, implementando a lógica para abrir e fechar o menu com um toque e garantindo que o menu off-canvas funcione corretamente em telas touch. A `detecção de tipo de dispositivo via JavaScript` permite aplicar otimizações específicas com base no tipo de dispositivo (mobile ou desktop), adaptando o comportamento da interface e garantindo a melhor experiência possível em cada plataforma.
 
 ## Arquitetura Geral do Projeto
 
-O SecureLab RFID adota uma arquitetura front-end centrada em JavaScript, HTML (implícito nos componentes e funcionalidades JS) e CSS, interagindo com um backend Firebase e integrando serviços de IA através da API Gemini.
+O SecureLab RFID adota uma arquitetura front-end robusta e bem estruturada, complementada por um backend escalável e serviços de IA avançados, resultando em um sistema de controle de acesso moderno, eficiente e inteligente.
 
-- **Front-end (HTML, CSS, JavaScript):**
-    - **HTML (Estrutura):** A estrutura da interface web é definida implicitamente através dos scripts JavaScript que manipulam o DOM e injetam HTML dinamicamente. O projeto se beneficiaria da criação de arquivos HTML explícitos para cada página ou componente principal para melhor organização e manutenção.
-    - **CSS (Estilização):** O CSS é bem organizado em múltiplos arquivos, cada um responsável por uma parte específica da interface (componentes, dashboard, tema escuro, páginas específicas, utilitários). Isso facilita a manutenção e a escalabilidade do design.
-    - **JavaScript (Lógica):** O JavaScript é responsável pela lógica da aplicação, incluindo manipulação do DOM, interação com o Firebase e a API Gemini, gerenciamento de estado da UI, validação de formulários, paginação, filtragem e funcionalidades específicas de cada página (dashboard, usuários, portas, dispositivos, logs).
-- **Backend (Firebase):**
-    - **Firebase Realtime Database:** Fornece persistência de dados em tempo real, armazenando informações de usuários, portas, dispositivos e logs de acesso.
-    - **Firebase Authentication:** Gerencia a autenticação de usuários, garantindo acesso seguro ao sistema.
-- **Serviços de IA (Gemini API):**
-    - **Gemini Assistant:** Integração com a API Gemini para fornecer um assistente virtual que permite interação em linguagem natural, geração de insights e execução de comandos no sistema.
+- **Front-end (HTML, CSS, JavaScript)**: A camada front-end é construída utilizando tecnologias web padrão, garantindo compatibilidade, desempenho e facilidade de desenvolvimento e manutenção.
+    - **Manipulação do DOM com JavaScript**: O JavaScript é utilizado extensivamente para manipular o DOM (Document Object Model) de forma dinâmica, permitindo a atualização da interface do usuário em tempo real, a interação com o usuário através de eventos e a criação de elementos HTML sob demanda. A `injeção de elementos HTML via JavaScript` permite adicionar componentes da UI de forma dinâmica, como modais, notificações e elementos mobile específicos, garantindo que a interface seja flexível e adaptável a diferentes contextos e dispositivos. A `atualização dinâmica de conteúdo` sem recarregamento da página proporciona uma experiência de usuário fluida e responsiva, melhorando a usabilidade e a eficiência do sistema. A `interação com o usuário via eventos (click, input, etc.)` é gerenciada através de JavaScript, permitindo que a interface responda às ações do usuário em tempo real, como cliques em botões, digitação em campos de entrada ou interações com elementos da UI, tornando o sistema interativo e responsivo.
 
-## Sugestões de Melhorias e Direções Futuras
+    - **CSS Modular para Estilização**: O CSS é organizado em módulos, com cada arquivo CSS responsável por estilizar uma parte específica da interface do usuário ou um conjunto de componentes relacionados. A `estrutura modular de CSS (components.css, dashboard.css, etc.)` facilita a manutenção e a escalabilidade do código CSS, permitindo que os desenvolvedores encontrem e modifiquem estilos de forma rápida e eficiente, sem afetar outras partes do sistema. A `reutilização de estilos CSS através de classes` e componentes CSS garante a consistência visual em toda a aplicação, reduzindo a duplicação de código e facilitando a criação de interfaces coesas e profissionais. O `uso de variáveis CSS para temas (cores, tipografia, etc.)` permite a fácil personalização da aparência do sistema, facilitando a implementação de temas claros e escuros e a adaptação da interface a diferentes preferências visuais.
 
-- **Refatoração para Framework Front-end:** Considerar refatorar o front-end para um framework JavaScript moderno como React, Vue ou Angular. Isso facilitaria o desenvolvimento de componentes reutilizáveis, gerenciamento de estado mais eficiente e melhor organização do código.
-- **Implementação de Testes:** Adicionar testes automatizados (unitários, de integração, E2E) para garantir a qualidade do código e evitar regressões em futuras atualizações.
-- **Melhoria da Documentação:** Expandir a documentação (como este documento detalhado) e criar documentação para desenvolvedores que desejam contribuir.
-- **Internacionalização (i18n):** Implementar suporte para múltiplos idiomas para tornar o sistema acessível a um público mais amplo.
-- **Acessibilidade (a11y):** Melhorar a acessibilidade da interface web, seguindo diretrizes WCAG para garantir que o sistema seja utilizável por pessoas com deficiência.
-- **Segurança:** Realizar auditorias de segurança e implementar medidas adicionais para proteger o sistema contra vulnerabilidades.
-- **Escalabilidade:** Considerar a escalabilidade do sistema, especialmente se o número de usuários, portas e dispositivos aumentar significativamente. Avaliar a possibilidade de migrar para um banco de dados mais escalável se necessário.
-- **Monitoramento e Alertas Avançados:** Expandir as funcionalidades de monitoramento e alertas, incluindo notificações mais ricas, alertas personalizáveis e integração com sistemas de notificação externos.
-- **Personalização e Tematização:** Permitir maior personalização da interface, incluindo temas adicionais e opções de customização para usuários.
-- **API Pública:** Desenvolver uma API pública para permitir que outras aplicações e sistemas interajam com o SecureLab, abrindo possibilidades para integrações e automações.
+    - **JavaScript para Lógica da Aplicação**: O JavaScript é utilizado para implementar a lógica de negócios do SecureLab RFID no front-end, gerenciando a interação do usuário com o sistema, a comunicação com o backend e a apresentação dos dados. A `gestão do estado da aplicação no front-end` permite que o JavaScript controle o fluxo da aplicação, gerencie dados temporários e coordene a interação entre diferentes componentes da UI, proporcionando uma experiência de usuário consistente e previsível. A `comunicação assíncrona com o backend (Firebase API)` é realizada através de JavaScript, permitindo que a interface web busque e envie dados para o Firebase Realtime Database em tempo real, garantindo que as informações exibidas estejam sempre atualizadas e refletindo o estado mais recente do sistema. O `processamento e formatação de dados para exibição` são realizados no front-end, permitindo que o JavaScript transforme os dados brutos recebidos do backend em formatos amigáveis e visualmente agradáveis para exibição na interface do usuário, melhorando a usabilidade e a compreensão das informações apresentadas.
 
-Este documento detalhado fornece uma visão abrangente do projeto SecureLab RFID, analisando sua estrutura, funcionalidades e tecnologias. Ele serve como um guia completo para entender o sistema e como ele foi construído, além de sugerir direções para futuras melhorias e expansões.
-```
+- **Backend (Firebase)**: O Firebase atua como o backend do SecureLab RFID, fornecendo serviços robustos e escaláveis para persistência de dados e autenticação de usuários.
+    - **Realtime Database para Persistência de Dados**: O Firebase Realtime Database oferece um armazenamento de dados NoSQL em nuvem, otimizado para aplicações em tempo real, garantindo a persistência e a sincronização de dados entre clientes. A `persistência de dados em tempo real` garante que todas as alterações feitas nos dados sejam salvas e propagadas instantaneamente para todos os clientes conectados, proporcionando uma experiência de usuário consistente e atualizada em tempo real. A `estrutura NoSQL flexível e escalável` do Realtime Database permite armazenar dados de diferentes tipos e tamanhos de forma eficiente, adaptando-se às necessidades do sistema e facilitando a gestão de grandes volumes de informações. A `sincronização automática de dados entre clientes` garante que todos os usuários vejam sempre a versão mais recente dos dados, independentemente de onde ou quando as alterações foram feitas, melhorando a colaboração e a consistência do sistema.
+
+    - **Authentication para Gerenciamento de Usuários**: O Firebase Authentication gerencia a autenticação de usuários, oferecendo um serviço seguro e escalável para verificar a identidade dos usuários e controlar o acesso ao sistema. O `gerenciamento de usuários e autenticação` é simplificado pelo Firebase Authentication, que cuida de tarefas complexas como registro de usuários, login, logout, recuperação de senha e verificação de e-mail, liberando os desenvolvedores para se concentrarem na lógica de negócios da aplicação. A `segurança robusta e escalabilidade` do Firebase Authentication garante que o sistema de autenticação seja capaz de lidar com um grande número de usuários e proteger as credenciais de acesso contra ameaças de segurança comuns, como ataques de força bruta e roubo de credenciais. A `integração fácil com o front-end` simplifica a implementação de fluxos de autenticação na interface web, permitindo que os desenvolvedores adicionem funcionalidades de login e logout seguras e personalizáveis com pouca codificação, acelerando o desenvolvimento e reduzindo o risco de vulnerabilidades de segurança.
+
+- **Serviços de IA (API Gemini)**: A integração com a API Gemini adiciona uma camada de inteligência artificial ao SecureLab RFID, proporcionando funcionalidades avançadas de PNL e análise de dados.
+    - **Assistente Virtual para Interação em Linguagem Natural**: O Gemini atua como um assistente virtual, permitindo que os usuários interajam com o sistema utilizando linguagem natural, tornando a interface mais intuitiva e acessível. A `interface de chat conversacional` do Gemini oferece uma forma natural e amigável de interagir com o sistema, permitindo que os usuários façam perguntas, deem comandos e recebam respostas de forma semelhante a conversar com um assistente humano. O `processamento de linguagem natural para comandos e consultas` permite que os usuários interajam com o sistema utilizando linguagem cotidiana, sem a necessidade de aprender sintaxes complexas ou navegar por menus intrincados, simplificando a interação e melhorando a usabilidade. A `geração de insights e recomendações inteligentes` pelo Gemini eleva a capacidade do sistema de fornecer valor aos usuários, transformando dados brutos em informações acionáveis e oferecendo análises proativas e recomendações de segurança, melhorando a tomada de decisões e a eficiência operacional.
+
+## Sugestões de Melhorias Futuras
+
+O projeto SecureLab RFID, embora já robusto e funcional, possui um potencial ainda maior de crescimento e aprimoramento. As sugestões de melhorias futuras visam não apenas expandir as funcionalidades do sistema, mas também otimizar sua arquitetura, segurança e experiência do usuário.
+
+- **Migração para Framework Front-end (React, Vue ou Angular)**: A refatoração do front-end para um framework JavaScript moderno como React, Vue ou Angular representaria um avanço significativo na organização e manutenibilidade do código. A `arquitetura baseada em componentes` oferecida por esses frameworks facilitaria a criação de interfaces de usuário mais complexas e reutilizáveis, promovendo a modularidade e a escalabilidade do código front-end. O `gerenciamento de estado centralizado` proporcionaria uma forma mais eficiente e organizada de lidar com os dados da aplicação, simplificando o desenvolvimento de funcionalidades dinâmicas e interativas. O `ecossistema rico em bibliotecas e ferramentas` desses frameworks aceleraria o desenvolvimento, oferecendo soluções prontas para tarefas comuns e permitindo que os desenvolvedores se concentrem na lógica de negócios da aplicação, em vez de reinventar a roda.
+
+- **Implementação de Testes Automatizados (Unitários, Integração e E2E)**: A inclusão de testes automatizados é crucial para garantir a qualidade, a estabilidade e a confiabilidade do SecureLab RFID a longo prazo. `Testes unitários` permitiriam verificar o correto funcionamento de componentes individuais da aplicação, garantindo que cada parte do código funcione como esperado de forma isolada. `Testes de integração` verificariam a interação entre diferentes componentes do sistema, assegurando que eles trabalhem juntos de forma coesa e sem erros. `Testes End-to-End (E2E)` simulariam o fluxo completo do usuário, desde a interação com a interface até a persistência de dados no backend, garantindo que todas as funcionalidades do sistema funcionem corretamente em um ambiente real. A `integração com pipelines de CI/CD (Integração Contínua/Entrega Contínua)` automatizaria a execução dos testes em cada commit de código, garantindo que novas funcionalidades e correções de bugs sejam testadas automaticamente antes de serem implementadas em produção, melhorando a qualidade e a velocidade de entrega do software.
+
+- **Internacionalização (i18n)**: A expansão do SecureLab RFID para suportar `múltiplos idiomas` tornaria o sistema acessível a um público global, removendo barreiras linguísticas e aumentando a usabilidade para usuários de diferentes nacionalidades. A `adaptação da interface do usuário para diferentes idiomas` envolveria a tradução de textos, rótulos, mensagens e outros elementos textuais da UI, garantindo que a interface seja exibida no idioma preferido do usuário. O `suporte para formatos de data, hora e moeda localizados` garantiria que os dados sejam exibidos de forma consistente com as convenções locais, melhorando a compreensão e a usabilidade para usuários em diferentes regiões do mundo. A `utilização de bibliotecas e ferramentas de i18n` facilitaria a implementação da internacionalização, oferecendo recursos para gerenciar traduções, formatos de data e hora e outras questões relacionadas à localização, simplificando o processo de adaptação do sistema para diferentes idiomas e regiões.
+
+- **Melhoria da Acessibilidade (a11y) e Conformidade WCAG**: Aprimorar a acessibilidade do SecureLab RFID garantiria que o sistema seja utilizável por pessoas com deficiência, tornando-o mais inclusivo e em conformidade com as diretrizes de acessibilidade web. A `conformidade com as diretrizes WCAG (Web Content Accessibility Guidelines)` é um passo importante para garantir que o sistema atenda aos padrões internacionais de acessibilidade web, abrangendo aspectos como percepção, operabilidade, compreensão e robustez do conteúdo web. A `implementação de alternativas textuais para conteúdo não textual` (como imagens, vídeos e áudios) permitiria que usuários com deficiência visual ou auditiva acessem o conteúdo do sistema através de tecnologias assistivas, como leitores de tela. A `navegação por teclado aprimorada` garantiria que todas as funcionalidades do sistema possam ser acessadas e operadas utilizando apenas o teclado, beneficiando usuários com deficiências motoras ou que preferem a navegação por teclado. O `contraste de cores adequado e o uso de fontes legíveis` melhorariam a legibilidade e a usabilidade da interface para todos os usuários, incluindo aqueles com baixa visão ou daltonismo, tornando o sistema mais acessível e confortável de usar.
+
+- **Auditorias de Segurança e Implementação de Medidas Adicionais**: A segurança é uma prioridade máxima para sistemas de controle de acesso, e auditorias de segurança regulares e a implementação de medidas adicionais são essenciais para proteger o SecureLab RFID contra ameaças e vulnerabilidades. `Auditorias de segurança regulares` permitiriam identificar e corrigir potenciais vulnerabilidades no código, na infraestrutura e nas configurações do sistema, garantindo que a segurança seja mantida em um nível elevado ao longo do tempo. A `implementação de medidas de segurança adicionais`, como `autenticação multi-fator (MFA)`, `criptografia de dados em trânsito e em repouso`, `proteção contra ataques comuns da web (OWASP)` e `monitoramento de segurança contínuo`, fortaleceriam a postura de segurança do sistema e reduziriam o risco de acesso não autorizado, roubo de dados ou outras ameaças cibernéticas. A `revisão e atualização contínua das políticas de segurança` garantiria que o sistema esteja sempre protegido contra as ameaças mais recentes e que as políticas de segurança sejam adaptadas às mudanças no ambiente de ameaças e nas necessidades do negócio.
+
+- **Estratégias para Escalabilidade da Base de Usuários e Dispositivos**: À medida que o SecureLab RFID cresce e se expande, é crucial implementar estratégias para garantir que o sistema possa lidar com um aumento na base de usuários e dispositivos sem comprometer o desempenho ou a estabilidade. A `otimização do desempenho do backend (Firebase Realtime Database)` pode envolver a indexação de dados, a otimização de consultas, a utilização de caches e outras técnicas para garantir que o banco de dados possa lidar com um grande número de requisições e manter tempos de resposta rápidos. A `implementação de balanceamento de carga para o frontend` pode envolver a distribuição do tráfego da aplicação por vários servidores, garantindo que o sistema possa lidar com picos de acesso e manter a disponibilidade mesmo sob carga elevada. A `utilização de Content Delivery Networks (CDNs)` para servir conteúdo estático (como arquivos CSS, JavaScript e imagens) pode melhorar o desempenho da aplicação, reduzindo a latência e acelerando o carregamento da página para usuários em diferentes localizações geográficas. O `monitoramento contínuo do desempenho e da escalabilidade` permitiria identificar gargalos e áreas de melhoria, garantindo que o sistema seja capaz de crescer e se adaptar às necessidades futuras do negócio.
+
+- **Expansão do Sistema de Alertas e Notificações**: Aprimorar o sistema de alertas e notificações do SecureLab RFID aumentaria a capacidade do sistema de alertar os administradores sobre eventos críticos ou anomalias em tempo real, permitindo uma resposta mais rápida e eficiente a problemas de segurança ou operacionais. `Alertas em tempo real para eventos de segurança críticos` (como tentativas de acesso não autorizado, portas destrancadas por longos períodos ou dispositivos offline) permitiriam que os administradores sejam notificados imediatamente sobre problemas que exigem atenção imediata, melhorando o tempo de resposta a incidentes de segurança. `Notificações personalizáveis e configuráveis` permitiriam que os administradores definam quais tipos de eventos devem gerar alertas e como esses alertas devem ser entregues (por exemplo, e-mail, SMS, push notifications), garantindo que eles recebam apenas alertas relevantes e importantes para suas responsabilidades. A `integração com canais de comunicação externos (e-mail, SMS, Slack, etc.)` permitiria que os alertas sejam enviados para os canais de comunicação preferidos dos administradores, garantindo que eles sejam notificados mesmo quando não estiverem logados na interface administrativa, melhorando a capacidade de resposta e a conscientização situacional.
+
+- **Desenvolvimento de API Pública para Integração com Outros Sistemas**: A criação de uma API pública para o SecureLab RFID abriria um mundo de possibilidades para integração com outros sistemas e aplicações, expandindo a funcionalidade e o valor do sistema de controle de acesso. Uma `API RESTful bem documentada` permitiria que desenvolvedores externos e internos acessem os dados e as funcionalidades do SecureLab RFID de forma programática, facilitando a criação de integrações personalizadas e a extensão do sistema para atender a necessidades específicas. `Integração com sistemas de gerenciamento de edifícios (BMS)` permitiria que o SecureLab RFID compartilhe dados de acesso e status de portas com outros sistemas de gerenciamento predial, como sistemas de iluminação, climatização ou segurança, permitindo a criação de soluções de automação predial mais completas e eficientes. A `integração com sistemas de recursos humanos (HRM)` facilitaria a gestão de usuários e permissões de acesso, permitindo que as informações de funcionários sejam sincronizadas automaticamente entre os sistemas de RH e o SecureLab RFID, simplificando a administração e reduzindo o risco de erros. A `criação de aplicativos móveis personalizados` para usuários finais ou administradores permitiria expandir o acesso ao SecureLab RFID para além da interface web, oferecendo aplicativos móveis para controle de acesso, monitoramento de logs ou gestão de dispositivos, melhorando a conveniência e a flexibilidade para os usuários.
+
+## Configuração do Firebase
+
+Antes de iniciar o projeto SecureLab RFID, é crucial configurar corretamente o Firebase para garantir que o backend esteja operacional e pronto para suportar as funcionalidades do sistema.
+
+1. **Crie um Projeto no Firebase Console**: O primeiro passo é criar um novo projeto no Firebase Console, a plataforma centralizada para gerenciar todos os serviços do Firebase.
+    - Acesse o [Firebase Console](https://console.firebase.google.com/) utilizando sua conta Google.
+    - Clique em "Adicionar projeto" ou "Criar projeto" para iniciar o processo de criação de um novo projeto Firebase.
+    - Siga as instruções na tela, fornecendo um nome para o projeto (por exemplo, "SecureLab RFID") e configurando as opções adicionais conforme necessário.
+    - Após a criação do projeto, você será redirecionado para o painel do projeto no Firebase Console, onde poderá configurar e gerenciar os serviços do Firebase.
+
+2. **Ative o Realtime Database e o Authentication**: O SecureLab RFID utiliza o Realtime Database para persistência de dados em tempo real e o Firebase Authentication para gerenciamento de usuários, sendo essencial ativar esses serviços no Firebase Console.
+    - No painel do projeto, navegue até a seção "Realtime Database" no menu lateral esquerdo e clique em "Criar banco de dados".
+    - Siga as instruções para configurar o Realtime Database, escolhendo o modo de segurança (recomenda-se iniciar no modo de teste para desenvolvimento e configurar regras de segurança mais restritivas para produção) e a localização do banco de dados.
+    - Em seguida, navegue até a seção "Authentication" no menu lateral esquerdo e clique em "Primeiros passos".
+    - Ative o método de login "Email/senha" na aba "Métodos de login", permitindo que os usuários se autentiquem no sistema utilizando um endereço de e-mail e senha.
+
+3. **Substitua as Credenciais em `firebase-config.js`**: Para conectar o front-end do SecureLab RFID ao seu projeto Firebase, é necessário substituir as credenciais de exemplo no arquivo `firebase-config.js` pelas credenciais do seu projeto.
+    - No painel do projeto, clique no ícone de engrenagem (Configurações do projeto) ao lado de "Visão geral do projeto" no menu superior esquerdo e selecione "Configurações do projeto".
+    - Na aba "Geral", role para baixo até a seção "Seus aplicativos" e clique no ícone "</>" (Web) para adicionar um aplicativo web ao seu projeto.
+    - Siga as instruções para registrar o aplicativo web, fornecendo um apelido para o aplicativo (por exemplo, "SecureLab RFID Web") e opcionalmente configurando o Firebase Hosting (isso pode ser configurado posteriormente).
+    - Após o registro do aplicativo, copie o objeto `firebaseConfig` exibido na tela, que contém as credenciais do seu projeto Firebase (apiKey, authDomain, databaseURL, projectId, etc.).
+    - Abra o arquivo `public/js/firebase-config.js` no seu editor de código e substitua o conteúdo do objeto `firebaseConfig` existente pelo objeto que você copiou do Firebase Console, garantindo que as credenciais do seu projeto sejam utilizadas pelo SecureLab RFID.
+
+4. **Configure as Regras de Segurança do Realtime Database**: Para proteger os dados armazenados no Realtime Database e controlar o acesso a eles, é fundamental configurar regras de segurança adequadas no Firebase Console.
+    - No painel do projeto, navegue até a seção "Realtime Database" no menu lateral esquerdo e selecione a aba "Regras".
+    - Revise as regras de segurança padrão geradas pelo Firebase e modifique-as conforme necessário para atender aos requisitos de segurança do SecureLab RFID.
+    - Considere restringir o acesso de leitura e escrita a coleções específicas de dados apenas a usuários autenticados e autorizados, utilizando regras de segurança personalizadas para garantir que apenas usuários com as permissões adequadas possam acessar ou modificar os dados do sistema.
+    - Publique as regras de segurança atualizadas clicando em "Publicar" para aplicá-las ao seu banco de dados e proteger os dados do SecureLab RFID contra acesso não autorizado.
+
+Seguindo esses passos, você terá o Firebase configurado corretamente para o projeto SecureLab RFID, garantindo que o backend esteja operacional, seguro e pronto para suportar as funcionalidades do sistema de controle de acesso.
+
+## Configuração da API Gemini
+
+A integração com a API Gemini enriquece o SecureLab RFID com capacidades de inteligência artificial, oferecendo funcionalidades avançadas como processamento de linguagem natural e geração de insights. Para configurar essa integração, siga os passos detalhados abaixo:
+
+1. **Obtenha uma Chave API do Google AI Studio**: O primeiro passo para integrar o Gemini ao SecureLab RFID é obter uma chave API válida do Google AI Studio, a plataforma de desenvolvimento de IA do Google.
+    - Acesse o [Google AI Studio](https://aistudio.google.com/app/apikey) utilizando sua conta Google.
+    - Se você ainda não tiver um projeto no Google AI Studio, siga as instruções para criar um novo projeto, que servirá como o contêiner para suas chaves API e outros recursos de IA.
+    - No painel do projeto, navegue até a seção "Chaves API" ou "Credenciais" e clique em "Criar chave API" ou "Gerar credencial" para gerar uma nova chave API para o seu projeto.
+    - Copie a chave API gerada e guarde-a em um local seguro, pois ela será necessária para autenticar as requisições à API Gemini a partir do SecureLab RFID.
+
+2. **Substitua a `apiKey` em `gemini-config.js`**: Com a chave API em mãos, o próximo passo é configurar o arquivo `gemini-config.js` do SecureLab RFID para utilizar sua chave API e outros parâmetros de configuração.
+    - Abra o arquivo `public/js/gemini-config.js` no seu editor de código, onde você encontrará um objeto JavaScript chamado `GEMINI_CONFIG` que contém as configurações da API Gemini.
+    - Localize a propriedade `apiKey` dentro do objeto `GEMINI_CONFIG` e substitua o valor padrão ou placeholder existente pela chave API que você copiou do Google AI Studio.
+    - Revise as outras propriedades do objeto `GEMINI_CONFIG`, como `apiEndpoint`, `maxTokens`, `temperature` e `safetySettings`, e ajuste-as conforme necessário para personalizar o comportamento do assistente Gemini e atender aos requisitos específicos do seu caso de uso.
+    - Salve as alterações no arquivo `gemini-config.js`, garantindo que a chave API e outras configurações sejam armazenadas de forma segura e que o arquivo esteja pronto para ser utilizado pelo SecureLab RFID.
+
+3. **Ajuste os Parâmetros de Configuração (Opcional)**: Além da chave API, o arquivo `gemini-config.js` oferece uma variedade de parâmetros de configuração que podem ser ajustados para personalizar o comportamento do assistente Gemini e otimizar a integração com o SecureLab RFID.
+    - `maxTokens`: Este parâmetro controla o tamanho máximo das respostas geradas pelo modelo Gemini, permitindo limitar o consumo de recursos e garantir tempos de resposta mais rápidos. Ajuste este valor com base nas necessidades da sua aplicação e no equilíbrio desejado entre detalhe da resposta e desempenho.
+    - `temperature`: A temperatura controla a aleatoriedade e a criatividade das respostas do Gemini, variando de 0.0 (respostas determinísticas e previsíveis) a 1.0 (respostas mais aleatórias e criativas). Ajuste este valor para controlar o nível de "criatividade" do assistente, dependendo do caso de uso e do tipo de interação desejada.
+    - `safetySettings`: As configurações de segurança permitem configurar filtros para evitar que o Gemini gere respostas inapropriadas ou prejudiciais, definindo limites para diferentes categorias de conteúdo (como assédio, discurso de ódio, conteúdo sexualmente explícito e conteúdo perigoso). Revise e ajuste essas configurações para garantir que o assistente Gemini responda de forma segura e alinhada com as políticas de conteúdo do seu sistema.
+    - `assistant.initiallyOpen`, `assistant.autoInitialize`, `assistant.initialDelay`, `assistant.mobileMinimized`: Estas opções controlam o comportamento e a aparência da interface do assistente Gemini, permitindo personalizar a experiência do usuário. Ajuste-as para definir se o assistente deve ser aberto por padrão, se deve ser inicializado automaticamente, o atraso na inicialização e se deve ser minimizado em dispositivos móveis, de acordo com as preferências e necessidades dos seus usuários.
+    - `insights.autoRefresh`, `insights.refreshInterval`, `insights.maxInsights`: Estas opções controlam a geração e exibição de insights baseados em IA, permitindo otimizar o desempenho e a relevância das informações fornecidas pelo assistente Gemini. Ajuste-as para definir se os insights devem ser atualizados automaticamente, a frequência de atualização e o número máximo de insights exibidos, equilibrando a atualização de informações com o consumo de recursos e a experiência do usuário.
+
+Ao seguir esses passos, você terá configurado a API Gemini para o projeto SecureLab RFID, permitindo que o sistema aproveite as capacidades de inteligência artificial do Gemini para processamento de linguagem natural, geração de insights e outras funcionalidades avançadas, enriquecendo a experiência do usuário e adicionando valor ao sistema de controle de acesso.
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+IGNORE_WHEN_COPYING_END
