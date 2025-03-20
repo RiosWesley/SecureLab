@@ -10,7 +10,7 @@ const GEMINI_CONFIG = {
 
     // Endpoint para o modelo Gemini Pro
     apiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/\n" +
-        "gemini-2.0-flash-thinking-exp-01-21:generateContent",
+        "gemini-2.0-pro-exp-02-05:generateContent",
 
     // Configurações padrão
     maxTokens: 1024,           // Tamanho máximo da resposta

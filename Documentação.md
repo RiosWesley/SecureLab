@@ -27,8 +27,6 @@ O sistema SecureLab 2.0 engloba:
 - Aplicativo móvel para gerenciamento remoto
 - Hardware RFID para leitura de cartões/tags
 - Controladores de portas eletrônicas
-- Gateway IoT para comunicação entre dispositivos
-- API RESTful para integração
 - Banco de dados em tempo real
 - Sistema de autenticação e autorização
 - Módulo de análise e relatórios
@@ -37,14 +35,60 @@ O sistema SecureLab 2.0 engloba:
 
 O SecureLab 2.0 segue uma arquitetura cliente-servidor com componentes IoT:
 
-1. **Camada de Hardware**: Leitores RFID, controladores de portas e gateways IoT
-2. **Camada de Backend**: Servidores API, sistema de autenticação e banco de dados
-3. **Camada de Frontend**: Interface web administrativa e aplicativo móvel
+1. **Camada de Hardware**: Leitores RFID e controladores de portas 
+2. **Camada de Backend**: Sistema de autenticação e banco de dados
+3. **Camada de Frontend**: Interface web administrativa
 4. **Camada de Comunicação**: Protocolos seguros para transferência de dados entre componentes
 
 ## 2. Arquitetura Técnica
-
-
+```
+SecureLab 2.0/
+├── .firebase/                  # Pasta de arquivos de configuração e implantação do Firebase (backend como serviço).
+├── node_modules/              # Pasta que contém as dependências do projeto Node.js (bibliotecas e módulos externos).
+├── public/                     # Pasta que contém todos os arquivos estáticos que serão servidos para o navegador (frontend).
+│   ├── css/                    # Pasta para arquivos de folha de estilo em cascata (CSS) para design e layout da interface web.
+│   │   ├── components.css       # Estilos CSS para componentes reutilizáveis da interface (botões, cards, etc.).
+│   │   ├── dark-mode.css        # Estilos CSS específicos para o modo escuro da interface.
+│   │   ├── dashboard.css        # Estilos CSS específicos para a página do painel de controle (dashboard).
+│   │   ├── devices.css          # Estilos CSS específicos para a página de gerenciamento de dispositivos RFID.
+│   │   ├── gemini-assistant.css # Estilos CSS para a integração com o Gemini Assistant (possivelmente uma IA assistente).
+│   │   ├── gemini-insights.css  # Estilos CSS para visualização de insights gerados pelo Gemini (possivelmente análise de dados).
+│   │   ├── logs.css             # Estilos CSS específicos para a página de visualização de logs/registros do sistema.
+│   │   ├── mobile.css           # Estilos CSS para otimizar a interface para dispositivos móveis (design responsivo).
+│   │   ├── styles.css           # Arquivo CSS principal com estilos globais e base para a aplicação.
+│   │   └── utils.css            # Estilos CSS utilitários, como classes para espaçamento, cores, etc.
+│   ├── js/                     # Pasta para arquivos JavaScript (JS) que controlam a interatividade e lógica do frontend.
+│   │   ├── activity-chart.js    # JavaScript para gerar e controlar gráficos de atividade (ex: uso do sistema).
+│   │   ├── common.js            # JavaScript com funções e utilitários comuns usados em várias partes do frontend.
+│   │   ├── dashboard.js         # JavaScript específico para a lógica e interatividade da página do painel de controle.
+│   │   ├── devices.js           # JavaScript específico para a lógica e interatividade da página de gerenciamento de dispositivos RFID.
+│   │   ├── doors.js             # JavaScript específico para a lógica e interatividade da página de gerenciamento de portas (controle de acesso).
+│   │   ├── firebase-config.js   # JavaScript para configurar e inicializar a conexão com o Firebase.
+│   │   ├── gemini-assistant.js  # JavaScript para a integração e interação com o Gemini Assistant.
+│   │   ├── gemini-config.js     # JavaScript para configurar o Gemini (possivelmente chaves de API ou configurações).
+│   │   ├── gemini-service.js    # JavaScript para serviços relacionados ao Gemini, como chamadas à API.
+│   │   ├── logs.js              # JavaScript específico para a lógica e interatividade da página de visualização de logs.
+│   │   ├── mobile.js            # JavaScript específico para funcionalidades ou ajustes para dispositivos móveis.
+│   │   ├── simplified-gemini-insights.js # JavaScript para gerar insights simplificados usando o Gemini (análise de dados mais simples).
+│   │   ├── theme-switcher.js    # JavaScript para controlar a troca de temas (ex: claro/escuro) na interface.
+│   │   ├── users.js             # JavaScript específico para a lógica e interatividade da página de gerenciamento de usuários.
+│   │   └── utils.js             # JavaScript com funções utilitárias diversas para o frontend.
+│   ├── 404.html               # Página HTML personalizada para erro 404 (Página Não Encontrada).
+│   ├── dashboard.html         # Página HTML do painel de controle principal do sistema SecureLab 2.0.
+│   ├── devices.html           # Página HTML para gerenciamento de dispositivos RFID cadastrados no sistema.
+│   ├── doors.html             # Página HTML para gerenciamento e monitoramento de portas controladas pelo sistema.
+│   ├── index.html             # Página HTML inicial ou página principal da aplicação web (possivelmente a página de boas-vindas ou login).
+│   ├── login.html             # Página HTML para autenticação de usuários (login no sistema).
+│   ├── logs.html              # Página HTML para visualização de logs de eventos e atividades do sistema.
+│   ├── settings.html          # Página HTML para configurações gerais do sistema e perfil do usuário.
+│   └── users.html             # Página HTML para gerenciamento de usuários do sistema (cadastro, edição, permissões).
+├── .env                       # Arquivo para variáveis de ambiente sensíveis (chaves de API, senhas, etc.), não versionado.
+├── .firebaserc                 # Arquivo de configuração para a ferramenta de linha de comando do Firebase (Firebase CLI).
+├── .gitignore                 # Arquivo para especificar arquivos e pastas que o Git deve ignorar no controle de versão.
+├── firebase.json              # Arquivo de configuração principal para o Firebase Hosting e outras funcionalidades do Firebase.
+├── Documentação.md            # Arquivo Markdown para documentação detalhada do projeto.
+└── README.md                  # Arquivo Markdown com informações gerais sobre o projeto (descrição, como rodar, etc.).
+```
 ### 2.1 Componentes do Sistema
 
 #### 2.1.1 Hardware
