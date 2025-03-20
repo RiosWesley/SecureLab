@@ -344,8 +344,9 @@
 
     <!-- Scripts GEMINI -->
     <script src="js/gemini-service.js"></script>
-    <script src="js/gemini-insights.js"></script>
+    <!--<script src="js/gemini-insights.js"></script> -->
     <script src="js/gemini-assistant.js"></script>
+    <script src="js/simplified-gemini-insights.js"></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -373,7 +374,7 @@
     <!-- Inicialização dos componentes Gemini -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar o componente de insights quando a página carregar
+            // Aguardar a inicialização do Firebase
             setTimeout(() => {
                 if (window.geminiInsights) {
                     window.geminiInsights.init('gemini-insights-container', {
@@ -382,7 +383,7 @@
                         maxInsights: 4
                     });
                 }
-            }, 1500); // Pequeno atraso para garantir que o Firebase esteja inicializado
+            }, 1000);
         });
     </script>
 
