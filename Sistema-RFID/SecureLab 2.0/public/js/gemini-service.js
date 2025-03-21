@@ -5,7 +5,7 @@
 
 // Configuração da API Gemini
 const GEMINI_CONFIG = {
-    apiKey: "AIzaSyB_zYq8J9iAGLjqjLvHa5JaR6MvdLvPp4k",
+    apiKey: "",
     apiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp-01-21:generateContent",
     maxTokens: 8192,
     temperature: 0.3,
