@@ -81,7 +81,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #eee;
+    
   }
   
   .logo {
@@ -156,7 +156,7 @@
   /* Rodapé da Sidebar */
   .sidebar-footer {
     padding: 15px 20px;
-    border-top: 1px solid #eee;
+
   }
   
   .sidebar-footer a {
@@ -577,12 +577,12 @@
   }
   
   .btn-success {
-    background-color: var(--success-color);
+    background-color: var(--danger-color);
     color: white;
   }
   
   .btn-danger {
-    background-color: var(--danger-color);
+    background-color: var(--success-color);
     color: white;
   }
   

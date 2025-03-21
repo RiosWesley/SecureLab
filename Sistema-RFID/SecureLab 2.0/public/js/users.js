@@ -267,6 +267,11 @@ function renderUsers() {
         updatePaginationInfo(0, 0, 0);
         return;
     }
+    filteredUsers.sort((a, b) => {
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
     
     // Calcular índices de paginação
     const startIndex = (currentPage - 1) * PAGE_SIZE;

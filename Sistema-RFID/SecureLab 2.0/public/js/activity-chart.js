@@ -244,6 +244,15 @@ function createActivityChart(data) {
         };
     });
     
+    // Verificar se o tema escuro está ativo
+    const isDarkMode = document.documentElement.classList.contains('dark-mode');
+    
+    // Definir cores baseadas no tema
+    const textColor = isDarkMode ? '#c9cdd4' : '#333';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    const tooltipBackgroundColor = isDarkMode ? 'rgba(33, 39, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)';
+    const tooltipTextColor = isDarkMode ? '#fff' : '#333';
+    
     // Configuração do gráfico
     const chartConfig = {
         type: 'bar',
@@ -263,7 +272,8 @@ function createActivityChart(data) {
                     labels: {
                         boxWidth: 12,
                         usePointStyle: true,
-                        pointStyle: 'circle'
+                        pointStyle: 'circle',
+                        color: textColor // Cor das legendas
                     }
                 },
                 tooltip: {
@@ -274,7 +284,12 @@ function createActivityChart(data) {
                         label: function(context) {
                             return `${context.dataset.label}: ${context.raw} acessos`;
                         }
-                    }
+                    },
+                    backgroundColor: tooltipBackgroundColor,
+                    titleColor: tooltipTextColor,
+                    bodyColor: tooltipTextColor,
+                    borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1
                 }
             },
             scales: {
@@ -282,21 +297,31 @@ function createActivityChart(data) {
                     stacked: true,
                     title: {
                         display: true,
-                        text: 'Dia'
+                        text: 'Dia',
+                        color: textColor // Cor do título do eixo X
                     },
                     grid: {
-                        display: false
+                        display: false,
+                        color: gridColor
+                    },
+                    ticks: {
+                        color: textColor // Cor dos ticks do eixo X
                     }
                 },
                 y: {
                     stacked: true,
                     title: {
                         display: true,
-                        text: 'Número de acessos'
+                        text: 'Número de acessos',
+                        color: textColor // Cor do título do eixo Y
                     },
                     beginAtZero: true,
                     ticks: {
-                        precision: 0
+                        precision: 0,
+                        color: textColor // Cor dos ticks do eixo Y
+                    },
+                    grid: {
+                        color: gridColor
                     }
                 }
             }
@@ -306,6 +331,9 @@ function createActivityChart(data) {
     try {
         // Criar o gráfico Chart.js e armazenar a instância
         activityChartInstance = new Chart(chartCanvas, chartConfig);
+        
+        // Adicionar a instância ao objeto window para acesso global (para o theme-switcher)
+        window.activityChartInstance = activityChartInstance;
     } catch (error) {
         console.error('Erro ao criar o gráfico:', error);
         // Tentar recuperar de erros

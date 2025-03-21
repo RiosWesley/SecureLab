@@ -112,4 +112,29 @@
 
 /* Cursor */
 .cursor-pointer { cursor: pointer !important; }
+/* Estilização global da barra de rolagem */
+::-webkit-scrollbar {
+    width: 8px;               /* Largura da barra de rolagem vertical */
+    height: 8px;              /* Altura da barra de rolagem horizontal */
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #1e2130;      /* Cor de fundo do trilho - ton escuro que combina com o tema atual */
+    border-radius: 4px;       /* Bordas arredondadas para o trilho */
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #3498db;      /* Cor do "polegar" da barra - azul que combina com os botões azuis da UI */
+    border-radius: 4px;       /* Bordas arredondadas para o polegar */
+    transition: background 0.3s;  /* Transição suave para o efeito hover */
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;      /* Cor mais escura ao passar o mouse */
+  }
+  
+  /* Suporte para o modo escuro */
+  [data-theme="dark"] ::-webkit-scrollbar-track {
+    background: #121420;      /* Cor mais escura para o modo escuro */
+  }
 

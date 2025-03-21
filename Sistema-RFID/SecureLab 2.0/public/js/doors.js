@@ -23,10 +23,7 @@
 }]
 
 
-/**
- * doors.js - Gerenciamento de portas para o sistema SecureLab RFID
- * Versão corrigida
- */
+/
 
 // Garantir que o DOM foi carregado antes de inicializar
 document.addEventListener('DOMContentLoaded', initDoorManagement);
@@ -143,9 +140,6 @@ function loadDoors() {
 /**
  * Renderiza as portas na tabela
  */
-/**
- * Renderiza as portas na tabela
- */
 function renderDoors() {
     console.log('Renderizando portas na tabela...');
 
@@ -169,6 +163,13 @@ function renderDoors() {
             );
         }
     }
+
+    // Ordenar as portas por nome em ordem alfabética
+    displayDoors.sort((a, b) => {
+        const nameA = (a.name || 'Sem nome').toLowerCase();
+        const nameB = (b.name || 'Sem nome').toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
 
     // Verificar se há portas para exibir
     if (displayDoors.length === 0) {
@@ -580,7 +581,7 @@ function controlDoor(action) {
         const user = firebase.auth().currentUser;
         if (user) {
             // Buscar o nome do usuário no banco de dados
-            return firebase.database().ref('users').orderByChild('email').equalTo(user.email).once('value')  // Corrigido para firebase.database()
+            return firebase.database().ref('users').orderByChild('email').equalTo(user.email).once('value') 
                 .then(snapshot => {
                     let userName = user.email; // Fallback para o email
 

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/utils.css">
     <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/logs.css">
     <!-- Otimizações Mobile -->
     <link rel="stylesheet" href="css/mobile.css">
@@ -56,12 +57,7 @@
                             <span>Logs de Acesso</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="reports.html">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Relatórios</span>
-                        </a>
-                    </li>
+               
                     <li>
                         <a href="settings.html">
                             <i class="fas fa-cog"></i>
@@ -83,8 +79,7 @@
             <header class="main-header">
                 <button class="mobile-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
                 <div class="header-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Pesquisar...">
+                    
                 </div>
                 <div class="header-right">
                     <div class="notifications">
@@ -95,42 +90,148 @@
                     </div>
                     <div class="user-menu">
                         <span class="user-name" id="current-user-name">Usuário</span>
-                        <i class="fas fa-chevron-down"></i>
                     </div>
                 </div>
             </header>
 
             <div class="content-wrapper">
                 <div class="page-header">
-                    <h1>Logs de acesso</h1>
-                    <div class="date-filter">
-                        <label for="date-range">Período:</label>
-                        <select id="date-range">
-                            <option value="hoje">Hoje</option>
-                            <option value="ontem">Ontem</option>
-                            <option value="7dias" selected>Últimos 7 dias</option>
-                            <option value="30dias">Últimos 30 dias</option>
-                            <option value="custom">Personalizado</option>
-                        </select>
-                    </div>
-                </div>
-
-                
-                <div class="log-grid">
-                    <div class="log activity-card">
-                        <div class="card-body">
-                            <ul class="activity-list" id="activity-list">
-                                <!-- As atividades serão carregadas dinamicamente via JavaScript -->
-                                <li class="no-data">Carregando atividades...</li>
-                            </ul>
-
+                    <h1><i class="fas fa-clipboard-list"></i> Logs de Acesso</h1>
+                    <div class="page-actions">
+                        <button class="btn btn-outline-primary" id="refresh-logs">
+                            <i class="fas fa-sync-alt"></i> Atualizar
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-primary" id="export-dropdown">
+                                <i class="fas fa-download"></i> Exportar
+                            </button>
+                            <div class="dropdown-menu" id="export-menu">
+                                <a href="#" class="dropdown-item" id="export-csv">
+                                    <i class="fas fa-file-csv"></i> CSV
+                                </a>
+                                <a href="#" class="dropdown-item" id="export-pdf">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </a>
+                            </div>
                         </div>
                     </div>
-
                 </div>
 
-
-            
+                <!-- Filtros em Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3>Filtros</h3>
+                        <div class="card-actions">
+                            <button class="btn btn-sm btn-outline-primary" id="reset-filters-btn">
+                                <i class="fas fa-sync-alt"></i> Limpar Filtros
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Primeira linha de filtros -->
+                            <div class="col-md-4 mb-2">
+                                <label for="date-range">Período</label>
+                                <select id="date-range" class="form-control">
+                                    <option value="today">Hoje</option>
+                                    <option value="yesterday">Ontem</option>
+                                    <option value="last7days" selected>Últimos 7 dias</option>
+                                    <option value="last30days">Últimos 30 dias</option>
+                                    <option value="custom">Personalizado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-action">Tipo de Ação</label>
+                                <select id="filter-action" class="form-control">
+                                    <option value="">Todas as ações</option>
+                                    <option value="access_granted">Acesso Permitido</option>
+                                    <option value="access_denied">Acesso Negado</option>
+                                    <option value="door_locked">Porta Trancada</option>
+                                    <option value="door_unlocked">Porta Destrancada</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-method">Método</label>
+                                <select id="filter-method" class="form-control">
+                                    <option value="">Todos</option>
+                                    <option value="rfid">RFID</option>
+                                    <option value="web">Web</option>
+                                    <option value="app">Aplicativo</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Segunda linha de filtros -->
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-user">Usuário</label>
+                                <input type="text" id="filter-user" class="form-control" placeholder="Nome do usuário">
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="filter-door">Porta</label>
+                                <input type="text" id="filter-door" class="form-control" placeholder="Nome da porta">
+                            </div>
+                            <div class="col-md-4 mb-2 d-flex align-items-end">
+                                <button class="btn btn-primary w-100" id="apply-filters-btn">
+                                    <i class="fas fa-filter"></i> Aplicar Filtros
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Data personalizada (inicialmente oculta) -->
+                        <div class="custom-date-filters" id="custom-date-container" style="display: none;">
+                            <div class="row mt-3">
+                                <div class="col-md-3 mb-2">
+                                    <label for="start-date">Data Inicial</label>
+                                    <input type="date" id="start-date" class="form-control">
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label for="start-time">Hora Inicial</label>
+                                    <input type="time" id="start-time" class="form-control">
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label for="end-date">Data Final</label>
+                                    <input type="date" id="end-date" class="form-control">
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label for="end-time">Hora Final</label>
+                                    <input type="time" id="end-time" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Log List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Registros de Acesso</h3>
+                        <div class="logs-count">
+                            <span id="logs-count">0</span> registros encontrados
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="activity-list logs-list" id="activity-list">
+                            <!-- Os logs serão carregados dinamicamente via JavaScript -->
+                            <li class="no-data">Carregando registros de acesso...</li>
+                        </ul>
+                        
+                        <!-- Paginação -->
+                        <div class="pagination-container mt-4" id="logs-pagination">
+                            <div class="pagination-info">
+                                Exibindo <span id="pagination-start">0</span> - <span id="pagination-end">0</span> de <span id="pagination-total">0</span> registros
+                            </div>
+                            <div class="pagination">
+                                <button class="pagination-btn" id="prev-page" disabled>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div id="pagination-numbers">
+                                    <!-- Números de paginação serão adicionados aqui -->
+                                </div>
+                                <button class="pagination-btn" id="next-page">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -144,18 +245,10 @@
     <!-- Scripts da aplicação -->
     <script src="js/firebase-config.js"></script>
     <script src="js/common.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/logs.js"></script>
     <script src="js/mobile.js"></script>
     <script src="js/theme-switcher.js"></script>
-    <script>
-        // Inicializar o gráfico quando a página terminar de carregar
-        document.addEventListener('DOMContentLoaded', function () {
-            // Verificar se a função initActivityChart está disponível
-            if (typeof initActivityChart === 'function') {
-                initActivityChart();
-            }
-        });
-    </script>
 
     <div class="mobile-overlay"></div>
 
