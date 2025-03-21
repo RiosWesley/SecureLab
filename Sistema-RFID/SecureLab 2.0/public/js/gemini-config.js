@@ -1,6 +1,5 @@
 /**
  * gemini-config.js - Configurações para a integração com a API Gemini
- * Este arquivo deve ser configurado com sua chave de API do Gemini
  */
 
 // Configuração da API Gemini
@@ -14,7 +13,7 @@ const GEMINI_CONFIG = {
 
     // Configurações padrão
     maxTokens: 8192,           // Tamanho máximo da resposta
-    temperature: 0.7,          // Criatividade da resposta (0.0 a 1.0)
+    temperature: 0.3,          // Criatividade da resposta (0.0 a 1.0)
 
     // Configurações de segurança
     safetySettings: [
