@@ -205,13 +205,58 @@
     color: #333;
 }
 
-.gemini-insight-description {
-    margin: 0 0 8px 0;
+.gemini-insight-description-content {
+    margin: 5px 0 8px 0; /* Ajuste a margem superior se necessário */
     font-size: 13px;
-    color: #666;
+    color: #666; /* Ou use variável CSS: var(--text-secondary); */
     line-height: 1.4;
 }
+/* Estilos para elementos DENTRO do container */
+.gemini-insight-description-content p {
+    margin-bottom: 8px; /* Espaçamento entre parágrafos */
+}
+.gemini-insight-description-content p:last-child {
+    margin-bottom: 0; /* Remove margem do último parágrafo */
+}
 
+.gemini-insight-description-content ul,
+.gemini-insight-description-content ol {
+    margin-top: 5px;
+    margin-bottom: 8px;
+    padding-left: 20px; /* Indentação padrão da lista */
+}
+
+.gemini-insight-description-content li {
+    margin-bottom: 4px; /* Espaçamento entre itens da lista */
+}
+
+/* Estilos para Markdown (opcional, mas bom ter) */
+.gemini-insight-description-content strong {
+    font-weight: 600; /* Ou use variável CSS */
+}
+.gemini-insight-description-content em {
+    font-style: italic;
+}
+.gemini-insight-description-content code {
+    background-color: rgba(0, 0, 0, 0.06); /* Ou variável */
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+    color: #e91e63; /* Ou variável */
+}
+.gemini-insight-description-content pre { /* Para blocos de código se usados */
+    margin: 10px 0;
+    /* Estilos completos de gemini-assistant.css para .gemini-code-block podem ser aplicados aqui */
+    background-color: #f5f7fc;
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    border: 1px solid #e1e4ea;
+}
 .gemini-insight-related {
     display: flex;
     flex-wrap: wrap;
@@ -388,8 +433,18 @@ html.dark-mode .gemini-insight-title {
     color: #f0f2f5;
 }
 
-html.dark-mode .gemini-insight-description {
-    color: #c9cdd4;
+/* Adaptações para Modo Escuro (Aplique o mesmo padrão) */
+html.dark-mode .gemini-insight-description-content {
+    color: #c9cdd4; /* Ou var(--dark-text-secondary); */
+}
+html.dark-mode .gemini-insight-description-content code {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ff4081; /* Ou var(--dark-accent-pink); */
+}
+html.dark-mode .gemini-insight-description-content pre {
+    background-color: #2a2c3a;
+    border-color: #3b4254;
+    color: #e0e0e0;
 }
 
 html.dark-mode .gemini-insight-tag {

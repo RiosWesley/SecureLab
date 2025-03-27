@@ -1,58 +1,55 @@
+// --- START OF FILE gemini-config.js ---
+
 /**
  * gemini-config.js - Configurações para a integração com a API Gemini
  */
 
-// Configuração da API Gemini
 const GEMINI_CONFIG = {
-    // Sua chave API do Gemini - https://aistudio.google.com/app/apikey
-    apiKey: "AIzaSyB_zYq8J9iAGLjqjLvHa5JaR6MvdLvPp4k",
+    // Chave API e Endpoint (mantidos como antes)
+    apiKey: "AIzaSyB_zYq8J9iAGLjqjLvHa5JaR6MvdLvPp4k", // Sua chave API
+    apiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent", // Modelo Flash ou Pro
 
-    // Endpoint para o modelo Gemini Pro
-    apiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/\n" +
-        "gemini-2.0-flash-thinking-exp-01-21:generateContent",
+    // Configurações de Geração (mantidos como antes)
+    maxTokens: 8192,
+    temperature: 0.3, // Mais determinístico para análise
 
-    // Configurações padrão
-    maxTokens: 8192,           // Tamanho máximo da resposta
-    temperature: 0.3,          // Criatividade da resposta (0.0 a 1.0)
-
-    // Configurações de segurança
+    // Configurações de Segurança (mantidos como antes)
     safetySettings: [
-        {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        }
+        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" }
     ],
 
-    // Configurações da UI
+    // Configurações da UI (mantidos como antes)
     assistant: {
-        initiallyOpen: false,      // Assistente aberto ao carregar a página
-        autoInitialize: true,      // Inicializar automaticamente
-        initialDelay: 1500,        // Atraso para inicialização (ms)
-        mobileMinimized: true      // Minimizado em dispositivos móveis
+        initiallyOpen: false,
+        autoInitialize: true,
+        initialDelay: 1500,
+        mobileMinimized: true
+    },
+    insights: {
+        autoRefresh: true,
+        refreshInterval: 900000, // 15 min
+        maxInsights: 4
     },
 
-    // Configurações de insights
-    insights: {
-        autoRefresh: true,         // Atualizar insights automaticamente
-        refreshInterval: 900000,   // Intervalo de atualização (15 min em ms)
-        maxInsights: 4             // Número máximo de insights exibidos
+    // NOVO: Configuração de Cache de Dados
+    dataCache: {
+        ttlSeconds: 60 // Tempo de vida do cache em segundos (e.g., 60s = 1 minuto)
+                       // Ajuste conforme a frequência esperada de atualização dos dados
+    },
+
+    // NOVO: Limites para busca de dados (para controlar o tamanho do contexto)
+    dataLimits: {
+        users: 150, // Limite de usuários a serem enviados no contexto
+        doors: 100,
+        devices: 100,
+        logs: 300,  // Limite de logs *recentes* a serem enviados
+        logDays: 7  // Buscar logs dos últimos 7 dias
     }
 };
 
-// Exportar a configuração
-export default GEMINI_CONFIG;
-
-// Para uso com scripts regulares
 window.GEMINI_CONFIG = GEMINI_CONFIG;
+console.log("GEMINI_CONFIG loaded:", window.GEMINI_CONFIG);
+// --- END OF FILE gemini-config.js ---

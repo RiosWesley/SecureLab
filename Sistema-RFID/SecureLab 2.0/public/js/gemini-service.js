@@ -1,606 +1,405 @@
+// --- START OF FILE gemini-service.js ---
+
 /**
- * gemini-service.js - Serviço para integração com a API Gemini
- * Este serviço gerencia a comunicação com a API Gemini e processa as respostas
+ * gemini-service.js - Serviço centralizado para integração com Gemini API e dados Firebase.
  */
 
-// Configuração da API Gemini
-const GEMINI_CONFIG = {
-    apiKey: "",
-    apiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp-01-21:generateContent",
-    maxTokens: 8192,
-    temperature: 0.3,
-    systemInstruction: "Responda diretamente às perguntas do usuário sem mostrar seu processo de pensamento. Forneça apenas a resposta final.",
-    safetySettings: [
-        {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        }
-    ]
-};
-
-// Classe para gerenciar a comunicação com a API Gemini
 class GeminiService {
     constructor() {
-        this.apiKey = GEMINI_CONFIG.apiKey;
-        this.apiEndpoint = GEMINI_CONFIG.apiEndpoint;
-        this.conversation = [];
-        this.systemContext = this._generateSystemContext();
+        // Carregar configuração
+        if (typeof window.GEMINI_CONFIG === 'undefined') {
+            console.error("CRITICAL: window.GEMINI_CONFIG is not defined.");
+            // Configuração de fallback mínima para evitar erros imediatos
+            this.config = { apiKey: "", apiEndpoint: "", temperature: 0.5, maxTokens: 4096, safetySettings: [], dataCache: { ttlSeconds: 60 }, dataLimits: { users: 50, doors: 50, devices: 50, logs: 100, logDays: 7 } };
+        } else {
+            this.config = window.GEMINI_CONFIG;
+            if (!this.config.apiKey) console.warn("Gemini API Key is missing in GEMINI_CONFIG.");
+            if (!this.config.apiEndpoint) console.warn("Gemini API Endpoint is missing in GEMINI_CONFIG.");
+        }
+
+        this.conversationHistory = []; // Histórico APENAS para o chat
+        this.systemDataContext = null; // Cache para dados do Firebase
+        this.lastDataFetchTime = 0; // Timestamp da última busca de dados
+
+        console.log("GeminiService initialized. Data cache TTL:", this.config.dataCache.ttlSeconds, "s");
     }
 
     /**
-     * Gera o contexto do sistema para o assistente Gemini
+     * Busca dados do Firebase se o cache expirou. Centraliza a coleta de dados.
      * @private
-     * @returns {Object} Objeto de contexto do sistema
+     * @returns {Promise<Object>} O objeto de contexto de dados do sistema.
      */
-    _generateSystemContext() {
-        return {
-            role: "user",
-            parts: [
-                {
-                    text: `Você é o assistente virtual do sistema SecureLab RFID, um sistema de controle de acesso.
-                    
-                    Conhecimentos:
-                    - Você tem conhecimento sobre o sistema SecureLab, incluindo gestão de usuários, portas, dispositivos RFID e logs de acesso.
-                    - Você pode analisar dados de acesso, identificar padrões anômalos e fornecer recomendações.
-                    - Você pode responder perguntas técnicas sobre o sistema e ajudar a resolver problemas.
-                    
-                    Comportamento:
-                    - Seja conciso e direto em suas respostas.
-                    - Quando apropriado, forneça insights baseados em dados.
-                    - Você pode executar comandos no sistema quando solicitado por um administrador.
-                    - Para ações críticas, confirme antes de executar.
-                    
-                    Limitações:
-                    - Você não deve compartilhar informações sensíveis com usuários não autorizados.
-                    - Você não deve modificar configurações críticas de segurança sem confirmação.`
-                }
-            ]
-        };
-    }
+    async _fetchSystemData() {
+        const now = Date.now();
+        const cacheTTL = (this.config.dataCache?.ttlSeconds ?? 60) * 1000; // TTL em milissegundos
 
-    /**
-     * Envia uma mensagem para a API Gemini e processa a resposta
-     * @param {string} message - Mensagem do usuário
-     * @param {Object} context - Contexto adicional (opcional)
-     * @returns {Promise<string>} Resposta do Gemini
-     */
-    /**
-     * Envia uma mensagem para a API Gemini e processa a resposta
-     * @param {string} message - Mensagem do usuário
-     * @param {Object} context - Contexto adicional (opcional)
-     * @param {Object} options - Opções adicionais
-     * @param {boolean} options.isConversation - Se é uma conversa natural (não estruturada)
-     * @returns {Promise<string>} Resposta do Gemini
-     */
-    /**
-     * Função que envia mensagens ao modelo Gemini, modificada para
-     * garantir respostas em linguagem natural no chat
-     */
-    async sendMessage(message, context = {}, options = {}) {
+        // Verifica se o cache é válido
+        if (this.systemDataContext && (now - this.lastDataFetchTime < cacheTTL)) {
+            console.log("Using cached system data.");
+            return this.systemDataContext;
+        }
+
+        console.log("Fetching fresh system data from Firebase...");
+        if (typeof firebase === 'undefined' || typeof firebase.database === 'undefined') {
+            throw new Error('Firebase database is not available.');
+        }
+
+        const limits = this.config.dataLimits || { users: 100, doors: 50, devices: 50, logs: 200, logDays: 30 }; // Fallback limits
+        const logDays = limits.logDays;
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - logDays);
+        const cutoffISO = cutoffDate.toISOString();
+
         try {
-            // Definir se é uma conversa natural ou uma solicitação estruturada
-            const isConversation = options.isConversation !== false; // Por padrão, assumir que é conversa
+            const results = await Promise.allSettled([
+                firebase.database().ref('users').limitToFirst(limits.users).once('value'),
+                firebase.database().ref('doors').limitToFirst(limits.doors).once('value'),
+                firebase.database().ref('devices').limitToFirst(limits.devices).once('value'),
+                firebase.database().ref('access_logs')
+                    .orderByChild('timestamp')
+                    .startAt(cutoffISO) // Busca a partir da data de corte
+                    .limitToLast(limits.logs) // Pega os N mais recentes no período
+                    .once('value')
+            ]);
 
-            // Adicionar mensagem do usuário à conversa
-            this.conversation.push({
-                role: "user",
-                parts: [{ text: message }]
-            });
+            const getData = (result) => result.status === 'fulfilled' ? (result.value.val() || {}) : {};
 
-            // Criar estrutura para envio
-            let contents = [];
+            const usersData = getData(results[0]);
+            const doorsData = getData(results[1]);
+            const devicesData = getData(results[2]);
+            const logsData = getData(results[3]); // Já limitado pela query
 
-            // Se for a primeira mensagem ou tivermos um novo contexto
-            if (this.conversation.length <= 3 || Object.keys(context).length > 0) {
-                // Instruções específicas para o modelo
-                let systemPrompt = "";
-
-                if (isConversation) {
-                    // Para conversas naturais, instruir o modelo a responder em linguagem natural
-                    systemPrompt = `Você é o assistente virtual do sistema SecureLab RFID, um sistema de controle de acesso. 
-                
-                IMPORTANTE: Responda diretamente às perguntas do usuário de forma natural e conversacional.
-                - NUNCA responda em formato JSON, a menos que o usuário explicitamente solicite.
-                - NUNCA inclua seu processo de pensamento interno ou passos analíticos.
-                - NUNCA use frases como "o usuário está perguntando sobre..."
-                - SEMPRE forneça a resposta diretamente em linguagem natural, como um assistente humano faria.
-                
-                Conhecimentos:
-                - Você tem conhecimento sobre o sistema SecureLab, incluindo gestão de usuários, portas, dispositivos RFID e logs de acesso.
-                - Você pode analisar dados de acesso e fornecer recomendações.
-                
-                Comportamento:
-                - Seja amigável e direto em suas respostas.
-                - Use linguagem natural e fácil de entender.
-                - Se for perguntado sobre insights ou análises, explique os padrões ou anomalias encontrados em linguagem conversacional.`;
-                } else {
-                    // Para análises estruturadas que explicitamente pedem JSON
-                    systemPrompt = `Você é o assistente analítico do sistema SecureLab RFID. 
-                Forneça análises técnicas e estruturadas conforme solicitado.
-                IMPORTANTE: Responda APENAS com o JSON válido solicitado, sem texto explicativo antes ou depois.`;
-                }
-
-                // Adicionar contexto do sistema se disponível
-                if (context && Object.keys(context).length > 0) {
-                    systemPrompt += `\n\nContexto do sistema:\n${JSON.stringify(context, null, 2)}`;
-                }
-
-                // Adicionar essa mensagem no início
-                contents.push({
-                    role: "user",
-                    parts: [{ text: systemPrompt }]
-                });
-            }
-
-            // Adicionar o histórico de conversa
-            contents = contents.concat(this.conversation);
-
-            // Preparar o payload para a API Gemini
-            const payload = {
-                contents: contents,
-                generationConfig: {
-                    temperature: isConversation ? 0.7 : 0.2, // Temperatura mais baixa para respostas estruturadas
-                    maxOutputTokens: GEMINI_CONFIG.maxTokens,
-                    topP: 0.95,
-                    topK: 64
+            // Processar e estruturar o contexto para o Gemini
+            const context = {
+                timestamp: new Date().toISOString(),
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                systemInfo: {
+                    name: "SecureLab RFID",
+                    description: "Sistema de controle de acesso RFID.",
+                    currentPage: window.location.pathname, // Pode ser útil
                 },
-                safetySettings: GEMINI_CONFIG.safetySettings
+                dataSummary: {
+                    userCount: Object.keys(usersData).length,
+                    doorCount: Object.keys(doorsData).length,
+                    deviceCount: Object.keys(devicesData).length,
+                    logCountFetched: Object.keys(logsData).length,
+                    logPeriodDays: logDays,
+                    deviceStatus: {
+                        online: Object.values(devicesData).filter(d => d.status === 'online').length,
+                        offline: Object.values(devicesData).filter(d => d.status === 'offline').length,
+                    },
+                    doorStatus: {
+                        locked: Object.values(doorsData).filter(d => d.status === 'locked').length,
+                        unlocked: Object.values(doorsData).filter(d => d.status === 'unlocked').length,
+                    }
+                },
+                // Estrutura para ajudar o modelo a entender os dados
+                dataSchema: {
+                    users: { _description: `Map of user objects (limited to ${limits.users})`, _exampleFields: ["name", "email", "status", "rfid_tag"] },
+                    doors: { _description: `Map of door objects (limited to ${limits.doors})`, _exampleFields: ["name", "location", "status"] },
+                    devices: { _description: `Map of device objects (limited to ${limits.devices})`, _exampleFields: ["name", "status", "firmware_version", "last_online"] },
+                    recentLogs: { _description: `Map of recent access logs (limited to ${limits.logs} from last ${logDays} days)`, _exampleFields: ["user_name", "door_name", "action", "timestamp", "reason"] }
+                },
+                // Dados reais (limitados)
+                data: {
+                    users: usersData,
+                    doors: doorsData,
+                    devices: devicesData,
+                    recentLogs: logsData // Renomeado para clareza
+                }
             };
 
-            // Configurar um timeout maior para o modelo Gemini Thinking
-            // Aumentar para 120 segundos (2 minutos) para dar mais tempo ao modelo thinking
-            const timeoutDuration = 120000; // 120 segundos para processamento de modelos thinking
+            this.systemDataContext = context;
+            this.lastDataFetchTime = now;
+            console.log("System data fetched and cached.", context.dataSummary);
+            return this.systemDataContext;
 
-            // Enviar requisição com timeout aumentado
-            const response = await fetch(`${this.apiEndpoint}?key=${this.apiKey}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload),
-                signal: AbortSignal.timeout(timeoutDuration)
-            });
-
-            // Verificar se a resposta foi bem-sucedida
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Erro na API Gemini: ${errorData.error?.message || 'Erro desconhecido'}`);
-            }
-
-            // Processar a resposta
-            const data = await response.json();
-            if (!data.candidates || data.candidates.length === 0) {
-                throw new Error('Resposta sem conteúdo');
-            }
-
-            const geminiResponse = data.candidates[0].content.parts[0].text;
-
-            // Se for uma conversa, verificar se a resposta contém JSON ou raciocínio interno e limpar
-            let cleanedResponse = geminiResponse;
-            if (isConversation) {
-                // Verificar se a resposta parece ser JSON
-                if (this._looksLikeJSON(cleanedResponse)) {
-                    // Tentar extrair o conteúdo relevante do JSON e convertê-lo em texto natural
-                    cleanedResponse = this._convertJSONToNaturalText(cleanedResponse);
-                } else {
-                    // Se não for JSON, remover padrões de raciocínio interno
-                    cleanedResponse = this._removeThinkingProcess(geminiResponse);
-                }
-            }
-
-            // Adicionar resposta do Gemini à conversa
-            this.conversation.push({
-                role: "model",
-                parts: [{ text: cleanedResponse }]
-            });
-
-            // Limitar o tamanho da conversa para evitar exceder limites de token
-            if (this.conversation.length > 10) {
-                this.conversation = this.conversation.slice(this.conversation.length - 10);
-            }
-
-            return cleanedResponse;
         } catch (error) {
-            console.error('Erro ao comunicar com a API Gemini:', error);
-            return `Erro de comunicação: ${error.message}`;
-        }
-    }
-    /**
-     * Verifica se uma string parece conter JSON
-     * @param {string} text - Texto a ser verificado
-     * @returns {boolean} True se parece conter JSON
-     */
-    _looksLikeJSON(text) {
-        // Verifica se o texto começa com { ou [ e termina com } ou ]
-        // ou se contém blocos de código com JSON
-        return (
-            /^\s*[\{\[]/.test(text) && /[\}\]]\s*$/.test(text) ||
-            /```(?:json)?\s*\n\s*[\{\[]/.test(text)
-        );
-    }
-
-    /**
-     * Converte respostas JSON em texto natural
-     * @param {string} jsonText - Texto contendo JSON
-     * @returns {string} Texto em linguagem natural
-     */
-    _convertJSONToNaturalText(jsonText) {
-        try {
-            // Extrair a parte JSON
-            let jsonContent = jsonText;
-
-            // Se estiver em um bloco de código, extrair apenas a parte JSON
-            const jsonMatch = jsonText.match(/```(?:json)?\s*\n([\s\S]*?)\n```/);
-            if (jsonMatch) {
-                jsonContent = jsonMatch[1];
-            }
-
-            // Tentar parsear o JSON
-            const jsonData = JSON.parse(jsonContent);
-
-            // Converter para texto natural
-            let naturalText = "";
-
-            // Se tiver um resumo, começar com ele
-            if (jsonData.summary) {
-                naturalText += jsonData.summary + "\n\n";
-            }
-
-            // Se tiver insights, adicionar cada um
-            if (jsonData.insights && Array.isArray(jsonData.insights)) {
-                jsonData.insights.forEach(insight => {
-                    // Criar título baseado no tipo e prioridade
-                    let title = insight.title || "Insight";
-                    let prefix = "";
-
-                    if (insight.type === "anomaly") {
-                        prefix = "⚠️ Anomalia: ";
-                    } else if (insight.type === "pattern") {
-                        prefix = "📊 Padrão: ";
-                    } else if (insight.type === "recommendation") {
-                        prefix = "💡 Recomendação: ";
-                    }
-
-                    // Adicionar ícone de prioridade
-                    if (insight.priority === "high") {
-                        prefix = "🔴 " + prefix;
-                    } else if (insight.priority === "medium") {
-                        prefix = "🟠 " + prefix;
-                    }
-
-                    naturalText += prefix + title + "\n";
-
-                    // Adicionar descrição
-                    if (insight.description) {
-                        naturalText += insight.description + "\n\n";
-                    }
-                });
-            } else {
-                // Se não conseguir extrair insights específicos, usar o JSON bruto como texto
-                naturalText = "Análise do sistema:\n\n" + JSON.stringify(jsonData, null, 2);
-            }
-
-            return naturalText.trim();
-        } catch (error) {
-            console.warn("Erro ao converter JSON para texto natural:", error);
-            // Retornar texto original se falhar
-            return "Desculpe, encontrei dados estruturados na minha resposta. Aqui está a informação em formato legível:\n\n" +
-                jsonText.replace(/```json\n|```/g, '').trim();
+            console.error('Error fetching system data for Gemini:', error);
+            // Limpa o cache em caso de erro para forçar nova tentativa
+            this.systemDataContext = null;
+            this.lastDataFetchTime = 0;
+            throw new Error(`Falha ao buscar dados do sistema: ${error.message}`);
         }
     }
 
     /**
-     * Remove o processo de raciocínio interno da resposta do modelo
+     * Constrói o prompt do sistema dinamicamente.
      * @private
-     * @param {string} response - Resposta bruta do modelo
-     * @returns {string} Resposta limpa
+     * @param {Object} context - Os dados do sistema buscados.
+     * @param {Object} options - Opções como { isInsightRequest: true }.
+     * @returns {string} O texto do prompt do sistema.
      */
-    _removeThinkingProcess(response) {
-        // Padrões comuns de raciocínio interno
-        const thinkingPatterns = [
-            /The user is asking .*?\./s,
-            /To answer this, I need to:.*?(?=\n\n)/s,
-            /Let's (?:analyze|examine|break down).*?(?=\n\n)/s,
-            /I'll (?:analyze|examine|break down).*?(?=\n\n)/s,
-            /First, (?:I'll|I will|let me).*?(?=\n\n)/s,
-            /(?:Step|Steps)(?: \d+)?:.*?(?=\n\n)/s,
-            /Let me (?:think|analyze|check).*?(?=\n\n)/s,
-            /Looking at (?:the|these) (?:logs|data).*?(?=\n\n)/s,
-            /Based on (?:the|these) (?:logs|data).*?, I need to.*?(?=\n\n)/s,
-            /(?:Problem|Constraints|Issues):(.*?)(?:(?:\n\n)|$)/s,
-            /Possible Solutions.*?(?=\n\n)/s,
-            /It seems there is a mistake.*?(?=\n\n)/s,
-            /Let's recount.*?(?=\n\n)/s,
-            /User Access Counts.*?(?=\n\n)/s
-        ];
+    _buildSystemPrompt(context, options = {}) {
+        // Instruções base (mantidas e refinadas)
+        let promptText = `Você é o assistente AI do SecureLab RFID, um sistema de controle de acesso. Sua função é **analisar os dados fornecidos** e ajudar administradores com insights e respostas.
 
-        let cleanedResponse = response;
+**IMPORTANTE: Use EXCLUSIVAMENTE os dados fornecidos na seção 'CONTEXTO ATUAL DO SISTEMA' abaixo para suas análises e respostas.** Não invente dados. Se a informação não estiver no contexto, diga que não a possui.
 
-        // Remover cada padrão de pensamento
-        thinkingPatterns.forEach(pattern => {
-            cleanedResponse = cleanedResponse.replace(pattern, '');
+**Capacidades:**
+*   Analisar logs, status de dispositivos/portas, dados de usuários do contexto.
+*   Identificar padrões, anomalias, tendências (e.g., acessos negados frequentes, dispositivos offline).
+*   Responder perguntas sobre os dados no contexto.
+*   Gerar resumos e insights acionáveis.
+*   Orientar sobre onde encontrar funcionalidades no dashboard (sem executar ações).
+
+**Restrições CRÍTICAS:**
+*   **NÃO EXECUTE AÇÕES:** Você apenas informa e analisa. Não pode abrir portas, mudar status, etc.
+*   **FOCO NO CONTEXTO:** Baseie TODAS as respostas nos dados JSON fornecidos abaixo.
+*   **SEM PROCESSAMENTO INTERNO:** Responda diretamente. Não descreva seu processo de pensamento (e.g., "Vou analisar os logs...").
+*   **CLAREZA:** Seja claro e conciso.
+
+**CONTEXTO ATUAL DO SISTEMA (Dados do Firebase):**
+\`\`\`json
+${JSON.stringify(context, null, 2)}
+\`\`\`
+`;
+
+        // Instruções de formato de saída
+        if (options.isInsightRequest) {
+            promptText += `
+**Instrução de Formato (INSIGHTS):** Responda **APENAS** com um objeto JSON válido contendo 'summary' (string) e 'insights' (array de objetos com type, title, description, priority, relatedItems). NENHUM outro texto antes ou depois do JSON.
+Exemplo: {"summary": "...", "insights": [{"type": "anomaly", "title": "...", "description": "...", "priority": "high", "relatedItems": ["devices"]}]}
+Prioridades válidas: 'low', 'medium', 'high'.
+Tipos válidos: 'anomaly', 'pattern', 'recommendation', 'info'.`;
+        } else { // Chat normal
+            promptText += `
+**Instrução de Formato (CHAT):** Responda em **linguagem natural**, de forma clara e conversacional. **NÃO** use formato JSON a menos que explicitamente pedido pelo usuário. Use markdown simples (negrito **, itálico *, listas -, blocos de código \`\`\`) quando apropriado para clareza.`;
+        }
+
+        return promptText;
+    }
+
+    /**
+     * Envia a requisição para a API Gemini.
+     * @private
+     * @param {Array} requestContents - O array de 'contents' para a API (histórico + mensagem atual).
+     * @param {string} systemPromptText - O prompt do sistema construído.
+     * @param {boolean} isInsightRequest - Define a temperatura e valida a resposta.
+     * @returns {Promise<string>} A resposta de texto do modelo Gemini.
+     */
+    async _callGeminiAPI(requestContents, systemPromptText, isInsightRequest = false) {
+        if (!this.config.apiKey || !this.config.apiEndpoint) {
+            throw new Error("API Key or Endpoint for Gemini not configured.");
+        }
+
+        const payload = {
+            // System Prompt usando systemInstruction
+            systemInstruction: {
+                role: "system", // Ou 'user' se 'system' der erro
+                parts: [{ text: systemPromptText }]
+            },
+            contents: requestContents,
+            generationConfig: {
+                temperature: isInsightRequest ? 0.2 : (this.config.temperature ?? 0.5), // Mais baixo para insights
+                maxOutputTokens: this.config.maxTokens ?? 4096,
+                // topP, topK podem ser adicionados aqui
+            },
+            safetySettings: this.config.safetySettings || []
+        };
+
+        // Debug: Logar o payload (sem o contexto completo se for muito grande)
+        console.log("Sending payload to Gemini:", {
+            // Mostra apenas as chaves do contexto para evitar log gigante
+            systemInstruction: payload.systemInstruction.parts[0].text.substring(0, 300) + "...", // Log inicial do prompt
+            contents: payload.contents, // Logar histórico + mensagem atual
+            generationConfig: payload.generationConfig
         });
 
-        // Remover linhas vazias extras e limpar a formatação
-        cleanedResponse = cleanedResponse.replace(/\n{3,}/g, '\n\n');
-        cleanedResponse = cleanedResponse.trim();
-
-        // Se limpar demais, retornar a resposta original
-        if (cleanedResponse.length < 20 && response.length > 100) {
-            // Tentar uma abordagem mais conservadora
-            // Manter apenas o primeiro parágrafo se for substantivo
-            const firstParagraph = response.split('\n\n')[0];
-            if (firstParagraph && firstParagraph.length > 30) {
-                return firstParagraph;
-            }
-            return response;
-        }
-
-        return cleanedResponse;
-    }
-    /**
-     * Limpa a conversa atual
-     */
-    clearConversation() {
-        this.conversation = [];
-    }
-
-    /**
-     * Gera insights baseados em dados do sistema
-     * @param {Object} systemData - Dados do sistema para análise
-     * @returns {Promise<Object>} Insights gerados
-     */
-    async generateInsights(systemData) {
         try {
-            const prompt = `Analise os seguintes dados do sistema SecureLab e forneça insights relevantes.
-        
-        ${JSON.stringify(systemData, null, 2)}
-        
-        Responda APENAS com um JSON válido no seguinte formato sem nenhum texto adicional antes ou depois:
-        {
-            "summary": "Resumo geral da análise em uma frase",
-            "insights": [
-                {
-                    "type": "anomaly|pattern|recommendation",
-                    "title": "Título breve do insight",
-                    "description": "Descrição detalhada",
-                    "priority": "high|medium|low",
-                    "relatedItems": []
-                }
-            ]
-        }
-        
-        É extremamente importante que você responda APENAS com o JSON válido, sem comentários adicionais ou texto explicativo.`;
+            const response = await fetch(`${this.config.apiEndpoint}?key=${this.config.apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                signal: AbortSignal.timeout(60000) // Timeout de 60s
+            });
 
-            const response = await this.sendMessage(prompt);
-
-            // Tentar extrair JSON diretamente
-            try {
-                // Primeiro, tentar analisar a resposta inteira como JSON
-                return JSON.parse(response);
-            } catch (firstParseError) {
-                // Se falhar, tentar extrair JSON de um bloco de código
+            if (!response.ok) {
+                let errorData;
+                let errorText = `HTTP error ${response.status}`;
                 try {
-                    const jsonMatch = response.match(/```(?:json)?\s*\n([\s\S]*?)\n```/) ||
-                        response.match(/```([\s\S]*?)```/) ||
-                        response.match(/\{[\s\S]*\}/);
+                    errorData = await response.json();
+                    errorText = errorData?.error?.message || JSON.stringify(errorData);
+                } catch (e) { /* Ignore json parse error */ }
+                console.error('Gemini API Error:', errorText, errorData);
+                throw new Error(`Erro na API Gemini (${response.status}): ${errorText}`);
+            }
 
-                    if (jsonMatch) {
-                        const jsonContent = jsonMatch[0].startsWith('{') ? jsonMatch[0] : jsonMatch[1];
-                        return JSON.parse(jsonContent);
-                    }
+            const data = await response.json();
+            console.log("Received response from Gemini:", JSON.stringify(data, null, 2)); // Log completo da resposta
 
-                    // Nenhum JSON encontrado, usar fallback
-                    console.warn('JSON não encontrado na resposta. Usando fallback.', response);
-                    return this._createFallbackInsights(response);
-                } catch (secondParseError) {
-                    console.error('Erro ao extrair e analisar JSON:', secondParseError);
-                    return this._createFallbackInsights(response);
+            // Verificações de segurança e conteúdo (mantidas da versão anterior)
+            if (data.promptFeedback?.blockReason) {
+                throw new Error(`Solicitação bloqueada (Prompt): ${data.promptFeedback.blockReason}`);
+            }
+            const candidate = data.candidates?.[0];
+            if (candidate?.finishReason === "SAFETY") {
+                const safetyRating = candidate.safetyRatings?.find(r => r.blocked);
+                throw new Error(`Resposta bloqueada por segurança (${safetyRating?.category || 'Não especificado'})`);
+            }
+            if (candidate?.finishReason === "MAX_TOKENS") {
+                // Retorna o texto parcial e avisa no console
+                console.warn("Gemini response may be truncated due to MAX_TOKENS.");
+                // return candidate?.content?.parts?.[0]?.text || ""; // Retorna o que tiver
+                throw new Error(`A resposta excedeu o limite de tamanho. Tente ser mais específico.`); // Ou pode lançar erro
+            }
+
+            const responseText = candidate?.content?.parts?.[0]?.text;
+            if (!responseText && candidate?.finishReason !== 'STOP') {
+                console.error("Gemini response missing text or finished unexpectedly.", candidate);
+                throw new Error(`Resposta inválida ou vazia do modelo (${candidate?.finishReason || 'desconhecido'}).`);
+            }
+            if (!responseText) {
+                console.warn("Gemini response text is empty, but finishReason is STOP.");
+                return ""; // Retorna string vazia se for um STOP válido sem texto
+            }
+
+
+            // Validação extra para Insights: Tenta parsear como JSON
+            if (isInsightRequest) {
+                try {
+                    // Remove possíveis ```json ... ``` do início/fim
+                    const cleanedJson = responseText.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+                    JSON.parse(cleanedJson); // Apenas valida, não retorna o objeto parseado aqui
+                    return cleanedJson; // Retorna a string JSON validada
+                } catch (e) {
+                    console.error("Insight response is not valid JSON:", e, responseText);
+                    throw new Error("A resposta da análise de insights não é um JSON válido.");
                 }
             }
+
+            return responseText; // Retorna texto normal para chat
+
         } catch (error) {
-            console.error('Erro ao gerar insights:', error);
-            return this._createFallbackInsights(null, error.message);
+            console.error('Error calling Gemini API:', error);
+            const userMessage = error.name === 'AbortError'
+                ? 'A requisição ao assistente demorou muito.'
+                : error.message || 'Erro desconhecido ao contatar o assistente.';
+            // Não rejeitamos a promessa aqui, o chamador tratará o erro
+            throw new Error(userMessage); // Relança o erro com mensagem amigável
         }
     }
 
-// Método auxiliar para criar insights de fallback
-    _createFallbackInsights(response, errorMessage = null) {
-        return {
-            summary: "Análise do sistema não estruturada",
-            insights: [
-                {
-                    type: "recommendation",
-                    title: errorMessage ? "Erro de comunicação" : "Resposta não estruturada",
-                    description: errorMessage ||
-                        "Não foi possível extrair insights estruturados. Consulte o assistente para obter uma análise detalhada.",
-                    priority: "medium",
-                    relatedItems: []
-                }
-            ],
-            rawResponse: response
-        };
-    }
     /**
-     * Processa comandos de linguagem natural
-     * @param {string} command - Comando em linguagem natural
-     * @param {Object} systemState - Estado atual do sistema
-     * @returns {Promise<Object>} Resultado do processamento do comando
+     * Envia uma mensagem para o chat do assistente.
+     * @param {string} userMessage - A mensagem do usuário.
+     * @returns {Promise<string>} A resposta do assistente em linguagem natural.
      */
-    async processCommand(command, systemState) {
+    async sendMessageToChat(userMessage) {
+        if (!userMessage) throw new Error("Mensagem do usuário não pode ser vazia.");
+
         try {
-            const prompt = `Ao analisar logs, considere todo o período disponível nos dados, que pode abranger vários dias ou semanas. Mencione sempre o intervalo de datas dos logs analisados. Processe o seguinte comando em linguagem natural para o sistema SecureLab:
-            
-            "${command}"
-            
-            Estado atual do sistema:
-            ${JSON.stringify(systemState, null, 2)}
-            
-            Identifique:
-            1. A intenção do comando (consulta, ação, configuração)
-            2. As entidades mencionadas (portas, usuários, dispositivos, etc.)
-            3. Os parâmetros ou filtros aplicáveis
-            4. A ação específica a ser executada
-            
-            Responda no seguinte formato JSON:
-            {
-                "intent": "query|action|config",
-                "entities": [{"type": "door|user|device", "id": "identificador", "name": "nome"}],
-                "parameters": {"param1": "valor1"},
-                "action": "nome_da_ação",
-                "confirmation": boolean,
-                "confirmationMessage": "Mensagem de confirmação, se necessário"
-            }`;
+            // 1. Obter contexto de dados atualizado (cache ou busca)
+            const context = await this._fetchSystemData();
 
-            const response = await this.sendMessage(prompt);
+            // 2. Construir prompt do sistema
+            const systemPrompt = this._buildSystemPrompt(context, { isInsightRequest: false });
 
-            // Extrair o JSON da resposta
+            // 3. Preparar histórico + mensagem atual
+            // Filtra o histórico local para enviar apenas user/model
+            const historyToSend = this.conversationHistory.filter(msg => msg.role === 'user' || msg.role === 'model');
+
+            const requestContents = [
+                ...historyToSend,
+                { role: "user", parts: [{ text: userMessage }] }
+            ];
+
+            // 4. Adicionar mensagem do usuário ao histórico *local*
+            // Adiciona ANTES da chamada para que não se perca se a chamada falhar
+            this.conversationHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+
+            // 5. Chamar a API
+            const responseText = await this._callGeminiAPI(requestContents, systemPrompt, false);
+
+            // 6. Adicionar resposta do modelo ao histórico *local*
+            this.conversationHistory.push({ role: "model", parts: [{ text: responseText }] });
+
+            // Limitar tamanho do histórico local (ex: últimos 10 pares)
+            const maxHistoryPairs = 10;
+            if (this.conversationHistory.length > maxHistoryPairs * 2) {
+                this.conversationHistory = this.conversationHistory.slice(-(maxHistoryPairs * 2));
+            }
+
+            // 7. Retornar resposta
+            return responseText;
+
+        } catch (error) {
+            console.error("Error in sendMessageToChat:", error);
+            // O erro já foi tratado em _callGeminiAPI ou _fetchSystemData, apenas relança
+            throw error;
+        }
+    }
+
+    /**
+     * Gera insights acionáveis analisando os dados do sistema.
+     * @returns {Promise<Object>} Um objeto com { summary: string, insights: Array<Object> }.
+     */
+    async generateInsights() {
+        const insightPromptMessage = `Analise os dados do sistema SecureLab fornecidos no contexto ('CONTEXTO ATUAL DO SISTEMA') e gere um resumo ('summary') e uma lista de insights acionáveis ('insights') sobre segurança, atividade, performance ou possíveis problemas. Siga ESTRITAMENTE o formato JSON especificado nas instruções, sem NENHUM texto adicional. Baseie TUDO nos dados fornecidos. Priorize anomalias e padrões relevantes. Limite a ${this.config.insights?.maxInsights ?? 4} insights.`;
+
+        try {
+            // 1. Obter contexto de dados atualizado
+            const context = await this._fetchSystemData();
+
+            // 2. Construir prompt do sistema específico para insights
+            const systemPrompt = this._buildSystemPrompt(context, { isInsightRequest: true });
+
+            // 3. Preparar conteúdo da requisição (sem histórico de chat)
+            const requestContents = [
+                { role: "user", parts: [{ text: insightPromptMessage }] }
+                // NÃO incluir histórico de chat aqui
+            ];
+
+            // 4. Chamar a API especificando que é para insights
+            const jsonResponseString = await this._callGeminiAPI(requestContents, systemPrompt, true);
+
+            // 5. Parsear a string JSON (já validada em _callGeminiAPI)
             try {
-                // Encontrar e extrair a parte JSON da resposta
-                const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/) ||
-                    response.match(/```\n([\s\S]*?)\n```/) ||
-                    response.match(/(\{[\s\S]*\})/);
-
-                if (jsonMatch && jsonMatch[1]) {
-                    return JSON.parse(jsonMatch[1]);
-                } else {
-                    return JSON.parse(response);
+                const insightsData = JSON.parse(jsonResponseString);
+                // Validação básica da estrutura recebida
+                if (!insightsData || typeof insightsData.summary !== 'string' || !Array.isArray(insightsData.insights)) {
+                    console.error("Estrutura de insights JSON inválida recebida:", insightsData);
+                    throw new Error("Formato de resposta de insights inesperado.");
                 }
-            } catch (parseError) {
-                console.error('Erro ao analisar comando JSON:', parseError);
-                return {
-                    intent: "error",
-                    error: "Não foi possível processar o comando",
-                    rawResponse: response
-                };
+                // Adiciona fonte para UI saber
+                insightsData.source = 'gemini';
+                return insightsData;
+            } catch(parseError){
+                // Se o parse falhar aqui (apesar da validação anterior), algo está errado
+                console.error("Erro final ao parsear JSON de insights:", parseError, jsonResponseString);
+                throw new Error("Falha ao processar a resposta JSON dos insights.");
             }
+
+
         } catch (error) {
-            console.error('Erro ao processar comando:', error);
+            console.error("Error in generateInsights:", error);
+            // Retorna um objeto de erro padronizado para a UI de Insights
             return {
-                intent: "error",
-                error: `Erro ao processar o comando: ${error.message}`
+                summary: "Erro na Análise",
+                insights: [{
+                    type: "error",
+                    title: "Falha ao Gerar Insights via API",
+                    description: error.message || "Erro desconhecido ao contatar o serviço de análise.",
+                    priority: "high",
+                    relatedItems: []
+                }],
+                source: 'gemini-error' // Indica erro na API
             };
         }
     }
-    /**
-     * Adicione esta função ao gemini-service.js para detectar e tratar
-     * respostas truncadas do modelo Gemini Thinking
-     */
-    async processModelResponse(response, isConversation = true) {
-        // Verificar se a resposta parece estar truncada
-        const isTruncated = this._checkForTruncation(response);
-
-        // Se for uma resposta JSON para análise e estiver truncada, tente corrigir
-        if (!isConversation && isTruncated) {
-            console.warn('Resposta possivelmente truncada detectada:', response.slice(-100));
-
-            // Tentar completar o JSON truncado
-            const fixedResponse = this._fixTruncatedJSON(response);
-            console.log('Tentativa de correção de JSON:', fixedResponse.length > 100 ? '(resposta longa)' : fixedResponse);
-
-            return fixedResponse;
-        }
-
-        return response;
-    }
 
     /**
-     * Verifica se a resposta parece estar truncada
-     * @param {string} response - Resposta do modelo
-     * @returns {boolean} True se parece truncada
+     * Limpa o histórico de conversação do chat.
      */
-    _checkForTruncation(response) {
-        // Sinais de que a resposta JSON pode estar truncada
-        const jsonTruncationMarkers = [
-            // Termina no meio de um objeto JSON
-            /\{[^}]*$/,
-            // Termina no meio de um array
-            /\[[^\]]*$/,
-            // Termina com uma chave não fechada
-            /"[^"]*$/,
-            // Termina com um separador de JSON mas nada depois
-            /[:,]\s*$/
-        ];
-
-        return jsonTruncationMarkers.some(marker => marker.test(response));
-    }
-
-    /**
-     * Tenta consertar JSON truncado
-     * @param {string} truncatedJSON - JSON possivelmente truncado
-     * @returns {string} JSON consertado ou original
-     */
-    _fixTruncatedJSON(truncatedJSON) {
-        try {
-            // Tentar detectar onde começa o JSON válido
-            const jsonStartMatch = truncatedJSON.match(/(\{|\[)/);
-            if (!jsonStartMatch) {
-                return truncatedJSON; // Não parece ser JSON
-            }
-
-            const jsonStart = truncatedJSON.indexOf(jsonStartMatch[0]);
-            let jsonContent = truncatedJSON.slice(jsonStart);
-
-            // Contar chaves e colchetes abertos
-            let openBraces = (jsonContent.match(/\{/g) || []).length;
-            let closeBraces = (jsonContent.match(/\}/g) || []).length;
-            let openBrackets = (jsonContent.match(/\[/g) || []).length;
-            let closeBrackets = (jsonContent.match(/\]/g) || []).length;
-
-            // Verificar se temos tags não fechadas ou mal pareadas
-            if (openBraces > closeBraces) {
-                // Adicionar as chaves fechantes faltantes
-                jsonContent += '}}'.repeat(openBraces - closeBraces);
-            }
-
-            if (openBrackets > closeBrackets) {
-                // Adicionar os colchetes fechantes faltantes
-                jsonContent += ']]'.repeat(openBrackets - closeBrackets);
-            }
-
-            // Tentar analisar o JSON para ver se ele é válido agora
-            JSON.parse(jsonContent);
-
-            return jsonContent;
-        } catch (error) {
-            console.error('Falha ao consertar JSON truncado:', error);
-
-            // Para um caso extremo, criar um JSON básico de fallback
-            const fallbackJSON = {
-                summary: "Análise incompleta - resposta truncada",
-                insights: [
-                    {
-                        type: "error",
-                        title: "Erro de processamento",
-                        description: "O modelo gerou uma resposta truncada que não pôde ser recuperada completamente.",
-                        priority: "medium",
-                        relatedItems: []
-                    }
-                ]
-            };
-
-            return JSON.stringify(fallbackJSON);
-        }
+    clearChatConversation() {
+        this.conversationHistory = [];
+        console.log("Gemini chat conversation history cleared.");
     }
 }
 
-// Inicializar e exportar o serviço como singleton
+// Inicializar e exportar a instância única (Singleton)
 const geminiService = new GeminiService();
+window.geminiService = geminiService; // Expor globalmente
 
-// Para uso em um ambiente modular (como com webpack, rollup, etc.)
-//export default geminiService;
-
-// Para uso com scripts regulares
-window.geminiService = geminiService;
+// --- END OF FILE gemini-service.js ---

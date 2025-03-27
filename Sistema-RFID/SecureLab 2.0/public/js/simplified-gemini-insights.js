@@ -1,546 +1,401 @@
+// --- START OF FILE simplified-gemini-insights.js ---
+
 /**
- * simplified-gemini-insights.js - Streamlined insights component for SecureLab dashboard
- * Generates and displays actionable insights about system status and user activities
+ * simplified-gemini-insights.js - Componente de UI para Insights Gemini.
+ * AGORA APENAS RENDERIZA A UI E CHAMA O GeminiService.
  */
 
 class SimplifiedInsights {
     constructor() {
         this.container = null;
         this.options = {
-            refreshInterval: 15 * 60 * 1000, // 15 minutes
-            maxInsights: 4
+            autoRefresh: window.GEMINI_CONFIG?.insights?.autoRefresh ?? true,
+            refreshInterval: window.GEMINI_CONFIG?.insights?.refreshInterval ?? 15 * 60 * 1000,
+            maxInsights: window.GEMINI_CONFIG?.insights?.maxInsights ?? 4 // Mantido para UI, embora o prompt tb limite
         };
         this.refreshTimer = null;
         this.isLoading = false;
+        this.lastUpdateTime = null;
+
+        // Referências de elementos (inicializadas no render)
+        this.loadingElement = null;
+        this.summaryElement = null;
+        this.summaryTextElement = null;
+        this.insightsListElement = null;
+        this.timestampElement = null;
     }
 
     /**
-     * Initialize the insights component
-     * @param {string} containerId - ID of the container element
-     * @param {Object} options - Optional configuration
+     * Inicializa o componente.
+     * @param {string} containerId - ID do container.
+     * @param {Object} [options] - Opções de override.
      */
     init(containerId, options = {}) {
-        // Get container element
         this.container = document.getElementById(containerId);
         if (!this.container) {
-            console.error(`Container with ID "${containerId}" not found`);
+            console.error(`Insights container with ID "${containerId}" not found.`);
             return;
         }
+        this.options = { ...this.options, ...options };
 
-        // Merge options
-        this.options = {...this.options, ...options};
+        this.render(); // Cria a estrutura HTML
+        this.refreshInsights(); // Busca inicial
 
-        // Render initial UI
-        this.render();
-
-        // Load initial insights
-        this.refreshInsights();
-
-        // Set up auto-refresh if enabled
-        if (this.options.autoRefresh) {
+        if (this.options.autoRefresh && this.options.refreshInterval > 0) {
             this.startAutoRefresh();
         }
+        console.log("SimplifiedInsights initialized with options:", this.options);
     }
 
-    /**
-     * Render the insights component UI
-     */
+    /** Renderiza a estrutura HTML do componente */
     render() {
+        // HTML (mantido como estava, parece bom)
         this.container.innerHTML = `
-      <div class="gemini-insights-panel">
-        <div class="gemini-insights-header">
-          <h3><i class="fas fa-lightbulb"></i> Insights</h3>
-          <div class="gemini-insights-actions">
-            <button class="gemini-insights-refresh" title="Refresh insights">
-              <i class="fas fa-sync-alt"></i>
-            </button>
-          </div>
-        </div>
-        <div class="gemini-insights-body">
-          <div class="gemini-insights-summary">
-            <div class="gemini-insights-loading">
-              <div class="gemini-insights-spinner"></div>
-              <p>Generating insights...</p>
-            </div>
-            <div class="gemini-insights-summary-content" style="display: none">
-              <div class="gemini-insights-summary-icon">
-                <i class="fas fa-brain"></i>
+          <div class="gemini-insights-panel">
+            <div class="gemini-insights-header">
+              <h3><i class="fas fa-lightbulb"></i> Insights</h3>
+              <div class="gemini-insights-actions">
+                <button class="gemini-insights-refresh" title="Atualizar insights">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
               </div>
-              <p>Analyzing system data...</p>
+            </div>
+            <div class="gemini-insights-body">
+              <div class="gemini-insights-summary">
+                <div class="gemini-insights-loading" style="display: none;">
+                  <div class="gemini-insights-spinner"></div> <p>Gerando insights...</p>
+                </div>
+                <div class="gemini-insights-summary-content">
+                  <div class="gemini-insights-summary-icon"><i class="fas fa-brain"></i></div>
+                  <p>Analisando dados...</p>
+                </div>
+              </div>
+              <div class="gemini-insights-list">
+                 <div class="gemini-no-insights">Carregando...</div>
+              </div>
+            </div>
+            <div class="gemini-insights-footer">
+              <span class="gemini-insights-updated">Aguardando...</span>
+              <a href="#" class="gemini-insights-more">Perguntar <i class="fas fa-chevron-right"></i></a>
             </div>
           </div>
-          <div class="gemini-insights-list"></div>
-        </div>
-        <div class="gemini-insights-footer">
-          <span class="gemini-insights-updated"></span>
-          <a href="#" class="gemini-insights-more">Ask assistant <i class="fas fa-chevron-right"></i></a>
-        </div>
-      </div>
-    `;
+        `;
 
-        // Store references to DOM elements
+        // Guarda referências
         this.loadingElement = this.container.querySelector('.gemini-insights-loading');
         this.summaryElement = this.container.querySelector('.gemini-insights-summary-content');
         this.summaryTextElement = this.container.querySelector('.gemini-insights-summary-content p');
         this.insightsListElement = this.container.querySelector('.gemini-insights-list');
         this.timestampElement = this.container.querySelector('.gemini-insights-updated');
 
-        // Set up event listeners
+        // Event Listeners
         this.container.querySelector('.gemini-insights-refresh').addEventListener('click', () => {
             this.refreshInsights();
+            const icon = this.container.querySelector('.gemini-insights-refresh i');
+            if (icon) { icon.classList.add('fa-spin'); setTimeout(() => icon.classList.remove('fa-spin'), 1000); }
         });
-
         this.container.querySelector('.gemini-insights-more').addEventListener('click', (e) => {
             e.preventDefault();
-            if (window.geminiAssistant) {
-                window.geminiAssistant.toggle(true);
-            }
+            if (window.geminiAssistant?.toggle) window.geminiAssistant.toggle(true);
+            else console.warn("geminiAssistant not found or toggle method missing.");
         });
     }
 
-    /**
-     * Start auto-refresh timer
-     */
+    /** Inicia o auto-refresh */
     startAutoRefresh() {
-        if (this.refreshTimer) {
-            clearInterval(this.refreshTimer);
-        }
-
-        this.refreshTimer = setInterval(() => {
-            this.refreshInsights();
-        }, this.options.refreshInterval);
+        if (this.refreshTimer) clearInterval(this.refreshTimer);
+        if(this.options.refreshInterval <= 0) return;
+        this.refreshTimer = setInterval(() => this.refreshInsights(), this.options.refreshInterval);
+        console.log(`Insights auto-refresh started (${this.options.refreshInterval}ms)`);
     }
 
-    /**
-     * Stop auto-refresh timer
-     */
+    /** Para o auto-refresh */
     stopAutoRefresh() {
         if (this.refreshTimer) {
-            clearInterval(this.refreshTimer);
-            this.refreshTimer = null;
+            clearInterval(this.refreshTimer); this.refreshTimer = null;
+            console.log("Insights auto-refresh stopped.");
         }
     }
 
     /**
-     * Refresh insights data
+     * Atualiza os insights chamando o GeminiService.
      */
     async refreshInsights() {
         if (this.isLoading) return;
-
-        try {
-            this.isLoading = true;
-            this.showLoading(true);
-
-            // Collect system data
-            const systemData = await this.collectSystemData();
-
-            // Generate insights
-            const insights = await this.generateInsights(systemData);
-
-            // Display insights
-            this.displayInsights(insights);
-
-            // Update timestamp
-            this.updateTimestamp();
-        } catch (error) {
-            console.error('Error refreshing insights:', error);
-            this.displayError('Unable to generate insights. Please try again later.');
-        } finally {
-            this.isLoading = false;
-            this.showLoading(false);
-        }
-    }
-
-    /**
-     * Collect system data for analysis
-     * @returns {Promise<Object>} System data
-     */
-    async collectSystemData() {
-        console.log('Iniciando coleta de dados do sistema...');
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
-
-        try {
-            const [usersSnapshot, doorsSnapshot, devicesSnapshot, logsSnapshot] = await Promise.all([
-                firebase.database().ref('users').once('value'),
-                firebase.database().ref('doors').once('value'),
-                firebase.database().ref('devices').once('value'),
-                firebase.database().ref('access_logs')
-                    .orderByChild('timestamp')
-                    .startAt(thirtyDaysAgoISO)
-                    .limitToLast(100)
-                    .once('value') // Sem limite, coletamos todos os logs
-            ]);
-
-            const systemData = {
-                users: usersSnapshot.val(),
-                doors: doorsSnapshot.val(),
-                devices: devicesSnapshot.val(),
-                logs: logsSnapshot.val()
-            };
-
-            console.log('Dados coletados com sucesso:', systemData);
-            return systemData;
-        } catch (error) {
-            console.error('Erro ao coletar dados do sistema:', error);
-            throw error;
-        }
-    }
-    /**
-     * Generate insights using data analysis
-     * @param {Object} systemData - Collected system data
-     * @returns {Promise<Object>} Generated insights
-     */
-    async generateInsights(systemData) {
-        // If Gemini API is available, use it
-        if (window.geminiService) {
-            try {
-                return await this.generateInsightsWithGemini(systemData);
-            } catch (error) {
-                console.warn('Error using Gemini for insights, falling back to local analysis:', error);
-                return this.generateLocalInsights(systemData);
-            }
-        } else {
-            // Fall back to local insight generation
-            return this.generateLocalInsights(systemData);
-        }
-    }
-
-    /**
-     * Generate insights using Gemini API
-     * @param {Object} systemData - Collected system data
-     * @returns {Promise<Object>} Insights from Gemini
-     */
-    // Modifique esta função no arquivo simplified-gemini-insights.js
-    async generateInsightsWithGemini(systemData) {
-        // Modificar o prompt para ser mais específico sobre o formato JSON
-        const prompt = `Analyze the following SecureLab access control system data and provide insights:
-${JSON.stringify(systemData, null, 2)}
-
-IMPORTANT: You MUST respond with a valid JSON object in the following format and NOTHING ELSE:
-{
-  "summary": "Brief summary of the system status",
-  "insights": [
-    {
-      "type": "anomaly|pattern|recommendation",
-      "title": "Short title of the insight",
-      "description": "Detailed description",
-      "priority": "high|medium|low",
-      "relatedItems": ["doors", "users", "access", etc]
-    }
-  ]
-}`;
-
-        try {
-            // Use o parâmetro isConversation: false para indicar que queremos JSON
-            const response = await window.geminiService.sendMessage(prompt, {}, {isConversation: false});
-            console.log('Resposta recebida da API Gemini:', response);
-
-            // Tentar extrair JSON da resposta
-            try {
-                // Primeiro, tentar analisar a resposta inteira como JSON
-                return JSON.parse(response);
-            } catch (parseError) {
-                // Se falhar, tentar extrair JSON de um bloco de código ou da resposta
-                const jsonMatch = response.match(/```(?:json)?\s*\n([\s\S]*?)\n```/) ||
-                    response.match(/```([\s\S]*?)```/) ||
-                    response.match(/(\{[\s\S]*\})/);
-
-                if (jsonMatch && jsonMatch[1]) {
-                    return JSON.parse(jsonMatch[1]);
-                } else if (jsonMatch) {
-                    return JSON.parse(jsonMatch[0]);
-                }
-
-                // Se ainda falhar, criar um objeto de insights básico
-                console.warn('Não foi possível extrair JSON válido da resposta:', response);
-                return {
-                    summary: "Análise baseada em resposta não estruturada",
-                    insights: [{
-                        type: "recommendation",
-                        title: "Limitações na análise de insights",
-                        description: "O sistema não conseguiu estruturar a análise em formato JSON. Recomenda-se revisar manualmente os logs de acesso.",
-                        priority: "medium",
-                        relatedItems: ["system"]
-                    }]
-                };
-            }
-        } catch (error) {
-            console.error('Erro ao gerar insights com Gemini:', error);
-            throw error;
-        }
-    }
-    /**
-     * Generate insights locally without API
-     * @param {Object} systemData - Collected system data
-     * @returns {Object} Generated insights
-     */
-    // Modifique esta função no arquivo simplified-gemini-insights.js
-    generateLocalInsights(systemData) {
-        const insights = {
-            summary: "Análise do Sistema SecureLab",
-            insights: []
-        };
-
-        try {
-            // Verificar se temos dados para analisar sem depender de systemData.stats
-            if (!systemData || !systemData.users || !systemData.doors || !systemData.logs) {
-                throw new Error('Insufficient data for analysis');
-            }
-
-            // Computar estatísticas a partir dos dados brutos
-            const stats = this.computeSystemStats(systemData);
-
-            // Atualizar o resumo com base nas estatísticas calculadas
-            insights.summary = `O sistema SecureLab tem ${Object.keys(systemData.users || {}).length} usuários e 
-                           ${Object.keys(systemData.doors || {}).length} portas registradas com 
-                           ${Object.keys(systemData.logs || {}).length} logs de acesso.`;
-
-            // Analisar portas destrancadas
-            const unlockedDoors = Object.values(systemData.doors || {}).filter(door =>
-                door.status === 'unlocked'
-            );
-
-            if (unlockedDoors.length > 0) {
-                insights.insights.push({
-                    type: "recommendation",
-                    title: `${unlockedDoors.length} Portas Destrancadas Detectadas`,
-                    description: `Existem ${unlockedDoors.length} portas atualmente destrancadas. Verifique se isso é intencional e considere trancá-las ao final do expediente.`,
-                    priority: unlockedDoors.length > 3 ? "high" : "medium",
-                    relatedItems: ["doors", "security"]
-                });
-            }
-
-            // Analisar logs de acesso
-            if (systemData.logs && Object.keys(systemData.logs).length > 0) {
-                const logsArray = Object.values(systemData.logs);
-
-                // Contar tipos de ações
-                const accessGranted = logsArray.filter(log => log.action === 'access_granted').length;
-                const accessDenied = logsArray.filter(log => log.action === 'access_denied').length;
-
-                if (accessGranted + accessDenied > 0) {
-                    const denialRate = Math.round((accessDenied / (accessGranted + accessDenied)) * 100);
-
-                    if (denialRate > 15) {
-                        insights.insights.push({
-                            type: "anomaly",
-                            title: "Taxa elevada de acessos negados",
-                            description: `A taxa de negação de acesso está em ${denialRate}%, acima do ideal. Verifique se as permissões estão configuradas corretamente.`,
-                            priority: "high",
-                            relatedItems: ["access", "security", "users"]
-                        });
-                    }
-                }
-
-                // Analisar atividade por usuário
-                const userActivity = {};
-                logsArray.forEach(log => {
-                    if (log.user_name) {
-                        userActivity[log.user_name] = (userActivity[log.user_name] || 0) + 1;
-                    }
-                });
-
-                // Encontrar usuários mais ativos
-                const topUsers = Object.entries(userActivity)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 3);
-
-                if (topUsers.length > 0) {
-                    insights.insights.push({
-                        type: "pattern",
-                        title: "Usuários com maior atividade",
-                        description: `Os usuários mais ativos são: ${topUsers.map(u => `${u[0]} (${u[1]} ações)`).join(', ')}.`,
-                        priority: "low",
-                        relatedItems: ["users", "access"]
-                    });
-                }
-            }
-
-            // Verificar dispositivos offline
-            const offlineDevices = Object.values(systemData.devices || {}).filter(device =>
-                device.status === 'offline'
-            );
-
-            if (offlineDevices.length > 0) {
-                insights.insights.push({
-                    type: "anomaly",
-                    title: `${offlineDevices.length} Dispositivos Offline`,
-                    description: `Existem ${offlineDevices.length} dispositivos offline. Verifique a conectividade e fonte de energia desses dispositivos.`,
-                    priority: "high",
-                    relatedItems: ["devices", "maintenance"]
-                });
-            }
-
-            // Se não houver insights, adicionar um insight padrão
-            if (insights.insights.length === 0) {
-                insights.insights.push({
-                    type: "recommendation",
-                    title: "Sistema operando normalmente",
-                    description: "Nenhum problema significativo detectado. Continue monitorando o sistema.",
-                    priority: "low",
-                    relatedItems: ["maintenance"]
-                });
-            }
-
-            return insights;
-        } catch (error) {
-            console.error('Error generating local insights:', error);
-            throw error;
-        }
-    }
-
-// Adicione esta nova função auxiliar para calcular estatísticas
-    computeSystemStats(systemData) {
-        const stats = {
-            users: {
-                total: Object.keys(systemData.users || {}).length,
-                active: Object.values(systemData.users || {}).filter(u => u.status === 'active').length
-            },
-            doors: {
-                total: Object.keys(systemData.doors || {}).length,
-                locked: Object.values(systemData.doors || {}).filter(d => d.status === 'locked').length,
-                unlocked: Object.values(systemData.doors || {}).filter(d => d.status === 'unlocked').length
-            },
-            devices: {
-                total: Object.keys(systemData.devices || {}).length,
-                online: Object.values(systemData.devices || {}).filter(d => d.status === 'online').length,
-                offline: Object.values(systemData.devices || {}).filter(d => d.status === 'offline').length
-            },
-            logs: {
-                total: Object.keys(systemData.logs || {}).length
-            }
-        };
-
-        // Calcular estatísticas adicionais
-        if (systemData.logs && Object.keys(systemData.logs).length > 0) {
-            const logsArray = Object.values(systemData.logs);
-            stats.access = {
-                granted: logsArray.filter(log => log.action === 'access_granted').length,
-                denied: logsArray.filter(log => log.action === 'access_denied').length,
-                doorLocked: logsArray.filter(log => log.action === 'door_locked').length,
-                doorUnlocked: logsArray.filter(log => log.action === 'door_unlocked').length
-            };
-
-            // Calcular taxa de negação
-            if (stats.access.granted + stats.access.denied > 0) {
-                stats.access.denialRate = (stats.access.denied / (stats.access.granted + stats.access.denied) * 100).toFixed(1);
-            } else {
-                stats.access.denialRate = "0.0";
-            }
-        }
-
-        return stats;
-    }
-
-    /**
-     * Display insights in the UI
-     * @param {Object} insights - Generated insights
-     */
-    displayInsights(insights) {
-        // Display summary
-        this.summaryTextElement.textContent = insights.summary || "System analysis complete";
-        this.summaryElement.style.display = "flex";
-
-        // Clear previous insights
-        this.insightsListElement.innerHTML = '';
-
-        // Display insights
-        const insightsToShow = insights.insights || [];
-
-        if (insightsToShow.length === 0) {
-            this.insightsListElement.innerHTML = '<div class="gemini-no-insights">No insights available at this time.</div>';
+        if (!window.geminiService) {
+            console.error("GeminiService is not available for insights.");
+            this.displayError("Serviço de IA indisponível.");
             return;
         }
 
-        // Add each insight to the list (limit to maxInsights)
-        insightsToShow.slice(0, this.options.maxInsights).forEach(insight => {
+        console.log("Refreshing insights...");
+        this.isLoading = true;
+        this.showLoading(true);
+        this.insightsListElement.innerHTML = '<div class="gemini-no-insights">Atualizando...</div>';
+        this.summaryTextElement.textContent = "Buscando novos insights...";
+
+        try {
+            // *** CHAMADA CENTRALIZADA AO SERVIÇO ***
+            const insightsData = await window.geminiService.generateInsights();
+
+            // Usa o maxInsights da config para limitar o que é exibido na UI,
+            // mesmo que a API retorne mais (como fallback)
+            if (insightsData?.insights && insightsData.insights.length > this.options.maxInsights) {
+                console.log(`Limiting displayed insights from ${insightsData.insights.length} to ${this.options.maxInsights}`);
+                insightsData.insights = insightsData.insights.slice(0, this.options.maxInsights);
+            }
+
+
+            this.displayInsights(insightsData); // Renderiza o resultado
+            this.updateTimestamp();
+
+        } catch (error) { // Erros de rede/fetch podem ocorrer antes da chamada do serviço
+            console.error('Error during insight refresh process:', error);
+            this.displayError(`Falha ao atualizar: ${error.message}`);
+        } finally {
+            this.isLoading = false;
+            this.showLoading(false);
+            console.log("Insight refresh finished.");
+        }
+    }
+
+    // --- MÉTODOS REMOVIDOS ---
+    // collectSystemData() -> Agora no GeminiService
+    // generateInsights() -> Agora no GeminiService
+    // generateLocalInsights() -> Removido (foco na API, mas pode ser readicionado como fallback *dentro* do service se necessário)
+    // computeSystemStats() -> Lógica similar agora no GeminiService para `dataSummary`
+
+    /**
+     * Exibe os insights na UI (Lógica de renderização mantida).
+     * @param {Object} insightsData - Objeto { summary, insights, source } vindo do serviço.
+     */
+    displayInsights(insightsData) {
+        if (!insightsData || !this.summaryTextElement || !this.insightsListElement) {
+            this.displayError("Erro interno ao exibir insights.");
+            return;
+        }
+
+        // Adiciona a fonte da informação (gemini, local, erro)
+        let sourceText = '';
+        switch(insightsData.source) {
+            case 'gemini': sourceText = '(via Gemini)'; break;
+            case 'local': sourceText = '(Análise Local)'; break; // Se reintroduzido
+            case 'gemini-error': sourceText = '(Erro API)'; break;
+            case 'local-error': sourceText = '(Erro Local)'; break; // Se reintroduzido
+        }
+        this.summaryTextElement.textContent = `${insightsData.summary || "Análise concluída"} ${sourceText}`;
+        this.summaryElement.style.display = "flex";
+
+        this.insightsListElement.innerHTML = ''; // Limpa lista anterior
+
+        const insightsToShow = insightsData.insights || [];
+
+        if (insightsToShow.length === 0) {
+            this.insightsListElement.innerHTML = '<div class="gemini-no-insights">Nenhum insight relevante encontrado.</div>';
+            return;
+        }
+
+        // Caso especial: A única "insight" é uma mensagem de erro do serviço
+        if (insightsToShow.length === 1 && insightsToShow[0].type === 'error') {
+            this.displayError(insightsToShow[0].description || "Falha na geração dos insights.");
+            // Ajusta o sumário para refletir o erro também
+            this.summaryTextElement.textContent = `${insightsToShow[0].title || "Erro na Análise"} ${sourceText}`;
+            return; // Não mostra o erro como um item normal
+        }
+
+        // Renderiza cada insight válido
+        insightsToShow.forEach(insight => {
+            // Não mostra erros se houver outros insights válidos
+            if (insight.type === 'error') return;
+
             const insightElement = document.createElement('div');
-            insightElement.className = `gemini-insight gemini-insight-${insight.type || 'recommendation'} gemini-priority-${insight.priority || 'medium'}`;
+            const type = insight.type || 'info'; // Default type 'info'
+            const priority = insight.priority || 'low';
+            insightElement.className = `gemini-insight gemini-insight-${type} gemini-priority-${priority}`;
 
-            // Select icon based on type
+            // Lógica de ícone/estilo (mantida como antes)
             let iconClass = 'fas fa-info-circle';
-            let iconContainer = '';
-
-            if (insight.type === 'anomaly') {
-                iconClass = 'fas fa-exclamation-triangle';
-                iconContainer = `<div class="gemini-insight-icon" style="background-color: #fff6f6; color: #dc3545;">`;
-                if (insight.priority === 'high') {
-                    iconContainer = `<div class="gemini-insight-icon" style="background-color: #ff8a8a; color: #721c24;">`;
-                }
-            } else if (insight.type === 'pattern') {
-                iconClass = 'fas fa-chart-line';
-                iconContainer = `<div class="gemini-insight-icon" style="background-color: #f0f8ff; color: #0d6efd;">`;
-            } else if (insight.type === 'recommendation') {
-                iconClass = 'fas fa-lightbulb';
-                iconContainer = `<div class="gemini-insight-icon" style="background-color: #f7f9ff; color: #4a6cf7;">`;
-            }
-
-            // Define title color based on priority
+            let iconStyle = ''; // CSS deve cuidar disso primariamente agora
             let titleStyle = '';
-            if (insight.priority === 'high') {
-                titleStyle = 'style="color: #dc3545;"';
-            } else if (insight.priority === 'medium') {
-                titleStyle = 'style="color: #fd7e14;"';
+            let priorityMarker = '';
+
+            switch (type) {
+                case 'anomaly': iconClass = 'fas fa-exclamation-triangle'; break;
+                case 'pattern': iconClass = 'fas fa-chart-line'; break;
+                case 'recommendation': iconClass = 'fas fa-lightbulb'; break;
+                case 'info': iconClass = 'fas fa-info-circle'; break;
             }
+
+            switch (priority) {
+                case 'high':
+                    priorityMarker = `<span class="gemini-priority-marker high" title="Prioridade Alta">!!</span>`;
+                    break;
+                case 'medium':
+                    priorityMarker = `<span class="gemini-priority-marker medium" title="Prioridade Média">!</span>`;
+                    break;
+            }
+
+            const relatedItemsHtml = (insight.relatedItems && insight.relatedItems.length > 0)
+                ? `<div class="gemini-insight-related">
+                       ${insight.relatedItems.map(item => `<span class="gemini-insight-tag">${this._escapeHtml(item)}</span>`).join('')}
+                     </div>`
+                : '';
 
             insightElement.innerHTML = `
-        ${iconContainer}
-          <i class="${iconClass}"></i>
-        </div>
-        <div class="gemini-insight-content">
-          <h4 class="gemini-insight-title" ${titleStyle}>${insight.title || 'Insight'}</h4>
-          <p class="gemini-insight-description">${insight.description || ''}</p>
-          ${insight.relatedItems && insight.relatedItems.length > 0 ? `
-            <div class="gemini-insight-related">
-              ${insight.relatedItems.map(item => `<span class="gemini-insight-tag">${item}</span>`).join('')}
-            </div>
-          ` : ''}
-        </div>
-      `;
-
+                <div class="gemini-insight-icon" style="${iconStyle}">
+                  <i class="${iconClass}"></i>
+                </div>
+                <div class="gemini-insight-content">
+                  <h4 class="gemini-insight-title" ${titleStyle}>${priorityMarker} ${this._escapeHtml(insight.title || 'Insight')}</h4>
+                   <div class="gemini-insight-description-content">
+                     ${this._formatResponse(insight.description || 'Sem detalhes.')}
+                   </div>
+                  ${relatedItemsHtml}
+                </div>
+              `;
             this.insightsListElement.appendChild(insightElement);
         });
     }
 
-    /**
-     * Display error message
-     * @param {string} message - Error message
-     */
-    displayError(message) {
-        this.summaryTextElement.textContent = message || "Unable to generate insights";
-        this.summaryElement.style.display = "flex";
-        this.insightsListElement.innerHTML = '';
-    }
+    /** Helper para escapar HTML (mantido) */
+    _escapeHtml(str) {
+        if (!str) return '';
+        const text = String(str);
+        const map = { '&': '&', '<': '<', '>': '>', '"': '"', "'": '' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        /** Exibe mensagem de erro na UI (mantido) */
+        displayError(message) {
+            if (this.summaryTextElement) this.summaryTextElement.textContent = "Erro ao gerar insights";
+            if (this.insightsListElement) {
+                this.insightsListElement.innerHTML = `<div class="gemini-insights-error"><i class="fas fa-exclamation-circle"></i><p>${this._escapeHtml(message)}</p></div>`;
+            }
+            this.showLoading(false);
+        }
+
+        /** Mostra/esconde loading (mantido) */
+        showLoading(isLoading) {
+            if (this.loadingElement) this.loadingElement.style.display = isLoading ? 'flex' : 'none';
+            // O sumário fica visível, apenas o texto muda
+        }
+
+        /** Atualiza timestamp (mantido) */
+        updateTimestamp() {
+            this.lastUpdateTime = new Date();
+            if (this.timestampElement) {
+                const timeString = this.lastUpdateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                this.timestampElement.textContent = `Atualizado às ${timeString}`;
+            }
+        }
 
     /**
-     * Show/hide loading indicator
-     * @param {boolean} isLoading - Whether loading is in progress
+     * Formata resposta (markdown básico para HTML) - COPIADO DE GeminiAssistant
+     * @param {string} response - Resposta bruta
+     * @returns {string} Resposta formatada com HTML
      */
-    showLoading(isLoading) {
-        if (this.loadingElement) {
-            this.loadingElement.style.display = isLoading ? 'flex' : 'none';
+    _formatResponse(response) {
+        if (!response) return '';
+
+        // 1. Escape HTML primeiro
+        let formatted = this._escapeHtml(response);
+
+        // 2. Lidar com Blocos de Código
+        const codeBlocks = [];
+        formatted = formatted.replace(/```(?:[a-zA-Z]+\n)?([\s\S]*?)```/g, (match, p1) => {
+            const placeholder = `___CODEBLOCK_${codeBlocks.length}___`;
+            codeBlocks.push(`<pre class="gemini-code-block"><code>${this._escapeHtml(p1.trim())}</code></pre>`);
+            return placeholder;
+        });
+
+        // 3. Ênfase e Código Inline
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        formatted = formatted.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+        formatted = formatted.replace(/(?<!_)_([^_]+)_(?!_)/g, '<em>$1</em>');
+        formatted = formatted.replace(/~~(.*?)~~/g, '<del>$1</del>');
+        formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        // 4. Processar Linhas (Listas, Parágrafos, Títulos)
+        const lines = formatted.split('\n');
+        let resultHtml = '';
+        let currentListType = null; // null, 'ul', 'ol'
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmedLine = line.trim();
+
+            // Restaurar blocos de código
+            if (trimmedLine.startsWith('___CODEBLOCK_')) {
+                if (currentListType) { resultHtml += `</${currentListType}>\n`; currentListType = null; }
+                const index = parseInt(trimmedLine.split('_')[2]);
+                resultHtml += codeBlocks[index] + '\n';
+                continue;
+            }
+
+            // Títulos
+            const headingMatch = trimmedLine.match(/^(#{1,4})\s+(.*)/);
+            if (headingMatch) {
+                if (currentListType) { resultHtml += `</${currentListType}>\n`; currentListType = null; }
+                const level = headingMatch[1].length;
+                resultHtml += `<h${level + 2}>${headingMatch[2]}</h${level + 2}>\n`;
+                continue;
+            }
+
+            // Listas
+            const ulMatch = trimmedLine.match(/^([*-])\s+(.*)/);
+            const olMatch = trimmedLine.match(/^(\d+)\.\s+(.*)/);
+            const potentialEmptyUlMatch = trimmedLine.match(/^([*-])(\s*)$/);
+            const potentialEmptyOlMatch = trimmedLine.match(/^(\d+)\.(\s*)$/);
+
+            let isListItem = false;
+            let itemContent = '';
+            let listTypeRequired = null;
+            let orderedAttrs = '';
+
+            if (olMatch) { // Item ordenado com conteúdo
+                isListItem = true; itemContent = olMatch[2]; listTypeRequired = 'ol'; orderedAttrs = ` value="${olMatch[1]}"`;
+            } else if (ulMatch) { // Item não ordenado com conteúdo
+                isListItem = true; itemContent = ulMatch[2]; listTypeRequired = 'ul';
+            } else if (potentialEmptyOlMatch || potentialEmptyUlMatch) { // Item vazio - PULAR
+                // console.warn("Detected potentially empty list item in insights:", trimmedLine);
+                isListItem = false;
+                if (currentListType && (i + 1 >= lines.length || !lines[i+1].trim().match(/^([*-]|\d+\.)\s/))) {
+                    resultHtml += `</${currentListType}>\n`; currentListType = null;
+                }
+                continue;
+            }
+
+            if (isListItem) {
+                if (currentListType !== listTypeRequired) {
+                    if (currentListType) resultHtml += `</${currentListType}>\n`;
+                    resultHtml += `<${listTypeRequired}>\n`;
+                    currentListType = listTypeRequired;
+                }
+                resultHtml += `<li${orderedAttrs}>${itemContent}</li>\n`;
+            } else { // Não é item de lista
+                if (currentListType) { resultHtml += `</${currentListType}>\n`; currentListType = null; }
+                if (trimmedLine.length > 0) { // Trata como parágrafo
+                    resultHtml += `<p>${trimmedLine}</p>\n`;
+                }
+            }
         }
-        if (this.summaryElement) {
-            this.summaryElement.style.display = isLoading ? 'none' : 'flex';
+        if (currentListType) resultHtml += `</${currentListType}>\n`; // Fecha lista final
+        return resultHtml.trim();
         }
     }
 
-    /**
-     * Update last updated timestamp
-     */
-    updateTimestamp() {
-        if (this.timestampElement) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            this.timestampElement.textContent = `Updated at ${timeString}`;
-        }
-    }
+// Inicialização (mantida)
+    const geminiInsights = new SimplifiedInsights();
+    window.geminiInsights = geminiInsights;
+
+    document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+    if (document.getElementById('gemini-insights-container')) {
+    const insightOptions = window.GEMINI_CONFIG?.insights || {};
+    geminiInsights.init('gemini-insights-container', insightOptions);
+} else {
+    console.warn("Insights container 'gemini-insights-container' not found.");
 }
-
-// Create global instance
-const geminiInsights = new SimplifiedInsights();
-
-// For use with regular scripts
-window.geminiInsights = geminiInsights;
+}, 1200); // Delay
+});
+// --- END OF FILE simplified-gemini-insights.js ---
