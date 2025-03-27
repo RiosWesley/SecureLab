@@ -62,7 +62,8 @@ class GeminiAssistant {
         this.toggle(startVisible);
 
 
-        console.log('Gemini Assistant UI initialized');
+        console.log(`Gemini Assistant UI initialized. Configured start: ${startVisible ? 'visible (expanded)' : 'hidden (minimized)'}.`);
+
     }
 
     /** Configura event listeners (lógica mantida) */
@@ -349,6 +350,40 @@ class GeminiAssistant {
             }
             console.log("Assistant toggled, visible:", this.visible);
         }
+    // Dentro da classe GeminiAssistant
+
+    /** Alterna visibilidade (com logs de depuração) */
+    toggle(forceVisible) {
+        // --- LOG INICIAL ---
+        console.log(`>>> toggle() chamado. forceVisible: ${forceVisible}, estado atual this.visible: ${this.visible}`);
+
+        // Calcula o estado desejado
+        const shouldBeVisible = forceVisible !== undefined ? forceVisible : !this.visible;
+        console.log(`>>> toggle(): Calculado shouldBeVisible: ${shouldBeVisible}`);
+
+
+        // Atualiza o estado interno
+        this.visible = shouldBeVisible;
+        const toggleIcon = this.container.querySelector('.gemini-toggle-btn i');
+
+        // Aplica/Remove classe e atualiza UI
+        if (this.visible) {
+            console.log(">>> toggle(): Definindo para VISÍVEL. Removendo classe 'gemini-minimized'.");
+            this.container.classList.remove('gemini-minimized');
+            if (toggleIcon) toggleIcon.className = 'fas fa-minus';
+            // Ações extras ao abrir (scroll, focus)
+            this._scrollToBottom();
+            // Adicionado um pequeno delay no foco para evitar problemas se o elemento ainda não estiver totalmente pronto
+            setTimeout(() => { if(this.inputField) this.inputField.focus(); }, 100);
+        } else {
+            console.log(">>> toggle(): Definindo para OCULTO (Minimizado). Adicionando classe 'gemini-minimized'.");
+            this.container.classList.add('gemini-minimized');
+            if (toggleIcon) toggleIcon.className = 'fas fa-expand-arrows-alt';
+        }
+
+        // --- LOG FINAL ---
+        console.log(`>>> toggle(): Estado final -> this.visible: ${this.visible}, Elemento tem classe 'gemini-minimized': ${this.container.classList.contains('gemini-minimized')}`);
+    }
 
         /** Limpa a conversa */
         clearConversation() {
@@ -362,6 +397,8 @@ class GeminiAssistant {
             console.log("Chat conversation cleared.");
         }
     }
+
+
 
 // Inicialização (mantida, depende de config e Firebase)
     const geminiAssistant = new GeminiAssistant();
@@ -392,4 +429,5 @@ setTimeout(() => {
     console.log("Gemini Assistant auto-init skipped.");
 }
 });
+
 // --- END OF FILE gemini-assistant.js ---
